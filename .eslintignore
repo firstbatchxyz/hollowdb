@@ -1,0 +1,8 @@
+build/
+node_modules
+lib
+tools
+build.cjs
+contracts
+config
+*.d.ts

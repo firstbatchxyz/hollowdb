@@ -1,0 +1,16 @@
+# OS junk files
+.DS_Store
+
+# Node files
+node_modules/
+yarn-error.log
+
+# Warp Logger logs
+logs 
+
+# Project files 
+.parcel-cache/
+cache/
+lib/
+build/
+dump.rdb

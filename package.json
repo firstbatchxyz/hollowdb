@@ -1,0 +1,75 @@
+{
+  "name": "hollowdb",
+  "version": "0.1.0",
+  "description": "A decentralized key-value database.",
+  "license": "MIT",
+  "type": "module",
+  "source": "src/index.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "FirstBatch Team <dev@firstbatch.xyz>",
+  "contributors": [
+    "Faruk Can Özkan <farukcan@firstbatch.xyz>",
+    "Erhan Tezcan <erhan@firstbatch.xyz>"
+  ],
+  "engines": {
+    "npm": "please-use-yarn",
+    "node": ">=18"
+  },
+  "files": [
+    "lib/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "parcel build",
+    "build:types": "yarn compile -b tsconfig.types.json",
+    "lint": "gts lint",
+    "format": "prettier --write './src/sdk/**/*.ts'",
+    "prepublishOnly": "yarn lint",
+    "preversion": "yarn lint && yarn build",
+    "version": "yarn format && git add -A sdk",
+    "postversion": "git push && git push --tags",
+    "yalc:publish": "yarn build && yalc publish --push",
+    "contract:deploy": "yarn build:ts && npx ts-node src/tools/deploy.ts",
+    "contract:build": "yarn clean:build && yarn build:ts",
+    "build:ts": "node build.cjs",
+    "clean:build": "rimraf ./build",
+    "compile": "tsc",
+    "test": "jest --forceExit",
+    "pretest": "yarn build:ts"
+  },
+  "dependencies": {
+    "warp-contracts-redis": "^0.1.0",
+    "warp-contract-plugin-snarkjs": "^0.1.0",
+    "redis": "^4.6.4",
+    "warp-contracts": "^1.2.49",
+    "warp-contracts-lmdb": "^1.1.9"
+  },
+  "devDependencies": {
+    "@parcel/packager-ts": "2.8.3",
+    "@parcel/transformer-typescript-tsc": "^2.8.3",
+    "@parcel/transformer-typescript-types": "2.8.3",
+    "@types/jest": "^29.4.0",
+    "@types/node": "^14.11.2",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "arlocal": "^1.1.60",
+    "arweave": "^1.13.0",
+    "copyfiles": "^2.4.1",
+    "esbuild": "^0.16.4",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "gts": "^3.1.1",
+    "jest": "^29.4.3",
+    "parcel": "^2.8.3",
+    "poseidon-lite": "^0.0.2",
+    "prettier": "2.8.3",
+    "replace-in-file": "^6.3.5",
+    "rimraf": "^4.1.2",
+    "snarkjs": "^0.6.1",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./build",
+    "strict": true,
+    "typeRoots": ["./types", "./node_modules/@types/"],
+    "moduleResolution": "node", // TODO: decide
+    "target": "ES2020",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "downlevelIteration": true, // TODO: why?
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "types": ["jest"],
+    "isolatedModules": true
+  },
+  "include": ["src/**/*.ts", "common/**/*.ts", "contracts/**/*.ts", "tools/**/*.ts", "types/**/*.ts"],
+  "exclude": ["./node_modules", "./lib", "./build", "./cache"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
+}
