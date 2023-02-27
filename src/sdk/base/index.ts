@@ -92,7 +92,6 @@ export class Base {
         new RedisCache({
           client: args.redisClient!,
           prefix: `${this.contractTxId}.${contractTxId}`,
-          ...MINMAX_OPTS.redis,
         }),
     }[args.cacheType];
     warp = warp.useKVStorageFactory(kvStorageFactory);
