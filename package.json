@@ -1,6 +1,6 @@
 {
   "name": "hollowdb",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A decentralized key-value database.",
   "license": "MIT",
   "type": "module",
@@ -13,6 +13,10 @@
   ],
   "cjs": "lib/index.cjs",
   "mjs": "lib/index.mjs",
+  "exports": {
+    "import": "./lib/index.mjs",
+    "require": "./lib/index.cjs"
+  },
   "targets": {
     "cjs": {
       "context": "node",
