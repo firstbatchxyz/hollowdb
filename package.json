@@ -1,17 +1,36 @@
 {
   "name": "hollowdb",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A decentralized key-value database.",
   "license": "MIT",
   "type": "module",
   "source": "src/index.ts",
-  "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "author": "FirstBatch Team <dev@firstbatch.xyz>",
   "contributors": [
     "Faruk Can Özkan <farukcan@firstbatch.xyz>",
     "Erhan Tezcan <erhan@firstbatch.xyz>"
   ],
+  "cjs": "lib/index.cjs",
+  "mjs": "lib/index.mjs",
+  "targets": {
+    "cjs": {
+      "context": "node",
+      "outputFormat": "commonjs",
+      "isLibrary": true,
+      "engines": {
+        "node": ">=18"
+      }
+    },
+    "mjs": {
+      "context": "node",
+      "outputFormat": "esmodule",
+      "isLibrary": true,
+      "engines": {
+        "node": ">=18"
+      }
+    }
+  },
   "engines": {
     "npm": "please-use-yarn",
     "node": ">=18"
@@ -22,10 +41,9 @@
     "README.md"
   ],
   "scripts": {
-    "build": "parcel build",
+    "build": "yarn clean:lib && parcel build",
     "build:types": "yarn compile -b tsconfig.types.json",
     "contract:deploy": "yarn contract:build && npx ts-node tools/deploy.ts",
-    "agy": "npx ts-node tools/agy.ts",
     "contract:build": "node build.cjs",
     "compile": "tsc",
     "clean:build": "rimraf ./build",
