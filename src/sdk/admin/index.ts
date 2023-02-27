@@ -1,4 +1,4 @@
-import {ArWallet, EvaluationManifest, knownWarpPlugins, Warp} from 'warp-contracts';
+import {ArWallet, EvaluationManifest, Warp} from 'warp-contracts';
 import {Base} from '../base';
 import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';

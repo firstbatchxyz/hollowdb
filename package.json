@@ -23,7 +23,7 @@
   "scripts": {
     "build": "parcel build",
     "build:types": "yarn compile -b tsconfig.types.json",
-    "contract:deploy": "yarn contract:build && npx ts-node src/tools/deploy.ts",
+    "contract:deploy": "yarn contract:build && npx ts-node tools/deploy.ts",
     "contract:build": "node build.cjs",
     "compile": "tsc",
     "clean:build": "rimraf ./build",
@@ -40,9 +40,8 @@
   },
   "dependencies": {
     "redis": "^4.6.4",
-    "warp-contracts": "^1.2.49",
+    "warp-contracts": "1.2.52",
     "warp-contracts-lmdb": "^1.1.9",
-    "warp-contracts-plugin-deploy": "^1.0.0",
     "warp-contracts-plugin-snarkjs": "^0.1.2",
     "warp-contracts-redis": "^0.1.1"
   },
