@@ -5,6 +5,17 @@ import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
 
+const MINMAX_OPTS = {
+  lmdb: {
+    minEntriesPerContract: 10,
+    maxEntriesPerContract: 100,
+  },
+  redis: {
+    minEntriesPerContract: 10,
+    maxEntriesPerContract: 100,
+  },
+};
+
 export class Base {
   warp: Warp;
   hollowDB: Contract<HollowDBState>;
@@ -30,14 +41,12 @@ export class Base {
             ...defaultCacheOptions,
             dbLocation: './cache/warp/state',
           },
-          {
-            maxEntriesPerContract: 100,
-            minEntriesPerContract: 10,
-          }
+          MINMAX_OPTS.lmdb
         ),
         redis: new RedisCache({
           client: args.redisClient!,
           prefix: `${args.contractTxId}.state`,
+          ...MINMAX_OPTS.redis,
         }),
       }[args.cacheType];
       warp = warp.useStateCache(stateCache);
@@ -60,10 +69,12 @@ export class Base {
           definition: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.contract`,
+            ...MINMAX_OPTS.redis,
           }),
           src: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.src`,
+            ...MINMAX_OPTS.redis,
           }),
         },
       }[args.cacheType];
@@ -81,6 +92,7 @@ export class Base {
         new RedisCache({
           client: args.redisClient!,
           prefix: `${this.contractTxId}.${contractTxId}`,
+          ...MINMAX_OPTS.redis,
         }),
     }[args.cacheType];
     warp = warp.useKVStorageFactory(kvStorageFactory);

@@ -5,11 +5,11 @@
     "outDir": "./build",
     "strict": true,
     "typeRoots": ["./types", "./node_modules/@types/"],
-    "moduleResolution": "node", // TODO: decide
+    "moduleResolution": "node",
     "target": "ES2020",
     "esModuleInterop": true,
     "allowJs": true,
-    "downlevelIteration": true, // TODO: why?
+    "downlevelIteration": true,
     "skipLibCheck": true,
     "module": "ESNext",
     "types": ["jest"],
