@@ -8566,10 +8566,10 @@ warp-contracts-plugin-snarkjs@^0.1.2:
   dependencies:
     snarkjs "^0.5.0"
 
-warp-contracts-redis@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/warp-contracts-redis/-/warp-contracts-redis-0.1.1.tgz#66df4845cc1c4bec073a60528c844a4eeda8cf13"
-  integrity sha512-LCuDn8cKVM+rbtq8ZJzKzF+08ulJwzcWxnpaADRpwGqaq+3Wyrp1fxrHqXnRNE6UVwIq1aLNLDIl5dF39m9AjA==
+warp-contracts-redis@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/warp-contracts-redis/-/warp-contracts-redis-0.1.2.tgz#e2a4bdbe22c1c7f6ff985741c60e8ed39c100dc7"
+  integrity sha512-J/UWnNAUL6e1GLjXz4tVjMuwmZDeKO5X4gy4GUXumJWOUOxJjKczC0HAG0yoItScbDDAZa+e1m1j75SKs3dD3A==
   dependencies:
     redis "^4.6.4"
     warp-contracts "^1.2.52"

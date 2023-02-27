@@ -24,6 +24,7 @@
     "build": "parcel build",
     "build:types": "yarn compile -b tsconfig.types.json",
     "contract:deploy": "yarn contract:build && npx ts-node tools/deploy.ts",
+    "agy": "npx ts-node tools/agy.ts",
     "contract:build": "node build.cjs",
     "compile": "tsc",
     "clean:build": "rimraf ./build",
@@ -43,7 +44,7 @@
     "warp-contracts": "1.2.52",
     "warp-contracts-lmdb": "^1.1.9",
     "warp-contracts-plugin-snarkjs": "^0.1.2",
-    "warp-contracts-redis": "^0.1.1"
+    "warp-contracts-redis": "^0.1.2"
   },
   "devDependencies": {
     "@parcel/packager-ts": "2.8.3",

@@ -10,6 +10,7 @@ import {generateProof} from './utils';
 import poseidon from 'poseidon-lite';
 import {createClient} from 'redis';
 import {JWKInterface} from 'warp-contracts/lib/types/utils/types/arweave-types';
+import {randomBytes} from 'crypto';
 
 // arbitrarily long timeout
 jest.setTimeout(30000);
@@ -19,7 +20,7 @@ enum PublicSignal {
   Key = 1,
 }
 
-const CACHE_TYPE: CacheType = 'lmdb';
+const CACHE_TYPE: CacheType = 'redis';
 
 describe('HollowDB tests using ' + CACHE_TYPE + ' cache', () => {
   // accounts
@@ -110,6 +111,19 @@ describe('HollowDB tests using ' + CACHE_TYPE + ' cache', () => {
       await expect(ownerSDK.put(KEY, VALUE_TX)).rejects.toThrow(
         'Contract Error [put]: Key already exists, use update instead'
       );
+    });
+
+    it('should put many values', async () => {
+      const count = 10;
+      const valueTxs = Array<string>(count).fill(randomBytes(10).toString('hex'));
+
+      for (let i = 0; i < valueTxs.length; ++i) {
+        const k = KEY + i;
+        const v = valueTxs[i];
+        expect(await ownerSDK.get(k)).toEqual(null);
+        await ownerSDK.put(k, v);
+        expect(await ownerSDK.get(k)).toEqual(v);
+      }
     });
   });
 
