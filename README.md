@@ -2,7 +2,7 @@
 
 HollowDB is a decentralized privacy-preserving key-value database on [Arweave](https://www.arweave.org/) network, powered by [Warp Contracts](https://warp.cc/).
 
-Anyone can read & put a value; however, to update or remove a value at some key, the user must provide a **zero-knowledge proof** that they know the preimage of the key.
+Anyone can **read** & **put** a value; however, to **update** or **remove** a value at some key, the user must provide a **zero-knowledge proof** that they know the preimage of the key.
 
 ## Usage
 
@@ -73,14 +73,14 @@ export const valueTxToBigInt = (valueTx: string): bigint => {
 };
 ```
 
-Your client will use the proof object while making requests, for more information check the [tests](./tests/hollowdb.test.ts).
+Your client will use the `fullProof.proof` object while making requests, while the `fullProof.publicSignals` will be given by the contract to verify the proof. For more information on using the proofs, check the [tests](./tests/hollowdb.test.ts).
 
 ### Building the contract
 
-The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. To build your contract, simply:
+The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. To build your contract, a shorthand script is provided within this repository:
 
 ```sh
-yarn build:ts
+yarn contract:build
 ```
 
 This will generate the built contract under `build/hollowDB/contract.js`.
@@ -97,7 +97,7 @@ This runs the deployment code under the [tools](./src/tools/) folder, which inte
 
 ## Testing
 
-There are Jest test suites for HollowDB operations that operate on a local Arweave instance (via ArLocal). To run, simply:
+There are Jest test suites for HollowDB operations that operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). To run:
 
 ```sh
 yarn test

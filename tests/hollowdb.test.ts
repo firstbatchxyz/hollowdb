@@ -10,6 +10,7 @@ import {generateProof} from './utils';
 import poseidon from 'poseidon-lite';
 import {createClient} from 'redis';
 import {JWKInterface} from 'warp-contracts/lib/types/utils/types/arweave-types';
+import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
 // arbitrarily long timeout
 jest.setTimeout(30000);
@@ -50,7 +51,7 @@ describe('HollowDB tests using ' + CACHE_TYPE + ' cache', () => {
 
     // setup warp factory for local arweave
     LoggerFactory.INST.logLevel('error');
-    warp = WarpFactory.forLocal(PORT);
+    warp = WarpFactory.forLocal(PORT).use(new DeployPlugin());
 
     // get accounts
     const ownerWallet = await warp.generateWallet();

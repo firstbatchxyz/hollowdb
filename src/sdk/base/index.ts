@@ -1,7 +1,7 @@
 import {defaultCacheOptions, LoggerFactory, Warp, Contract, ArWallet} from 'warp-contracts';
 import {LmdbCache} from 'warp-contracts-lmdb';
 import {RedisCache} from 'warp-contracts-redis';
-import {SnarkjsExtension} from 'warp-contract-plugin-snarkjs';
+import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
 

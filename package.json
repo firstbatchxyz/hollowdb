@@ -23,27 +23,28 @@
   "scripts": {
     "build": "parcel build",
     "build:types": "yarn compile -b tsconfig.types.json",
+    "contract:deploy": "yarn contract:build && npx ts-node src/tools/deploy.ts",
+    "contract:build": "node build.cjs",
+    "compile": "tsc",
+    "clean:build": "rimraf ./build",
+    "clean:lib": "rimraf ./lib",
+    "test": "jest --forceExit",
+    "pretest": "yarn contract:build",
     "lint": "gts lint",
     "format": "prettier --write './src/sdk/**/*.ts'",
     "prepublishOnly": "yarn lint",
     "preversion": "yarn lint && yarn build",
     "version": "yarn format && git add -A sdk",
     "postversion": "git push && git push --tags",
-    "yalc:publish": "yarn build && yalc publish --push",
-    "contract:deploy": "yarn build:ts && npx ts-node src/tools/deploy.ts",
-    "contract:build": "yarn clean:build && yarn build:ts",
-    "build:ts": "node build.cjs",
-    "clean:build": "rimraf ./build",
-    "compile": "tsc",
-    "test": "jest --forceExit",
-    "pretest": "yarn build:ts"
+    "yalc:publish": "yarn build && yalc publish --push"
   },
   "dependencies": {
-    "warp-contracts-redis": "^0.1.0",
-    "warp-contract-plugin-snarkjs": "^0.1.0",
     "redis": "^4.6.4",
     "warp-contracts": "^1.2.49",
-    "warp-contracts-lmdb": "^1.1.9"
+    "warp-contracts-lmdb": "^1.1.9",
+    "warp-contracts-plugin-deploy": "^1.0.0",
+    "warp-contracts-plugin-snarkjs": "^0.1.2",
+    "warp-contracts-redis": "^0.1.1"
   },
   "devDependencies": {
     "@parcel/packager-ts": "2.8.3",
