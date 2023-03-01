@@ -1,6 +1,12 @@
 import type {HollowDBContractFunction} from '../../types';
 
-export const get: HollowDBContractFunction = async (state, action) => {
+export type HollowDBGet = {
+  function: 'get';
+  data: {
+    key: string;
+  };
+};
+export const get: HollowDBContractFunction<HollowDBGet> = async (state, action) => {
   const {key} = action.input.data;
 
   return {

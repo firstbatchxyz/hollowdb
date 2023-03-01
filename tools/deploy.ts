@@ -4,16 +4,10 @@ import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
 import type {JWKInterface} from 'warp-contracts/lib/types/utils/types/arweave-types';
-import {HollowDBState} from '../contracts/hollowDB/types';
+import initialState from '../common/initialState';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// initial state for your deployment
-const initialState: HollowDBState = {
-  owner: '',
-  verificationKey: {},
-};
 
 async function main() {
   let walletName: string = 'wallet-main';
@@ -34,7 +28,7 @@ async function main() {
   // deploy
   console.log('Deploying contract...');
   const result = await Admin.deploy(wallet, initialState, contractSource, warp);
-  console.log(result);
+  console.log('Deployed.', result);
 }
 
 main();
