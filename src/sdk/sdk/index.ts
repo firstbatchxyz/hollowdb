@@ -1,3 +1,4 @@
+import {HollowDBInput} from '../../../contracts/hollowDB/types';
 import {Base} from '../base';
 import type {HollowDbSdkArgs} from '../types';
 
@@ -16,7 +17,7 @@ export class SDK extends Base {
    * @returns The value of the given key.
    */
   async get(key: string) {
-    const response = await this.hollowDB.viewState({
+    const response = await this.hollowDB.viewState<HollowDBInput>({
       function: 'get',
       data: {
         key: key,
@@ -36,11 +37,7 @@ export class SDK extends Base {
    * @returns The values of the given keys.
    */
   async getMany(keys: string[]) {
-    return await Promise.all(
-      keys.map(async key => {
-        return await this.get(key);
-      })
-    );
+    return await Promise.all(keys.map(async key => this.get(key)));
   }
 
   /**
@@ -49,7 +46,7 @@ export class SDK extends Base {
    * @param valueTx The valueTx to be inserted.
    */
   async put(key: string, valueTx: string) {
-    const result = await this.hollowDB.dryWrite({
+    const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'put',
       data: {
         key: key,
@@ -61,7 +58,7 @@ export class SDK extends Base {
       throw new Error('Contract Error [put]: ' + result.errorMessage);
     }
 
-    await this.hollowDB.writeInteraction({
+    await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'put',
       data: {
         key: key,
@@ -76,8 +73,8 @@ export class SDK extends Base {
    * @param value The new valueTx.
    * @param proof Proof of the value to be updated.
    */
-  async update(key: string, valueTx: string, proof: object) {
-    const result = await this.hollowDB.dryWrite({
+  async update(key: string, valueTx: string, proof: object = {}) {
+    const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'update',
       data: {
         key: key,
@@ -90,7 +87,7 @@ export class SDK extends Base {
       throw new Error('Contract Error [update]: ' + result.errorMessage);
     }
 
-    await this.hollowDB.writeInteraction({
+    await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'update',
       data: {
         key: key,
@@ -106,8 +103,8 @@ export class SDK extends Base {
    * @param key The key of the value to be removed.
    * @param proof Proof of the value to be removed.
    */
-  async remove(key: string, proof: object) {
-    const result = await this.hollowDB.dryWrite({
+  async remove(key: string, proof: object = {}) {
+    const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'remove',
       data: {
         key: key,
@@ -119,7 +116,7 @@ export class SDK extends Base {
       throw new Error('Contract Error [remove]: ' + result.errorMessage);
     }
 
-    await this.hollowDB.writeInteraction({
+    await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'remove',
       data: {
         key: key,

@@ -2,15 +2,37 @@ import errors from '../../errors';
 import type {HollowDBContractFunction} from '../../types';
 import {verifyProof, valueTxToBigInt} from '../../../../common/utilities';
 
-export const update: HollowDBContractFunction = async (state, action) => {
+export type HollowDBUpdate = {
+  function: 'update';
+  data: {
+    key: string;
+    proof: object;
+    valueTx: string;
+  };
+};
+export const update: HollowDBContractFunction<HollowDBUpdate> = async (state, action) => {
   const {key, valueTx, proof} = action.input.data;
 
+  // caller must be whitelisted
+  if (state.isWhitelistRequired.update && !state.whitelist.update[action.caller]) {
+    throw errors.NotWhitelistedError(action.input.function);
+  }
+
+  // there must be a value at the key
   const dbValueTx = await SmartWeave.kv.get<string>(key);
   if (dbValueTx === null) {
     throw errors.KeyNotExistsError;
   }
 
-  if (await verifyProof(proof, [valueTxToBigInt(dbValueTx), BigInt(key)], state.verificationKey)) {
+  // if required, the proof must verify
+  if (
+    !state.isProofRequired ||
+    (await verifyProof(
+      proof,
+      [valueTxToBigInt(dbValueTx), valueTxToBigInt(valueTx), BigInt(key)],
+      state.verificationKey
+    ))
+  ) {
     await SmartWeave.kv.put(key, valueTx);
   } else {
     throw errors.InvalidProofError(action.input.function);

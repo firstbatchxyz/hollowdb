@@ -1,36 +1,60 @@
+import {HollowDBGet} from '../actions/read/get';
+import {HollowDBPut} from '../actions/write/put';
+import {HollowDBRemove} from '../actions/write/remove';
+import {HollowDBUpdate} from '../actions/write/update';
+import {HollowDBUpdateState} from '../actions/write/updateState';
+import {HollowDBUpdateWhitelist} from '../actions/write/updateWhitelist';
+
+/**
+ * Union of all HollowDB input types
+ */
+export type HollowDBInput =
+  | HollowDBGet
+  | HollowDBRemove
+  | HollowDBPut
+  | HollowDBUpdate
+  | HollowDBUpdateState
+  | HollowDBUpdateWhitelist;
+
+/**
+ * HollowDB contract state.
+ */
 export interface HollowDBState {
   verificationKey: object;
-  creator: string;
-}
-
-export interface HollowDBAction {
-  input: HollowDBInput;
-  caller: string;
-}
-
-export interface HollowDBInput {
-  function: HollowDBFunctionSelector;
-  data: {
-    key: string;
-    valueTx: string;
-    proof: object;
-    verificationKey: object;
-    creator: string;
+  owner: string;
+  isProofRequired: boolean;
+  isWhitelistRequired: {
+    put: boolean;
+    update: boolean;
+  };
+  whitelist: {
+    put: {
+      [address: string]: boolean;
+    };
+    update: {
+      [address: string]: boolean;
+    };
   };
 }
 
-export type HollowDBFunctionSelector = 'put' | 'update' | 'remove' | 'get' | 'setVerificationKey' | 'setCreator';
+/**
+ * A contract action, that is a caller and their input.
+ */
+export type HollowDBAction<InputType> = {
+  input: InputType;
+  caller: string;
+};
 
-export type HollowDBResult =
-  | string
-  | null
-  | {
-      verificationKey: object;
-    };
+/**
+ * A result from a read request can be a value at the given key, that is a string or null if none exists.
+ */
+export type HollowDBResult = string | null;
 
-export type HollowDBContractResult = {state: HollowDBState} | {result: HollowDBResult};
-
-export type HollowDBContractFunction = (
+/**
+ * A generic HollowDB contract function. Functions can specify their
+ * input type via the generic type parameter
+ */
+export type HollowDBContractFunction<InputType = any> = (
   state: HollowDBState,
-  action: HollowDBAction
-) => Promise<HollowDBContractResult>;
+  action: HollowDBAction<InputType>
+) => Promise<{state: HollowDBState} | {result: HollowDBResult}>;

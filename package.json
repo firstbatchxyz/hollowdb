@@ -1,7 +1,7 @@
 {
   "name": "hollowdb",
   "version": "0.1.6",
-  "description": "A decentralized key-value database.",
+  "description": "A decentralized key-value database",
   "license": "MIT",
   "type": "module",
   "source": "src/index.ts",
@@ -14,8 +14,10 @@
   "cjs": "lib/index.cjs",
   "mjs": "lib/index.mjs",
   "exports": {
+    "types": "./lib/index.d.ts",
     "import": "./lib/index.mjs",
-    "require": "./lib/index.cjs"
+    "require": "./lib/index.cjs",
+    "default": "./lib/index.mjs"
   },
   "targets": {
     "cjs": {
@@ -55,7 +57,7 @@
     "test": "jest --forceExit",
     "pretest": "yarn contract:build",
     "lint": "gts lint",
-    "format": "prettier --write './src/sdk/**/*.ts'",
+    "format": "prettier --write './src/**/*.ts'",
     "prepublishOnly": "yarn lint",
     "preversion": "yarn lint && yarn build",
     "version": "yarn format && git add -A src",

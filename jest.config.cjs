@@ -7,4 +7,7 @@ module.exports = {
   transform: {
     '^.+\\.(ts|js)$': 'ts-jest',
   },
+  globals: {
+    __REDIS_URL__: 'redis://default:redispw@localhost:6379',
+  },
 };

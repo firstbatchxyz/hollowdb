@@ -1,13 +1,22 @@
 import errors from '../../errors';
 import type {HollowDBContractFunction} from '../../types';
 
-export const put: HollowDBContractFunction = async (state, action) => {
+export type HollowDBPut = {
+  function: 'put';
+  data: {
+    key: string;
+    valueTx: string;
+  };
+};
+export const put: HollowDBContractFunction<HollowDBPut> = async (state, action) => {
   const {key, valueTx} = action.input.data;
 
-  if (action.caller !== state.creator) {
-    throw errors.NotCreatorError(action.input.function);
+  // caller must be whitelisted
+  if (state.isWhitelistRequired.put && !state.whitelist.put[action.caller]) {
+    throw errors.NotWhitelistedError(action.input.function);
   }
 
+  // must be an empty value
   if ((await SmartWeave.kv.get<string>(key)) !== null) {
     throw errors.KeyExistsError;
   }
