@@ -10,7 +10,9 @@ export const update: HollowDBContractFunction = async (state, action) => {
     throw errors.KeyNotExistsError;
   }
 
-  if (await verifyProof(proof, [valueTxToBigInt(dbValueTx), BigInt(key)], state.verificationKey)) {
+  if (
+    await verifyProof(proof, [valueTxToBigInt(dbValueTx), valueTxToBigInt(valueTx), BigInt(key)], state.verificationKey)
+  ) {
     await SmartWeave.kv.put(key, valueTx);
   } else {
     throw errors.InvalidProofError(action.input.function);

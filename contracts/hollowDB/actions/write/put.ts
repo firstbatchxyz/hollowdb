@@ -4,8 +4,8 @@ import type {HollowDBContractFunction} from '../../types';
 export const put: HollowDBContractFunction = async (state, action) => {
   const {key, valueTx} = action.input.data;
 
-  if (action.caller !== state.creator) {
-    throw errors.NotCreatorError(action.input.function);
+  if (action.caller !== state.owner) {
+    throw errors.NotOwnerError(action.input.function);
   }
 
   if ((await SmartWeave.kv.get<string>(key)) !== null) {

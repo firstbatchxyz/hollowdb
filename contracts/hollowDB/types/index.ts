@@ -1,6 +1,6 @@
 export interface HollowDBState {
   verificationKey: object;
-  creator: string;
+  owner: string;
 }
 
 export interface HollowDBAction {
@@ -15,22 +15,21 @@ export interface HollowDBInput {
     valueTx: string;
     proof: object;
     verificationKey: object;
-    creator: string;
+    owner: string;
   };
 }
 
-export type HollowDBFunctionSelector = 'put' | 'update' | 'remove' | 'get' | 'setVerificationKey' | 'setCreator';
+/**
+ * Defined functions in HollowDB
+ */
+export type HollowDBFunctionSelector = 'put' | 'update' | 'remove' | 'get' | 'setVerificationKey' | 'setOwner';
 
-export type HollowDBResult =
-  | string
-  | null
-  | {
-      verificationKey: object;
-    };
-
-export type HollowDBContractResult = {state: HollowDBState} | {result: HollowDBResult};
+/**
+ * A result from a read request can be a value at the given key, that is a string or null if none exists.
+ */
+export type HollowDBResult = string | null;
 
 export type HollowDBContractFunction = (
   state: HollowDBState,
   action: HollowDBAction
-) => Promise<HollowDBContractResult>;
+) => Promise<{state: HollowDBState} | {result: HollowDBResult}>;

@@ -11,4 +11,8 @@ export type HollowDbSdkArgs = {
   useContractCache?: Boolean;
   useStateCache?: Boolean;
   redisClient?: ReturnType<typeof createClient>;
+  limitOptions?: {
+    minEntriesPerContract: number;
+    maxEntriesPerContract: number;
+  };
 };

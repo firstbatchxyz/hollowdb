@@ -2,7 +2,9 @@
 
 HollowDB is a decentralized privacy-preserving key-value database on [Arweave](https://www.arweave.org/) network, powered by [Warp Contracts](https://warp.cc/).
 
-Anyone can **read** & **put** a value; however, to **update** or **remove** a value at some key, the user must provide a **zero-knowledge proof** that they know the preimage of the key.
+- Anyone can **read** a value at any key.
+- To **update** or **remove** a value at some key, the user must provide a **zero-knowledge proof** that they know the preimage of the key, along with constraints.
+- Only the contract owner account can **put** a value. Owner can be changed, and putting a value does not require a proof.
 
 ## Usage
 
@@ -39,27 +41,68 @@ As shown in example, you must provide 4 required arguments:
 - `contractTxId`: the transaction id of your contract deployment.
 - `cacheType`: type of cache to be used, `lmdb` or `redis`.
   - if this is `redis`, then you must also provide a Redis client object via `redisClient` argument.
-  - you can enable caching with the optional boolean arguments `useContractCache` and `useStateCache`, both undefined (i.e. falsy) by default.
-  - `useKVStorageFactory` is always enabled, and will respect the `cacheType`.
+  - you can enable caching with the optional boolean arguments `useContractCache` and `useStateCache`; both are undefined (i.e. falsy) by default.
+  - you can specify a `limitOptions` object with the fields `minEntriesPerContract` and `maxEntriesPerContract` that specify a limit of sortKey caches per key.
+  - note that `useKVStorageFactory` is always enabled, and will respect the `cacheType`.
 - `warp`: a Warp instance, could be for mainnet, testnet or local.
 
-### Generating a proof
+### SDK Operations
 
-Each key in the database is the Poseidon hash of some preimage, the client must provide a preimage knowledge proof to update or remove a value at that key.
+SDK provides the basic CRUD functionality.
+
+```ts
+// GET is open to everyone
+await sdk.get(key);
+
+// PUT does not require a proof, but only the owner can do it
+await sdk.put(key, valueTx);
+
+// UPDATE requires a proof
+let {proof} = await generateProof(keyPreimage, curValueTx, newValueTx);
+await sdk.update(key, newValueTx, proof);
+
+// REMOVE requires a proof
+let {proof} = await generateProof(keyPreimage, curValueTx, null);
+await sdk.remove(key, proof);
+```
+
+Furthermore, you can read the state of contract.
+
+```ts
+const {cachedValue} await sdk.readState();
+const {owner, verificationKey} = cachedValue.state;
+```
+
+### Admin Operations
+
+The admin can change owner, or update the verification key. Admin does not have SDK functions in it, as we don't expect the Admin to be used in such a way; Admin should only be instantiated when a major change such as changing the owner or the verification key is required.
+
+```ts
+// verification key is an object obtained from SnarkJS
+await admin.setVerificationKey(verificationKey);
+
+// newOwner is a JWK wallet object, to ensure that you have access to the new owner
+await admin.setOwner(newOwner);
+```
+
+### Generating the proof
+
+Each key in the database is the Poseidon hash of some preimage, the client must provide a preimage knowledge proof to update or remove a value at that key. Additional constraints on the current value and next value to be written are also given to the proof.
 
 ```ts
 export async function generateProof(
   preimage: bigint,
-  curValueTx: string
-): Promise<{proof: object; publicSignals: string[]}> {
-  // `yarn add snarkjs` to get snarkjs
+  curValueTx: string | null,
+  nextValueTx: string | null
+): Promise<{proof: object; publicSignals: [curValueTx: bigint, nextValueTx: bigint, key: bigint]}> {
   const fullProof = await snarkjs.groth16.fullProve(
     {
-      id_commitment: preimage,
-      valueTx: valueTxToBigInt(curValueTx),
+      idCommitment: preimage,
+      curValueTx: curValueTx ? valueTxToBigInt(curValueTx) : 0n,
+      nextValueTx: nextValueTx ? valueTxToBigInt(nextValueTx) : 0n,
     },
-    WASM_PATH, // circuits/hollow-authz/hollow-authz.wasm
-    PROVERKEY_PATH // circuits/hollow-authz/prover_key.zkey
+    WASM_PATH,
+    PROVERKEY_PATH
   );
   return fullProof;
 }
@@ -101,4 +144,15 @@ There are Jest test suites for HollowDB operations that operate on a local Arwea
 
 ```sh
 yarn test
+```
+
+The test will run for both LMDB cache and Redis cache. For Redis, you need to have a server running, with the URL that you specify in the [Jest config](./jest.config.cjs).
+
+## Formatting & Linting
+
+We are using the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html).
+
+```sh
+yarn format
+yarn lint
 ```

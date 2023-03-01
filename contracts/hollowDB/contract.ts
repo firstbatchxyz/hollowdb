@@ -4,7 +4,7 @@ import {get} from './actions/read/get.js';
 import {put} from './actions/write/put.js';
 import {update} from './actions/write/update.js';
 import {remove} from './actions/write/remove.js';
-import {setCreator} from './actions/write/setCreator.js';
+import {setOwner} from './actions/write/setOwner.js';
 import {setVerificationKey} from './actions/write/setVerificationKey.js';
 // types & constants
 import type {HollowDBContractFunction} from './types/index.js';
@@ -22,8 +22,8 @@ export const handle: HollowDBContractFunction = (state, action) => {
       return get(state, action);
     case 'setVerificationKey':
       return setVerificationKey(state, action);
-    case 'setCreator':
-      return setCreator(state, action);
+    case 'setOwner':
+      return setOwner(state, action);
     default:
       throw errors.UnknownFunctionError(action.input.function);
   }

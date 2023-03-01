@@ -4,9 +4,9 @@ import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
 
 /**
- * HollowDB admin that can set creator and set verification key.
+ * HollowDB admin that can set owner and set verification key.
  * For both operations, the admin wallet address must match the
- * creator in the contract state.
+ * owner in the contract state.
  */
 export class Admin extends Base {
   constructor(args: HollowDbSdkArgs) {
@@ -14,15 +14,15 @@ export class Admin extends Base {
   }
 
   /**
-   * Sets the creator as the given wallet address.
+   * Sets the owner as the given wallet address.
    * @param jwk wallet of the new owner
    */
-  async changeCreator(jwk: ArWallet) {
+  async changeOwner(jwk: ArWallet) {
     const addr = await this.warp.arweave.wallets.jwkToAddress(jwk);
     await this.hollowDB.writeInteraction({
-      function: 'setCreator',
+      function: 'setOwner',
       data: {
-        creator: addr,
+        owner: addr,
       },
     });
   }
@@ -42,18 +42,20 @@ export class Admin extends Base {
 
   /**
    * Utility function to deploy the HollowDB contract.
-   * @param creator wallet to deploy the contract
+   * @param owner wallet to deploy the contract
+   * @param initialState the initial HollowDB state; owner will be overwritten
+   * @param contractSource source code of the contract, as a string
    * @param warp optional warp instance, defaults to mainnet
    * @returns transaction ids and the initial state
    */
   static async deploy(
-    creator: ArWallet,
+    owner: ArWallet,
     initialState: HollowDBState,
     contractSource: string,
     warp: Warp
   ): Promise<{contractTxId: string; srcTxId: string | undefined}> {
-    // override creator with the deployer wallet
-    initialState.creator = await warp.arweave.wallets.jwkToAddress(creator);
+    // override owner with the deployer wallet
+    initialState.owner = await warp.arweave.wallets.jwkToAddress(owner);
 
     // deploy
     const evaluationManifest: EvaluationManifest = {
@@ -63,7 +65,7 @@ export class Admin extends Base {
       },
     };
     const {contractTxId, srcTxId} = await warp.deploy({
-      wallet: creator,
+      wallet: owner,
       initState: JSON.stringify(initialState),
       src: contractSource,
       evaluationManifest,

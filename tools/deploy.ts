@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 // initial state for your deployment
 const initialState: HollowDBState = {
-  creator: '',
+  owner: '',
   verificationKey: {},
 };
 

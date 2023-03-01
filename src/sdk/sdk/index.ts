@@ -36,11 +36,7 @@ export class SDK extends Base {
    * @returns The values of the given keys.
    */
   async getMany(keys: string[]) {
-    return await Promise.all(
-      keys.map(async key => {
-        return await this.get(key);
-      })
-    );
+    return await Promise.all(keys.map(async key => this.get(key)));
   }
 
   /**

@@ -5,7 +5,11 @@
  * @param verKey verification key
  * @returns true if proof is verified, false otherwise
  */
-export const verifyProof = async (proof: object, psignals: bigint[], verificationKey: object): Promise<boolean> => {
+export const verifyProof = async (
+  proof: object,
+  psignals: [curValueTx: bigint, nextValueTx: bigint, key: bigint],
+  verificationKey: object
+): Promise<boolean> => {
   return await SmartWeave.extensions.groth16.verify(verificationKey, psignals, proof);
 };
 

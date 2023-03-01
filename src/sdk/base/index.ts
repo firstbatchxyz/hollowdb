@@ -5,7 +5,7 @@ import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
 
-const MINMAX_OPTS = {
+const defaultLimitOptions = {
   lmdb: {
     minEntriesPerContract: 10,
     maxEntriesPerContract: 100,
@@ -25,6 +25,7 @@ export class Base {
   constructor(args: HollowDbSdkArgs) {
     this.jwk = args.jwk;
     this.contractTxId = args.contractTxId;
+    args.limitOptions = args.limitOptions || defaultLimitOptions[args.cacheType];
 
     if (args.cacheType === 'redis' && args.redisClient === undefined) {
       throw new Error('Provide a Redis client if you want cacheType redis.');
@@ -41,12 +42,12 @@ export class Base {
             ...defaultCacheOptions,
             dbLocation: './cache/warp/state',
           },
-          MINMAX_OPTS.lmdb
+          args.limitOptions
         ),
         redis: new RedisCache({
           client: args.redisClient!,
           prefix: `${args.contractTxId}.state`,
-          ...MINMAX_OPTS.redis,
+          ...args.limitOptions,
         }),
       }[args.cacheType];
       warp = warp.useStateCache(stateCache);
@@ -69,12 +70,12 @@ export class Base {
           definition: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.contract`,
-            ...MINMAX_OPTS.redis,
+            ...args.limitOptions,
           }),
           src: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.src`,
-            ...MINMAX_OPTS.redis,
+            ...args.limitOptions,
           }),
         },
       }[args.cacheType];
