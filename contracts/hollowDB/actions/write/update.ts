@@ -13,6 +13,11 @@ export type HollowDBUpdate = {
 export const update: HollowDBContractFunction<HollowDBUpdate> = async (state, action) => {
   const {key, valueTx, proof} = action.input.data;
 
+  // caller must be whitelisted
+  if (state.isWhitelistRequired.update && !state.whitelist.update[action.caller]) {
+    throw errors.NotWhitelistedError(action.input.function);
+  }
+
   // there must be a value at the key
   const dbValueTx = await SmartWeave.kv.get<string>(key);
   if (dbValueTx === null) {

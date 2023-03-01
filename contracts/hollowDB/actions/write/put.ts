@@ -11,13 +11,8 @@ export type HollowDBPut = {
 export const put: HollowDBContractFunction<HollowDBPut> = async (state, action) => {
   const {key, valueTx} = action.input.data;
 
-  // caller must be owner
-  if (action.caller !== state.owner) {
-    throw errors.NotOwnerError(action.input.function);
-  }
-
   // caller must be whitelisted
-  if (state.isWhitelistRequired && !state.whitelist[action.caller]) {
+  if (state.isWhitelistRequired.put && !state.whitelist.put[action.caller]) {
     throw errors.NotWhitelistedError(action.input.function);
   }
 

@@ -18,12 +18,12 @@ export class Admin extends Base {
    * @param jwk wallet of the new owner
    */
   async changeOwner(jwk: ArWallet) {
-    const addr = await this.warp.arweave.wallets.jwkToAddress(jwk);
+    const newOwnerAddress = await this.warp.arweave.wallets.jwkToAddress(jwk);
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
       data: {
         newState: {
-          owner: addr,
+          owner: newOwnerAddress,
         },
       },
     });
@@ -38,29 +38,27 @@ export class Admin extends Base {
       function: 'updateState',
       data: {
         newState: {
-          verificationKey: verificationKey,
+          verificationKey,
         },
       },
     });
   }
 
-  /**
-   * Updates the verification key.
-   * @param verificationKey verification key
-   */
-  async setWhitelistRequirement(isWhitelistRequired: boolean) {
+  async setWhitelistRequirement(isWhitelistRequired: {put: boolean; update: boolean}) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
       data: {
         newState: {
-          isWhitelistRequired: isWhitelistRequired,
+          isWhitelistRequired,
         },
       },
     });
   }
 
   /**
-   * Updates the verification key.
+   * Set the proof requirement condition.
+   * - if true, certain operations will require zero-knowledge proofs (ZKP)
+   * - otherwise, proofs will be ignored
    * @param isProofRequired true if you want ZKP to be mandatory
    */
   async setProofRequirement(isProofRequired: boolean) {
@@ -68,7 +66,7 @@ export class Admin extends Base {
       function: 'updateState',
       data: {
         newState: {
-          isProofRequired: isProofRequired,
+          isProofRequired,
         },
       },
     });
@@ -78,8 +76,9 @@ export class Admin extends Base {
    * Add a list of users to the whitelist. This way, if `isWhitelistRequired` is true,
    * only the whitelisted users may do operations on HollowDB.
    * @param users a list of users to be whitelisted
+   * @param type type of whitelist, PUT or UPDATE. Note that REMOVE also uses the whitelist of UPDATE
    */
-  async addUsersToWhitelist(users: string[]) {
+  async addUsersToWhitelist(users: string[], type: keyof HollowDBState['whitelist']) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateWhitelist',
       data: {
@@ -87,11 +86,17 @@ export class Admin extends Base {
           add: users,
           remove: [],
         },
+        type,
       },
     });
   }
 
-  async removeUsersFromWhitelist(users: string[]) {
+  /**
+   * Removes a list of users from whitelist.
+   * @param users a list of users to be removed from whitelist
+   * @param type type of whitelist, PUT or UPDATE. Note that REMOVE also uses the whitelist of UPDATE
+   */
+  async removeUsersFromWhitelist(users: string[], type: keyof HollowDBState['whitelist']) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateWhitelist',
       data: {
@@ -99,6 +104,7 @@ export class Admin extends Base {
           remove: users,
           add: [],
         },
+        type,
       },
     });
   }
@@ -120,7 +126,8 @@ export class Admin extends Base {
     // default owner becomes the deployer, and is also whitelisted
     const ownerAddress = await warp.arweave.wallets.jwkToAddress(owner);
     initialState.owner = ownerAddress;
-    initialState.whitelist[ownerAddress] = true;
+    initialState.whitelist['put'][ownerAddress] = true;
+    initialState.whitelist['update'][ownerAddress] = true;
 
     // deploy
     const evaluationManifest: EvaluationManifest = {

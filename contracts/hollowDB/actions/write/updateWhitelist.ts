@@ -1,5 +1,5 @@
 import errors from '../../errors';
-import type {HollowDBContractFunction} from '../../types';
+import type {HollowDBContractFunction, HollowDBState} from '../../types';
 
 export type HollowDBUpdateWhitelist = {
   function: 'updateWhitelist';
@@ -8,10 +8,11 @@ export type HollowDBUpdateWhitelist = {
       add: string[];
       remove: string[];
     };
+    type: keyof HollowDBState['whitelist'];
   };
 };
 export const updateWhitelist: HollowDBContractFunction<HollowDBUpdateWhitelist> = async (state, action) => {
-  const {whitelist} = action.input.data;
+  const {whitelist, type} = action.input.data;
 
   // caller must be owner
   if (action.caller !== state.owner) {
@@ -20,12 +21,12 @@ export const updateWhitelist: HollowDBContractFunction<HollowDBUpdateWhitelist> 
 
   // add users
   whitelist.add.forEach(user => {
-    state.whitelist[user] = true;
+    state.whitelist[type][user] = true;
   });
 
   // remove users
-  whitelist.add.forEach(user => {
-    delete state.whitelist[user];
+  whitelist.remove.forEach(user => {
+    delete state.whitelist[type][user];
   });
 
   return {state};

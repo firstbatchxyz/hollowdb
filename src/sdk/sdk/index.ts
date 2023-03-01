@@ -103,7 +103,7 @@ export class SDK extends Base {
    * @param key The key of the value to be removed.
    * @param proof Proof of the value to be removed.
    */
-  async remove(key: string, proof: object) {
+  async remove(key: string, proof: object = {}) {
     const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'remove',
       data: {

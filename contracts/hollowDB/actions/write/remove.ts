@@ -12,15 +12,17 @@ export type HollowDBRemove = {
 export const remove: HollowDBContractFunction<HollowDBRemove> = async (state, action) => {
   const {key, proof} = action.input.data;
 
+  // caller must be whitelisted
+  // note that we check the UPDATE whitelist, since REMOVE is equivalent to
+  // UPDATE but with null as the next value
+  if (state.isWhitelistRequired.update && !state.whitelist.update[action.caller]) {
+    throw errors.NotWhitelistedError(action.input.function);
+  }
+
   // there must be a value at the key
   const dbValueTx = await SmartWeave.kv.get<string>(key);
   if (dbValueTx === null) {
     throw errors.KeyNotExistsError;
-  }
-
-  // caller must be whitelisted
-  if (state.isWhitelistRequired && !state.whitelist[action.caller]) {
-    throw errors.NotWhitelistedError(action.input.function);
   }
 
   // if required, the proof must verify

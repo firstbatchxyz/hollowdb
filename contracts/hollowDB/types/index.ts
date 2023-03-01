@@ -23,9 +23,17 @@ export interface HollowDBState {
   verificationKey: object;
   owner: string;
   isProofRequired: boolean;
-  isWhitelistRequired: boolean;
+  isWhitelistRequired: {
+    put: boolean;
+    update: boolean;
+  };
   whitelist: {
-    [address: string]: boolean;
+    put: {
+      [address: string]: boolean;
+    };
+    update: {
+      [address: string]: boolean;
+    };
   };
 }
 
@@ -42,6 +50,10 @@ export type HollowDBAction<InputType> = {
  */
 export type HollowDBResult = string | null;
 
+/**
+ * A generic HollowDB contract function. Functions can specify their
+ * input type via the generic type parameter
+ */
 export type HollowDBContractFunction<InputType = any> = (
   state: HollowDBState,
   action: HollowDBAction<InputType>

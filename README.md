@@ -2,9 +2,24 @@
 
 HollowDB is a decentralized privacy-preserving key-value database on [Arweave](https://www.arweave.org/) network, powered by [Warp Contracts](https://warp.cc/).
 
-- Anyone can **read** a value at any key.
-- To **update** or **remove** a value at some key, the user must provide a **zero-knowledge proof** that they know the preimage of the key, along with constraints.
-- Only the contract owner account can **put** a value. Owner can be changed, and putting a value does not require a proof.
+HollowDB has two modus operandi: **proofs** and **whitelisting**. Both can be enabled together, or separately.
+
+- Usage of proofs can be enabled by setting `isProofRequired` true in the contract state. When using proofs:
+
+  - Anyone can **read** and **put**.
+  - To **update** or **remove** a value at some key, user must provide preimage knowledge of that key.
+
+- Usage of whitelisting can be enabled by setting `isWhitelistRequired` true in the contract state. When using whitelisting:
+
+  - Anyone can **read**.
+  - To **put**, **update**, or **remove**, the user must have been whitelisted by the contract owner.
+
+The table below summarizes this:
+
+| Requirements     | **Put** | **Update** | **Remove** | **Read** |
+| ---------------- | ------- | ---------- | ---------- | -------- |
+| **Proofs**       | -       | ✅         | ✅         | -        |
+| **Whitelisting** | ✅      | ✅         | ✅         | -        |
 
 ## Usage
 
@@ -39,7 +54,7 @@ As shown in example, you must provide 4 required arguments:
 
 - `jwk`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you `.gitignore` your wallet files.
 - `contractTxId`: the transaction id of your contract deployment.
-- `cacheType`: type of cache to be used, `lmdb` or `redis`.
+- `cacheType`: type of cache to be used, i.e. `lmdb` or `redis`.
   - if this is `redis`, then you must also provide a Redis client object via `redisClient` argument.
   - you can enable caching with the optional boolean arguments `useContractCache` and `useStateCache`; both are undefined (i.e. falsy) by default.
   - you can specify a `limitOptions` object with the fields `minEntriesPerContract` and `maxEntriesPerContract` that specify a limit of sortKey caches per key.
