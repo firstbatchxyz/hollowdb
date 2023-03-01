@@ -1,7 +1,7 @@
 {
   "name": "hollowdb",
   "version": "0.1.6",
-  "description": "A decentralized key-value database.",
+  "description": "A decentralized key-value database",
   "license": "MIT",
   "type": "module",
   "source": "src/index.ts",
