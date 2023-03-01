@@ -54,7 +54,7 @@ const admin = new Admin(args);
 As shown in example, you must provide 4 required arguments:
 
 - `jwk`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you .gitignore your wallet files!
-- `contractTxId`: the transaction id of your contract deployment.
+- `contractTxId`: the transaction id of the contract. You can **connect to an existing contract**, or deploy one of your own and provide it's id here.
 - `cacheType`: type of cache to be used, i.e. `lmdb` or `redis`.
   - if this is `redis`, then you must also provide a Redis client object via `redisClient` argument.
   - you can enable contract & state caching with the optional boolean arguments `useContractCache` and `useStateCache`; both are falsy by default.
@@ -73,14 +73,14 @@ await sdk.get(key);
 await sdk.put(key, value);
 
 // UPDATE with a proof
-let {proof} = await generateProof(keyPreimage, curValueTx, newValueTx);
+let {proof} = await generateProof(keyPreimage, curValue, newValue);
 await sdk.update(key, newValue, proof);
 
 // UPDATE without a proof
-await sdk.update(key, newValueTx);
+await sdk.update(key, newValue);
 
 // REMOVE with a proof
-let {proof} = await generateProof(keyPreimage, curValueTx, null);
+let {proof} = await generateProof(keyPreimage, curValue, null);
 await sdk.remove(key, proof);
 
 // REMOVE without a proof
@@ -106,7 +106,7 @@ await admin.setProofRequirement(false); // e.g. disables proof checking
 
 // whitelisting
 await admin.setWhitelistRequirement({
-  put: true, // e.g. check for proofs on PUT operations
+  put: true, // e.g. check for whitelist on PUT operations
   update: false, // but don't care for UPDATE & REMOVE operations
 });
 
@@ -114,11 +114,34 @@ await admin.setWhitelistRequirement({
 await admin.addUsersToWhitelist([aliceAddr, bobAddr], 'put');
 
 // remove someone from the whitelist
+await ownerAdmin.removeUsersFromWhitelist([bobAddr], 'put');
 ```
 
-Usage of proofs can be enabled by setting `isProofRequired: true` in the contract state.
+### Building & deploying the contract
 
-### Generating the proof
+The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. To build your contract, a shorthand script is provided within this repository:
+
+```sh
+yarn contract:build
+```
+
+This will generate the built contract under `build/hollowDB/contract.js`. To deploy this contract, you need an Arweave wallet. Download your wallet as JWK and save it under [config/wallet](./config/wallet/) folder. Afterwards, use the following script:
+
+```bash
+yarn contract:deploy <wallet-name>
+```
+
+This runs the deployment code under the [tools](./src/tools/) folder, which internally uses the static deploy function of the `Admin` toolkit. It will use the wallet `./config/wallet/<wallet-name>.json` with `wallet-main` as the default name.
+
+### Values larger than 2KB
+
+Currently [Warp Contracts](https://warp.cc/) only support transactions that are below 2KB in size. Since 2KB may not be sufficient for all use cases, we suggest using [bundlr](https://bundlr.network/) to upload your data to Arweave network, and only store the transaction ID within the contract.
+
+In other words, you will store `key, valueTxId` instead of `key, value`! This will enable you to store arbitary amounts of data, and retrieve them with respect to their transaction ids, also while reducing the overall size of the contract.
+
+We use such an approach in our [HollowDB gRPC server](https://github.com/firstbatchxyz/HollowDB-grpc), for more details please refer to [this document](https://github.com/firstbatchxyz/HollowDB-grpc/blob/master/docs/bundlr.md).
+
+## Zero-Knowledge Proofs
 
 Proof generation is not provided by the HollowDB package, it is left to the developer to integrate the proof within their flow.
 
@@ -129,14 +152,14 @@ A utility to function to generate the proof is written as follows:
 ```ts
 export async function generateProof(
   preimage: bigint,
-  curValueTx: string | null,
-  nextValueTx: string | null
+  curValue: string | null,
+  nextValue: string | null
 ): Promise<{proof: object; publicSignals: bigint[]}> {
   const fullProof = await snarkjs.groth16.fullProve(
     {
       idCommitment: preimage,
-      curValueTx: curValueTx ? valueTxToBigInt(curValueTx) : 0n,
-      nextValueTx: nextValueTx ? valueTxToBigInt(nextValueTx) : 0n,
+      curValue: curValue ? stringToBigInt(curValue) : 0n,
+      nextValue: nextValue ? stringToBigInt(nextValue) : 0n,
     },
     WASM_PATH,
     PROVERKEY_PATH
@@ -144,10 +167,10 @@ export async function generateProof(
   return fullProof;
 }
 
-// convert a string to bigint, output ensured to be in BN128 curve finite field
-export const valueTxToBigInt = (valueTx: string): bigint => {
+// naively convert a string to bigint, output ensured to be in BN128 curve finite field
+export const stringToBigInt = (value: string): bigint => {
   return (
-    BigInt('0x' + Buffer.from(valueTx).toString('hex')) %
+    BigInt('0x' + Buffer.from(value).toString('hex')) %
     BigInt('21888242871839275222246405745257275088548364400416034343698204186575808495617')
   );
 };
@@ -155,25 +178,7 @@ export const valueTxToBigInt = (valueTx: string): bigint => {
 
 Your client will should use the `fullProof.proof` object while making requests; the `fullProof.publicSignals` will be provided by the contract to verify the proof. For more information on using the proofs, check the [tests](./tests/hollowdb.test.ts).
 
-### Building the contract
-
-The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. To build your contract, a shorthand script is provided within this repository:
-
-```sh
-yarn contract:build
-```
-
-This will generate the built contract under `build/hollowDB/contract.js`.
-
-### Deploying the contract
-
-To deploy the contract yourself, you need an Arweave wallet. Download your wallet as JWK and save it under [config/wallet](./config/wallet/) folder. Afterwards, use the following script:
-
-```bash
-yarn contract:deploy <wallet-name>
-```
-
-This runs the deployment code under the [tools](./src/tools/) folder, which internally uses the static deploy function of the `Admin` toolkit. It will use the wallet `./config/wallet/<wallet-name>.json` with `wallet-main` as the default name.
+You can use the prover key, WASM circuit and the verification key that we provide under [circuits](./circuits/hollow-authz/) folder to generate proofs and verify them.
 
 ## Testing
 
