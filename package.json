@@ -6,6 +6,7 @@
   "type": "module",
   "source": "src/index.ts",
   "types": "lib/index.d.ts",
+  "homepage": "https://github.com/firstbatchxyz/HollowDB#readme",
   "author": "FirstBatch Team <dev@firstbatch.xyz>",
   "contributors": [
     "Faruk Can Özkan <farukcan@firstbatch.xyz>",
