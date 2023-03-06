@@ -1,3 +1,8 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Test Workflow](https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg)
+[![Formatter: Prettier](https://img.shields.io/badge/formatter-prettier-f8bc45?logo=prettier)](https://prettier.io/)
+[![Linter: ESLint](https://img.shields.io/badge/linter-eslint-8080f2?logo=eslint)](https://eslint.org/)
+
 # HollowDB
 
 HollowDB is a decentralized privacy-preserving key-value database on [Arweave](https://www.arweave.org/) network, powered by [Warp Contracts](https://warp.cc/).
@@ -114,7 +119,7 @@ await admin.setWhitelistRequirement({
 await admin.addUsersToWhitelist([aliceAddr, bobAddr], 'put');
 
 // remove someone from the whitelist
-await ownerAdmin.removeUsersFromWhitelist([bobAddr], 'put');
+await admin.removeUsersFromWhitelist([bobAddr], 'put');
 ```
 
 ### Building & deploying the contract
