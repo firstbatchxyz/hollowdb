@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - dev
 
 jobs:
   test:
@@ -17,6 +18,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
+
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.5.0
+        with:
+          redis-version: 7
+          redis-port: 6379
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path

@@ -1,14 +1,10 @@
-const Bundlr = require("@bundlr-network/client");
+const Bundlr = require('@bundlr-network/client');
 
 //for more information on bundlr, visit https://bundlr.network
 async function upload(jwk, payload) {
-  const bundlr = new Bundlr.default(
-    "http://node1.bundlr.network",
-    "arweave",
-    jwk
-  );
+  const bundlr = new Bundlr.default('http://node1.bundlr.network', 'arweave', jwk);
 
-  const tags = [{ name: "Content-Type", value: "application/json" }];
+  const tags = [{name: 'Content-Type', value: 'application/json'}];
   const transaction = await bundlr.createTransaction(
     JSON.stringify({
       data: payload,
