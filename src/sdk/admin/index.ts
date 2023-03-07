@@ -1,7 +1,8 @@
-import {ArWallet, EvaluationManifest, Warp} from 'warp-contracts';
+import {ArWallet, EvaluationManifest, JWKInterface, Warp} from 'warp-contracts';
 import {Base} from '../base';
 import {HollowDBInput, HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
+import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
 /**
  * HollowDB admin that can set owner and set verification key.
@@ -118,10 +119,11 @@ export class Admin extends Base {
    * @returns transaction ids and the initial state
    */
   static async deploy(
-    owner: ArWallet,
+    owner: JWKInterface,
     initialState: HollowDBState,
     contractSource: string,
-    warp: Warp
+    warp: Warp,
+    disableBundling = false
   ): Promise<{contractTxId: string; srcTxId: string | undefined}> {
     // default owner becomes the deployer, and is also whitelisted
     const ownerAddress = await warp.arweave.wallets.jwkToAddress(owner);
@@ -136,12 +138,16 @@ export class Admin extends Base {
         useKVStorage: true,
       },
     };
-    const {contractTxId, srcTxId} = await warp.deploy({
-      wallet: owner,
-      initState: JSON.stringify(initialState),
-      src: contractSource,
-      evaluationManifest,
-    });
+
+    const {contractTxId, srcTxId} = await warp.deploy(
+      {
+        wallet: disableBundling ? owner : new ArweaveSigner(owner),
+        initState: JSON.stringify(initialState),
+        src: contractSource,
+        evaluationManifest,
+      },
+      disableBundling
+    );
 
     return {contractTxId, srcTxId};
   }

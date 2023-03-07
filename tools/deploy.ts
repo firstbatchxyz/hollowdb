@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import type {JWKInterface} from 'warp-contracts/lib/types/utils/types/arweave-types';
 import initialState from '../common/initialState';
+import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,8 +15,6 @@ async function main() {
   if (process.argv.length === 3) {
     walletName = process.argv[2];
   }
-  // deploying to mainnet
-  const warp = WarpFactory.forMainnet();
 
   // read wallet
   const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
@@ -24,6 +23,9 @@ async function main() {
   // read source code
   const contractSourcePath = __dirname + '/../build/hollowDB/contract.js';
   const contractSource = fs.readFileSync(contractSourcePath).toString();
+
+  // deploying to mainnet
+  const warp = WarpFactory.forMainnet().use(new DeployPlugin());
 
   // deploy
   console.log('Deploying contract...');

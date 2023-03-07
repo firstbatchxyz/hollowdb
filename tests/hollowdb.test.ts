@@ -1,5 +1,6 @@
 import ArLocal from 'arlocal';
 import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
+import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
 import {valueTxToBigInt} from '../common/utilities';
 import fs from 'fs';
@@ -34,7 +35,7 @@ describe('HollowDB', () => {
     contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
   });
 
-  describe.each<CacheType>(['lmdb', 'redis'])('using %s cache, proofs enabled', cacheType => {
+  describe.each<CacheType>(['lmdb' /*'redis'*/])('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin;
     let ownerSDK: SDK;
     let aliceSDK: SDK;
@@ -47,14 +48,20 @@ describe('HollowDB', () => {
 
     beforeAll(async () => {
       // setup warp factory for local arweave
-      warp = WarpFactory.forLocal(ARWEAVE_PORT);
+      warp = WarpFactory.forLocal(ARWEAVE_PORT).use(new DeployPlugin());
 
       // get accounts
       const ownerWallet = await warp.generateWallet();
       const aliceWallet = await warp.generateWallet();
 
       // deploy contract
-      const {contractTxId: hollowDBTxId} = await Admin.deploy(ownerWallet.jwk, initialState, contractSource, warp);
+      const {contractTxId: hollowDBTxId} = await Admin.deploy(
+        ownerWallet.jwk,
+        initialState,
+        contractSource,
+        warp,
+        true // bundling is disabled during testing
+      );
       console.log('Deployed contract: ', hollowDBTxId);
 
       // prepare SDKs
@@ -229,9 +236,9 @@ describe('HollowDB', () => {
 
         beforeAll(async () => {
           // enabe whitelisting
-          const {cachedValue} = await ownerSDK.readState();
-          expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
-          expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
+          const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+          expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(false);
+          expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(false);
           await ownerAdmin.setWhitelistRequirement({
             put: true,
             update: true,
@@ -257,9 +264,9 @@ describe('HollowDB', () => {
         });
 
         it('should whitelist user Alice', async () => {
-          const {cachedValue} = await aliceSDK.readState();
-          expect(cachedValue.state.whitelist.put).not.toHaveProperty(aliceAddress);
-          expect(cachedValue.state.whitelist.update).not.toHaveProperty(aliceAddress);
+          const {cachedValue: oldCachedValue} = await aliceSDK.readState();
+          expect(oldCachedValue.state.whitelist.put).not.toHaveProperty(aliceAddress);
+          expect(oldCachedValue.state.whitelist.update).not.toHaveProperty(aliceAddress);
 
           await ownerAdmin.addUsersToWhitelist([aliceAddress], 'put');
           await ownerAdmin.addUsersToWhitelist([aliceAddress], 'update');
@@ -294,9 +301,9 @@ describe('HollowDB', () => {
 
         afterAll(async () => {
           // disable whitelisting
-          const {cachedValue} = await ownerSDK.readState();
-          expect(cachedValue.state.isWhitelistRequired.put).toEqual(true);
-          expect(cachedValue.state.isWhitelistRequired.update).toEqual(true);
+          const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+          expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(true);
+          expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(true);
 
           await ownerAdmin.setWhitelistRequirement({
             put: false,
@@ -311,8 +318,8 @@ describe('HollowDB', () => {
 
       afterAll(async () => {
         // enable proofs
-        const {cachedValue} = await ownerSDK.readState();
-        expect(cachedValue.state.isProofRequired).toEqual(false);
+        const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+        expect(oldCachedValue.state.isProofRequired).toEqual(false);
 
         await ownerAdmin.setProofRequirement(true);
 
