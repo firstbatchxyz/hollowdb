@@ -151,4 +151,26 @@ export class Admin extends Base {
 
     return {contractTxId, srcTxId};
   }
+
+  static async evolve(
+    owner: JWKInterface,
+    contractSource: string,
+    contractTxId: string,
+    warp: Warp
+  ): Promise<{contractTxId: string; srcTxId: string}> {
+    //connect to contract that we want to evolve
+    const contract = warp.contract(contractTxId).connect(owner);
+
+    // create a new source
+    console.log('Creating a new contract source...');
+    const newSource = await warp.createSource({src: contractSource}, new ArweaveSigner(owner));
+
+    // save contract source
+    const newSrcId = await warp.saveSource(newSource);
+
+    // evolve contract
+    await contract.evolve(newSrcId);
+
+    return {contractTxId, srcTxId: newSrcId};
+  }
 }
