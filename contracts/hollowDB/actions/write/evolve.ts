@@ -1,9 +1,9 @@
 import errors from '../../errors';
-import type {HollowDBContractFunction, HollowDBState} from '../../types';
+import type {HollowDBContractFunction} from '../../types';
 
 export type HollowDBEvolve = {
   function: 'evolve';
-  value: any;
+  value: string;
 };
 export const evolve: HollowDBContractFunction<HollowDBEvolve> = async (state, action) => {
   // caller must be owner
@@ -11,7 +11,12 @@ export const evolve: HollowDBContractFunction<HollowDBEvolve> = async (state, ac
     throw errors.NotOwnerError(action.input.function);
   }
 
-  if (state.canEvolve) state.evolve = action.input.value;
+  // evolving must be enabled
+  if (!state.canEvolve) {
+    throw errors.CantEvolveError;
+  }
+
+  state.evolve = action.input.value;
 
   return {state};
 };

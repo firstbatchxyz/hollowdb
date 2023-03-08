@@ -116,7 +116,7 @@ export class Admin extends Base {
    * @param initialState the initial HollowDB state; owner will be overwritten
    * @param contractSource source code of the contract, as a string
    * @param warp optional warp instance, defaults to mainnet
-   * @returns transaction ids and the initial state
+   * @returns transaction ids
    */
   static async deploy(
     owner: JWKInterface,
@@ -152,25 +152,32 @@ export class Admin extends Base {
     return {contractTxId, srcTxId};
   }
 
+  /**
+   * Utility function to evolve the HollowDB contract.
+   * @param owner wallet to deploy the new contract
+   * @param contractSource source code of the contract, as a string
+   * @param contractTxId existing contract source transaction id
+   * @param warp optional warp instance, defaults to mainnet
+   * @returns transaction ids
+   */
   static async evolve(
     owner: JWKInterface,
     contractSource: string,
     contractTxId: string,
     warp: Warp
   ): Promise<{contractTxId: string; srcTxId: string}> {
-    //connect to contract that we want to evolve
+    // connect to the contract that we want to evolve
     const contract = warp.contract(contractTxId).connect(owner);
 
     // create a new source
-    console.log('Creating a new contract source...');
     const newSource = await warp.createSource({src: contractSource}, new ArweaveSigner(owner));
 
     // save contract source
-    const newSrcId = await warp.saveSource(newSource);
+    const newSrcTxId = await warp.saveSource(newSource);
 
     // evolve contract
-    await contract.evolve(newSrcId);
+    await contract.evolve(newSrcTxId);
 
-    return {contractTxId, srcTxId: newSrcId};
+    return {contractTxId, srcTxId: newSrcTxId};
   }
 }

@@ -24,7 +24,7 @@ async function evolve() {
   const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
   const wallet = JSON.parse(fs.readFileSync(walletPath).toString()) as JWKInterface;
 
-  // read source code
+  // read the new source code
   const contractSourcePath = __dirname + '/../build/hollowDB/contract.js';
   const contractSource = fs.readFileSync(contractSourcePath).toString();
 

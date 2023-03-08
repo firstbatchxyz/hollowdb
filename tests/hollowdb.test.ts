@@ -2,21 +2,20 @@ import ArLocal from 'arlocal';
 import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
-import {valueTxToBigInt} from '../common/utilities';
 import fs from 'fs';
 import path from 'path';
 import {SDK, Admin} from '../src/sdk';
 import type {CacheType} from '../src/sdk/types';
 import poseidon from 'poseidon-lite';
 import {randomBytes} from 'crypto';
-import {generateProof, prepareSDKs} from './utils';
+import {generateProof, prepareSDKs, valueToBigInt} from './utils';
 
 // arbitrarily long timeout
 jest.setTimeout(30000);
 
 enum PublicSignal {
-  CurValueTx = 0,
-  NextValueTx = 1,
+  CurValueHash = 0,
+  NextValueHash = 1,
   Key = 2,
 }
 
@@ -35,7 +34,7 @@ describe('HollowDB', () => {
     contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
   });
 
-  describe.each<CacheType>(['lmdb' /*'redis'*/])('using %s cache, proofs enabled', cacheType => {
+  describe.each<CacheType>(['lmdb', 'redis'])('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin;
     let ownerSDK: SDK;
     let aliceSDK: SDK;
@@ -111,11 +110,11 @@ describe('HollowDB', () => {
 
       it('should put many values', async () => {
         const count = 10;
-        const valueTxs = Array<string>(count).fill(randomBytes(10).toString('hex'));
+        const values = Array<string>(count).fill(randomBytes(10).toString('hex'));
 
-        for (let i = 0; i < valueTxs.length; ++i) {
+        for (let i = 0; i < values.length; ++i) {
           const k = KEY + i;
-          const v = valueTxs[i];
+          const v = values[i];
           expect(await ownerSDK.get(k)).toEqual(null);
           await ownerSDK.put(k, v);
           expect(await ownerSDK.get(k)).toEqual(v);
@@ -130,18 +129,19 @@ describe('HollowDB', () => {
         const currentValue = (await aliceSDK.get(KEY)) as string;
         const fullProof = await generateProof(KEY_PREIMAGE, currentValue, NEXT_VALUE_TX);
         proof = fullProof.proof;
-        expect(valueTxToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[PublicSignal.CurValueTx]);
+        expect(valueToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[PublicSignal.CurValueHash]);
+        expect(valueToBigInt(NEXT_VALUE_TX).toString()).toEqual(fullProof.publicSignals[PublicSignal.NextValueHash]);
         expect(KEY).toEqual(fullProof.publicSignals[PublicSignal.Key]);
       });
 
-      it('should NOT update with a proof using wrong curValueTx', async () => {
-        // generate a proof with wrong nextValueTx
+      it('should NOT update with a proof using wrong current value', async () => {
+        // generate a proof with wrong next value
         const fullProof = await generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE_TX);
         await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
       });
 
-      it('should NOT update with a proof using wrong nextValueTx', async () => {
-        // generate a proof with wrong nextValueTx
+      it('should NOT update with a proof using wrong next value', async () => {
+        // generate a proof with wrong next value
         const fullProof = await generateProof(KEY_PREIMAGE, VALUE_TX, 'abcdefg');
         await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
       });
@@ -176,7 +176,7 @@ describe('HollowDB', () => {
         const fullProof = await generateProof(KEY_PREIMAGE, currentValue, null);
         proof = fullProof.proof;
 
-        expect(valueTxToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[PublicSignal.CurValueTx]);
+        expect(valueToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[PublicSignal.CurValueHash]);
         expect(KEY).toEqual(fullProof.publicSignals[PublicSignal.Key]);
       });
 
