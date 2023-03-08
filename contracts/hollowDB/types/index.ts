@@ -27,6 +27,8 @@ export interface HollowDBState {
     put: boolean;
     update: boolean;
   };
+  canEvolve: boolean;
+  evolve?: string; // evolve is not required to be present initially
   whitelist: {
     put: {
       [address: string]: boolean;

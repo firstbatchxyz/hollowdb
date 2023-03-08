@@ -2,6 +2,7 @@ import {defaultCacheOptions, LoggerFactory, Warp, Contract, ArWallet} from 'warp
 import {LmdbCache} from 'warp-contracts-lmdb';
 import {RedisCache} from 'warp-contracts-redis';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
+import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
 
@@ -97,8 +98,11 @@ export class Base {
     }[args.cacheType];
     warp = warp.useKVStorageFactory(kvStorageFactory);
 
-    // SnarkJS extension is required
+    // SnarkJS extension is required for proof verification
     warp = warp.use(new SnarkjsExtension());
+
+    // Ethers extension is required for SHA256
+    warp = warp.use(new EthersExtension());
 
     // instantiate HollowDB
     this.hollowDB = warp

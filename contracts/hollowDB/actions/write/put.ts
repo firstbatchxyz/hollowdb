@@ -5,11 +5,11 @@ export type HollowDBPut = {
   function: 'put';
   data: {
     key: string;
-    valueTx: string;
+    value: string;
   };
 };
 export const put: HollowDBContractFunction<HollowDBPut> = async (state, action) => {
-  const {key, valueTx} = action.input.data;
+  const {key, value} = action.input.data;
 
   // caller must be whitelisted
   if (state.isWhitelistRequired.put && !state.whitelist.put[action.caller]) {
@@ -21,7 +21,7 @@ export const put: HollowDBContractFunction<HollowDBPut> = async (state, action) 
     throw errors.KeyExistsError;
   }
 
-  await SmartWeave.kv.put(key, valueTx);
+  await SmartWeave.kv.put(key, value);
 
   return {state};
 };
