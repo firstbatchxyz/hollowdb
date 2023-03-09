@@ -43,14 +43,14 @@ export class SDK extends Base {
   /**
    * Inserts the given value into database.
    * @param key The key of the value to be inserted.
-   * @param valueTx The valueTx to be inserted.
+   * @param value The value to be inserted.
    */
-  async put(key: string, valueTx: string) {
+  async put(key: string, value: string) {
     const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'put',
       data: {
         key: key,
-        valueTx: '', // arbitrary mock data
+        value: '', // arbitrary mock data
       },
     });
 
@@ -62,7 +62,7 @@ export class SDK extends Base {
       function: 'put',
       data: {
         key: key,
-        valueTx: valueTx,
+        value: value,
       },
     });
   }
@@ -70,15 +70,15 @@ export class SDK extends Base {
   /**
    * Updates the value of given key.
    * @param key The key of the value to be updated.
-   * @param value The new valueTx.
+   * @param value The new value.
    * @param proof Proof of the value to be updated.
    */
-  async update(key: string, valueTx: string, proof: object = {}) {
+  async update(key: string, value: string, proof: object = {}) {
     const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'update',
       data: {
         key: key,
-        valueTx: valueTx,
+        value: value,
         proof: proof,
       },
     });
@@ -91,7 +91,7 @@ export class SDK extends Base {
       function: 'update',
       data: {
         key: key,
-        valueTx: valueTx,
+        value: value,
         proof: proof,
       },
     });

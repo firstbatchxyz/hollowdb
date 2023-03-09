@@ -1,3 +1,8 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Test Workflow](https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master)
+[![Formatter: Prettier](https://img.shields.io/badge/formatter-prettier-f8bc45?logo=prettier)](https://prettier.io/)
+[![Linter: ESLint](https://img.shields.io/badge/linter-eslint-8080f2?logo=eslint)](https://eslint.org/)
+
 # HollowDB
 
 HollowDB is a decentralized privacy-preserving key-value database on [Arweave](https://www.arweave.org/) network, powered by [Warp Contracts](https://warp.cc/).
@@ -22,7 +27,7 @@ The table below summarizes the requirements to make a transaction on HollowDB:
 | **with Proofs**       | -             | Zero-Knowledge Proof | Zero-Knowledge Proof | -        |
 | **with Whitelisting** | PUT whitelist | UPDATE whitelist     | UPDATE whitelist     | -        |
 
-## Usage
+## Installation
 
 To install HollowDB:
 
@@ -33,7 +38,13 @@ yarn add hollowdb
 npm install hollowdb
 ```
 
-HollowDB exposes a SDK to allow ease of development with its functionalities, along with an Admin SDK that handles higher authorized operations. To instantiate the SDK, you must provide an Arweave Wallet along with the contract transaction id.
+## Usage
+
+HollowDB exposes the following:
+
+- an `SDK` class to allow ease of development with its functionalities
+- an `Admin` class that handles higher authorized operations.
+- a `Prover` class that provides a utility function to generate proofs for HollowDB.
 
 ```ts
 import {SDK, Admin} from 'hollowdb';
@@ -63,7 +74,7 @@ As shown in example, you must provide 4 required arguments:
 
 ### SDK Operations
 
-SDK provides the basic CRUD functionality, along with a helper function to read the contract state.
+SDK provides the basic CRUD functionality.
 
 ```ts
 // GET is open to everyone
@@ -73,14 +84,14 @@ await sdk.get(key);
 await sdk.put(key, value);
 
 // UPDATE with a proof
-let {proof} = await generateProof(keyPreimage, curValue, newValue);
+let {proof} = await prover.generateProof(keyPreimage, curValue, newValue);
 await sdk.update(key, newValue, proof);
 
 // UPDATE without a proof
 await sdk.update(key, newValue);
 
 // REMOVE with a proof
-let {proof} = await generateProof(keyPreimage, curValue, null);
+let {proof} = await prover.generateProof(keyPreimage, curValue, null);
 await sdk.remove(key, proof);
 
 // REMOVE without a proof
@@ -89,6 +100,8 @@ await sdk.remove(key);
 // read state variables
 const {cachedValue} = await sdk.readState();
 ```
+
+For more detailed explanation on the `Prover`, see the related section below.
 
 ### Admin Operations
 
@@ -114,7 +127,7 @@ await admin.setWhitelistRequirement({
 await admin.addUsersToWhitelist([aliceAddr, bobAddr], 'put');
 
 // remove someone from the whitelist
-await ownerAdmin.removeUsersFromWhitelist([bobAddr], 'put');
+await admin.removeUsersFromWhitelist([bobAddr], 'put');
 ```
 
 ### Building & deploying the contract
@@ -143,42 +156,78 @@ We use such an approach in our [HollowDB gRPC server](https://github.com/firstba
 
 ## Zero-Knowledge Proofs
 
-Proof generation is not provided by the HollowDB package, it is left to the developer to integrate the proof within their flow.
+HollowDB is a **key-value** database where each **key** in the database is the [Poseidon hash](https://www.poseidon-hash.info/) of some preimage. The client provides a "preimage knowledge proof" to update or remove a value at that key. Additional constraints on the current value and next value to be written are also given to the proof as a preventive measure against replay attacks and middle-man attacks.
 
-Each key in the database is the Poseidon hash of some preimage, the client must provide a preimage knowledge proof to update or remove a value at that key. Additional constraints on the current value and next value to be written are also given to the proof as a preventive measure against replay attacks and middle-man attacks.
+```mermaid
+flowchart LR
+  pi[public\ninputs]
+  i0(preimage) --> si[secret\ninputs]
+  i1(curHash) --> si
+  i2(nextHash) --> si
 
-A utility to function to generate the proof is written as follows:
+  subgraph hollow authz circuit
+  si --> ha[circuit]
+  pi --> ha
 
-```ts
-export async function generateProof(
-  preimage: bigint,
-  curValue: string | null,
-  nextValue: string | null
-): Promise<{proof: object; publicSignals: bigint[]}> {
-  const fullProof = await snarkjs.groth16.fullProve(
-    {
-      idCommitment: preimage,
-      curValue: curValue ? stringToBigInt(curValue) : 0n,
-      nextValue: nextValue ? stringToBigInt(nextValue) : 0n,
-    },
-    WASM_PATH,
-    PROVERKEY_PATH
-  );
-  return fullProof;
-}
+  ha --> proof
+  ha --> o[outputs]
+  end
 
-// naively convert a string to bigint, output ensured to be in BN128 curve finite field
-export const stringToBigInt = (value: string): bigint => {
-  return (
-    BigInt('0x' + Buffer.from(value).toString('hex')) %
-    BigInt('21888242871839275222246405745257275088548364400416034343698204186575808495617')
-  );
-};
+  o --> o0(curHash)
+  o --> o1(nextHash)
+  o --> o2(key)
 ```
 
-Your client will should use the `fullProof.proof` object while making requests; the `fullProof.publicSignals` will be provided by the contract to verify the proof. For more information on using the proofs, check the [tests](./tests/hollowdb.test.ts).
+As shown above, all inputs are secret for HollowDB prover, although `curHash` and `nextHash` are immediately provided as an output.
 
-You can use the prover key, WASM circuit and the verification key that we provide under [circuits](./circuits/hollow-authz/) folder to generate proofs and verify them.
+### Generating Proofs with Prover
+
+HollowDB provides a `Prover` class to ease the generation of proofs. First, you must make sure to have the circuit WASM file and prover key in your device, the paths to these files are required by the prover. Verification is done at the contract side, with the verification key being stored in the state of the contract itself.
+
+You can obtain all these files from this repository:
+
+- [WASM Circuit](./circuits/hollow-authz/hollow-authz.wasm): required by the Prover
+- [Prover Key](./circuits/hollow-authz/prover_key.zkey): required by the Prover
+- [Verification Key](./circuits/hollow-authz/verification_key.json): required by the contract if you would like to write your own
+
+Here is how to use the prover class:
+
+```ts
+import {SDK, Prover} from 'hollowdb';
+
+// instantiate the SDK, shown above
+// ...
+
+// instantiate the prover
+const wasmPath = '/some/path/to/hollow-authz.wasm';
+const proverkeyPath = '/some/path/to/prover_key.zkey';
+const prover = new Prover(wasmPath, proverkeyPath);
+
+// your key preimage and values
+const keyPreimage = BigInt(1122334455);
+const curValue = 'previously-stored-value';
+const newValue = 'new-awesome-value';
+
+// generate the `fullProof`, which has `proof` and `publicSignals`
+// the name comes from SnarkJS's `fullProve` function
+// values are hashed inside the `generateProof` function,
+// so you don't have to worry about that part
+let fullProof = await prover.generateProof(preimage, curValue, newValue);
+
+// get the key (hash of preimage) from the circuit outputs
+// publicSignals[0] --> current value hash
+// publicSignals[1] --> next value hash
+// publicSignals[2] --> key
+const key = fullProof.publicSignals[2];
+
+// get actual proof object
+const proof = fullProof.proof;
+
+// update the value at this key!
+await sdk.update(key, newValue, proof);
+```
+
+You might notice that the `key` is being read from the public signals. This is because we need to hash the preimage with Poseidon hash to make this request. If you do not have the key in the first place, you can use a package such as [Poseidon Lite](https://www.npmjs.com/package/poseidon-lite) to easily find the hash of your preimage.
 
 ## Testing
 
@@ -190,11 +239,13 @@ yarn test
 
 The test will run for both LMDB cache and Redis cache. For Redis, you need to have a server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
 
-## Formatting & Linting
+## Styling
 
 We are using the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html).
 
 ```sh
+# formatting with prettier
 yarn format
+# linting with eslint
 yarn lint
 ```

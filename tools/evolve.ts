@@ -4,33 +4,37 @@ import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
 import type {JWKInterface} from 'warp-contracts/lib/types/utils/types/arweave-types';
-import initialState from '../common/initialState';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
+import {DeployPlugin, ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function main() {
+async function evolve() {
   let walletName: string = 'wallet-main';
-  if (process.argv.length === 3) {
+  let contractTxId: string;
+
+  if (process.argv.length === 4) {
     walletName = process.argv[2];
+    contractTxId = process.argv[3];
+  } else {
+    throw new Error('Usage: yarn evolve <wallet-name> <contract-tx-id>');
   }
 
   // read wallet
   const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
   const wallet = JSON.parse(fs.readFileSync(walletPath).toString()) as JWKInterface;
 
-  // read source code
+  // read the new source code
   const contractSourcePath = __dirname + '/../build/hollowDB/contract.js';
   const contractSource = fs.readFileSync(contractSourcePath).toString();
 
-  // deploying to mainnet
+  // create a warp instance
   const warp = WarpFactory.forMainnet().use(new DeployPlugin());
 
-  // deploy
-  console.log('Deploying contract...');
-  const result = await Admin.deploy(wallet, initialState, contractSource, warp);
-  console.log('Deployed.', result);
+  // evolve
+  console.log('Evolving contract...');
+  const result = await Admin.evolve(wallet, contractSource, contractTxId, warp);
+  console.log('Evolved.', result);
 }
 
-main();
+evolve();

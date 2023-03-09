@@ -1,29 +1,34 @@
 import ArLocal from 'arlocal';
 import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
+import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
-import {valueTxToBigInt} from '../common/utilities';
 import fs from 'fs';
 import path from 'path';
-import {SDK, Admin} from '../src/sdk';
+import {SDK, Admin, Prover} from '../src';
 import type {CacheType} from '../src/sdk/types';
 import poseidon from 'poseidon-lite';
 import {randomBytes} from 'crypto';
-import {generateProof, prepareSDKs} from './utils';
+import {prepareSDKs} from './utils';
+
+// WASM and prover key for generating proofs
+const WASM_PATH = './circuits/hollow-authz/hollow-authz.wasm';
+const PROVERKEY_PATH = './circuits/hollow-authz/prover_key.zkey';
 
 // arbitrarily long timeout
 jest.setTimeout(30000);
 
 enum PublicSignal {
-  CurValueTx = 0,
-  NextValueTx = 1,
+  CurValueHash = 0,
+  NextValueHash = 1,
   Key = 2,
 }
 
 const ARWEAVE_PORT = 3169;
 
-describe('HollowDB', () => {
+describe('hollowdb', () => {
   let arlocal: ArLocal;
   let contractSource: string;
+  let prover: Prover;
 
   beforeAll(async () => {
     arlocal = new ArLocal(ARWEAVE_PORT, false);
@@ -32,6 +37,8 @@ describe('HollowDB', () => {
     LoggerFactory.INST.logLevel('error');
 
     contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
+
+    prover = new Prover(WASM_PATH, PROVERKEY_PATH);
   });
 
   describe.each<CacheType>(['lmdb', 'redis'])('using %s cache, proofs enabled', cacheType => {
@@ -47,14 +54,20 @@ describe('HollowDB', () => {
 
     beforeAll(async () => {
       // setup warp factory for local arweave
-      warp = WarpFactory.forLocal(ARWEAVE_PORT);
+      warp = WarpFactory.forLocal(ARWEAVE_PORT).use(new DeployPlugin());
 
       // get accounts
       const ownerWallet = await warp.generateWallet();
       const aliceWallet = await warp.generateWallet();
 
       // deploy contract
-      const {contractTxId: hollowDBTxId} = await Admin.deploy(ownerWallet.jwk, initialState, contractSource, warp);
+      const {contractTxId: hollowDBTxId} = await Admin.deploy(
+        ownerWallet.jwk,
+        initialState,
+        contractSource,
+        warp,
+        true // bundling is disabled during testing
+      );
       console.log('Deployed contract: ', hollowDBTxId);
 
       // prepare SDKs
@@ -104,11 +117,11 @@ describe('HollowDB', () => {
 
       it('should put many values', async () => {
         const count = 10;
-        const valueTxs = Array<string>(count).fill(randomBytes(10).toString('hex'));
+        const values = Array<string>(count).fill(randomBytes(10).toString('hex'));
 
-        for (let i = 0; i < valueTxs.length; ++i) {
+        for (let i = 0; i < values.length; ++i) {
           const k = KEY + i;
-          const v = valueTxs[i];
+          const v = values[i];
           expect(await ownerSDK.get(k)).toEqual(null);
           await ownerSDK.put(k, v);
           expect(await ownerSDK.get(k)).toEqual(v);
@@ -121,27 +134,32 @@ describe('HollowDB', () => {
 
       beforeAll(async () => {
         const currentValue = (await aliceSDK.get(KEY)) as string;
-        const fullProof = await generateProof(KEY_PREIMAGE, currentValue, NEXT_VALUE_TX);
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, currentValue, NEXT_VALUE_TX);
         proof = fullProof.proof;
-        expect(valueTxToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[PublicSignal.CurValueTx]);
+        expect(prover.valueToBigInt(currentValue).toString()).toEqual(
+          fullProof.publicSignals[PublicSignal.CurValueHash]
+        );
+        expect(prover.valueToBigInt(NEXT_VALUE_TX).toString()).toEqual(
+          fullProof.publicSignals[PublicSignal.NextValueHash]
+        );
         expect(KEY).toEqual(fullProof.publicSignals[PublicSignal.Key]);
       });
 
-      it('should NOT update with a proof using wrong curValueTx', async () => {
-        // generate a proof with wrong nextValueTx
-        const fullProof = await generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE_TX);
+      it('should NOT update with a proof using wrong current value', async () => {
+        // generate a proof with wrong next value
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE_TX);
         await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
       });
 
-      it('should NOT update with a proof using wrong nextValueTx', async () => {
-        // generate a proof with wrong nextValueTx
-        const fullProof = await generateProof(KEY_PREIMAGE, VALUE_TX, 'abcdefg');
+      it('should NOT update with a proof using wrong next value', async () => {
+        // generate a proof with wrong next value
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, VALUE_TX, 'abcdefg');
         await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
       });
 
       it('should NOT update with a proof using wrong preimage', async () => {
         // generate a proof with wrong preimage
-        const fullProof = await generateProof(1234567n, VALUE_TX, NEXT_VALUE_TX);
+        const fullProof = await prover.generateProof(1234567n, VALUE_TX, NEXT_VALUE_TX);
         await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
       });
 
@@ -166,10 +184,12 @@ describe('HollowDB', () => {
 
       beforeAll(async () => {
         const currentValue = (await aliceSDK.get(KEY)) as string;
-        const fullProof = await generateProof(KEY_PREIMAGE, currentValue, null);
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, currentValue, null);
         proof = fullProof.proof;
 
-        expect(valueTxToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[PublicSignal.CurValueTx]);
+        expect(prover.valueToBigInt(currentValue).toString()).toEqual(
+          fullProof.publicSignals[PublicSignal.CurValueHash]
+        );
         expect(KEY).toEqual(fullProof.publicSignals[PublicSignal.Key]);
       });
 
@@ -229,9 +249,9 @@ describe('HollowDB', () => {
 
         beforeAll(async () => {
           // enabe whitelisting
-          const {cachedValue} = await ownerSDK.readState();
-          expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
-          expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
+          const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+          expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(false);
+          expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(false);
           await ownerAdmin.setWhitelistRequirement({
             put: true,
             update: true,
@@ -257,9 +277,9 @@ describe('HollowDB', () => {
         });
 
         it('should whitelist user Alice', async () => {
-          const {cachedValue} = await aliceSDK.readState();
-          expect(cachedValue.state.whitelist.put).not.toHaveProperty(aliceAddress);
-          expect(cachedValue.state.whitelist.update).not.toHaveProperty(aliceAddress);
+          const {cachedValue: oldCachedValue} = await aliceSDK.readState();
+          expect(oldCachedValue.state.whitelist.put).not.toHaveProperty(aliceAddress);
+          expect(oldCachedValue.state.whitelist.update).not.toHaveProperty(aliceAddress);
 
           await ownerAdmin.addUsersToWhitelist([aliceAddress], 'put');
           await ownerAdmin.addUsersToWhitelist([aliceAddress], 'update');
@@ -294,9 +314,9 @@ describe('HollowDB', () => {
 
         afterAll(async () => {
           // disable whitelisting
-          const {cachedValue} = await ownerSDK.readState();
-          expect(cachedValue.state.isWhitelistRequired.put).toEqual(true);
-          expect(cachedValue.state.isWhitelistRequired.update).toEqual(true);
+          const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+          expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(true);
+          expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(true);
 
           await ownerAdmin.setWhitelistRequirement({
             put: false,
@@ -311,8 +331,8 @@ describe('HollowDB', () => {
 
       afterAll(async () => {
         // enable proofs
-        const {cachedValue} = await ownerSDK.readState();
-        expect(cachedValue.state.isProofRequired).toEqual(false);
+        const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+        expect(oldCachedValue.state.isProofRequired).toEqual(false);
 
         await ownerAdmin.setProofRequirement(true);
 

@@ -4,6 +4,7 @@ const initialState: HollowDBState = {
   owner: '',
   verificationKey: {},
   isProofRequired: true,
+  canEvolve: true,
   whitelist: {
     put: {},
     update: {},

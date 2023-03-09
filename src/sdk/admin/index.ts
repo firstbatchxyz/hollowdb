@@ -1,7 +1,8 @@
-import {ArWallet, EvaluationManifest, Warp} from 'warp-contracts';
+import {ArWallet, EvaluationManifest, JWKInterface, Warp} from 'warp-contracts';
 import {Base} from '../base';
 import {HollowDBInput, HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
+import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
 /**
  * HollowDB admin that can set owner and set verification key.
@@ -115,13 +116,14 @@ export class Admin extends Base {
    * @param initialState the initial HollowDB state; owner will be overwritten
    * @param contractSource source code of the contract, as a string
    * @param warp optional warp instance, defaults to mainnet
-   * @returns transaction ids and the initial state
+   * @returns transaction ids
    */
   static async deploy(
-    owner: ArWallet,
+    owner: JWKInterface,
     initialState: HollowDBState,
     contractSource: string,
-    warp: Warp
+    warp: Warp,
+    disableBundling = false
   ): Promise<{contractTxId: string; srcTxId: string | undefined}> {
     // default owner becomes the deployer, and is also whitelisted
     const ownerAddress = await warp.arweave.wallets.jwkToAddress(owner);
@@ -136,13 +138,46 @@ export class Admin extends Base {
         useKVStorage: true,
       },
     };
-    const {contractTxId, srcTxId} = await warp.deploy({
-      wallet: owner,
-      initState: JSON.stringify(initialState),
-      src: contractSource,
-      evaluationManifest,
-    });
+
+    const {contractTxId, srcTxId} = await warp.deploy(
+      {
+        wallet: disableBundling ? owner : new ArweaveSigner(owner),
+        initState: JSON.stringify(initialState),
+        src: contractSource,
+        evaluationManifest,
+      },
+      disableBundling
+    );
 
     return {contractTxId, srcTxId};
+  }
+
+  /**
+   * Utility function to evolve the HollowDB contract.
+   * @param owner wallet to deploy the new contract
+   * @param contractSource source code of the contract, as a string
+   * @param contractTxId existing contract source transaction id
+   * @param warp optional warp instance, defaults to mainnet
+   * @returns transaction ids
+   */
+  static async evolve(
+    owner: JWKInterface,
+    contractSource: string,
+    contractTxId: string,
+    warp: Warp
+  ): Promise<{contractTxId: string; srcTxId: string}> {
+    // connect to the contract that we want to evolve
+    const contract = warp.contract(contractTxId).connect(owner);
+
+    // create a new source
+    const newSource = await warp.createSource({src: contractSource}, new ArweaveSigner(owner));
+
+    // save contract source
+    const newSrcTxId = await warp.saveSource(newSource);
+
+    // evolve contract
+    await contract.evolve(newSrcTxId);
+
+    return {contractTxId, srcTxId: newSrcTxId};
   }
 }
