@@ -1,4 +1,4 @@
-name: test
+name: style
 
 # run when `dev` has a push or PR
 # or when `master` has a push
@@ -14,7 +14,7 @@ on:
       - dev
 
 jobs:
-  test:
+  style:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,12 +24,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 19.x
-
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.5.0
-        with:
-          redis-version: 7
-          redis-port: 6379
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -46,5 +40,11 @@ jobs:
       - name: Install dependencies
         run: yarn
 
-      - name: Run tests
-        run: yarn test
+      - name: Formatting
+        run: yarn format
+
+      - name: Linting
+        run: yarn lint
+
+      - name: Compiling
+        run: yarn compile
