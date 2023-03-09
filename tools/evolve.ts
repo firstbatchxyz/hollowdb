@@ -4,13 +4,13 @@ import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
 import type {JWKInterface} from 'warp-contracts/lib/types/utils/types/arweave-types';
-import {DeployPlugin, ArweaveSigner} from 'warp-contracts-plugin-deploy';
+import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function evolve() {
-  let walletName: string = 'wallet-main';
+  let walletName = 'wallet-main';
   let contractTxId: string;
 
   if (process.argv.length === 4) {

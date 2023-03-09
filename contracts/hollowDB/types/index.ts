@@ -1,4 +1,5 @@
 import {HollowDBGet} from '../actions/read/get';
+import {HollowDBEvolve} from '../actions/write/evolve';
 import {HollowDBPut} from '../actions/write/put';
 import {HollowDBRemove} from '../actions/write/remove';
 import {HollowDBUpdate} from '../actions/write/update';
@@ -14,7 +15,8 @@ export type HollowDBInput =
   | HollowDBPut
   | HollowDBUpdate
   | HollowDBUpdateState
-  | HollowDBUpdateWhitelist;
+  | HollowDBUpdateWhitelist
+  | HollowDBEvolve;
 
 /**
  * HollowDB contract state.
@@ -56,6 +58,7 @@ export type HollowDBResult = string | null;
  * A generic HollowDB contract function. Functions can specify their
  * input type via the generic type parameter
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type HollowDBContractFunction<InputType = any> = (
   state: HollowDBState,
   action: HollowDBAction<InputType>

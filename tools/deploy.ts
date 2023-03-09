@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
-  let walletName: string = 'wallet-main';
+  let walletName = 'wallet-main';
   if (process.argv.length === 3) {
     walletName = process.argv[2];
   }
