@@ -160,25 +160,7 @@ We use such an approach in our [HollowDB gRPC server](https://github.com/firstba
 
 HollowDB is a **key-value** database where each **key** in the database is the [Poseidon hash](https://www.poseidon-hash.info/) of some preimage. The client provides a "preimage knowledge proof" to update or remove a value at that key. Additional constraints on the current value and next value to be written are also given to the proof as a preventive measure against replay attacks and middle-man attacks.
 
-```mermaid
-flowchart LR
-  pi[public\ninputs]
-  i0(preimage) --> si[secret\ninputs]
-  i1(curHash) --> si
-  i2(nextHash) --> si
-
-  subgraph hollow authz circuit
-  si --> ha[circuit]
-  pi --> ha
-
-  ha --> proof
-  ha --> o[outputs]
-  end
-
-  o --> o0(curHash)
-  o --> o1(nextHash)
-  o --> o2(key)
-```
+[![hollow-authz](https://mermaid.ink/img/pako:eNpdkLtuwzAMRX9F4OQACZBk9NCpQ4dO7WhlYCQ6ImI9oAfaNMi_V7bT1O0mnnsgXPIKymuCFvrBfyiDMYvXN-mECNyFchxYSenYhZLTYcS8bUIktniildhsnkTiLpGKlP95u0aV-ILJ_GgT3TeOPvNfPAapHE8RgxHGD7WIwJLNl1AcVeE8CTz5Brs7PMwl73T-xeA0huh9v5h950t-NCOnZ9vP4fZRdAF3vz0XdN-c6bKCNViKFlnXs13HWEI2ZElCW58a41mCdLfq1TX8-8UpaHMstIYSNGZ6ZqzLWmh7HBLdvgG7u38h?type=png)](https://mermaid.live/edit#pako:eNpdkLtuwzAMRX9F4OQACZBk9NCpQ4dO7WhlYCQ6ImI9oAfaNMi_V7bT1O0mnnsgXPIKymuCFvrBfyiDMYvXN-mECNyFchxYSenYhZLTYcS8bUIktniildhsnkTiLpGKlP95u0aV-ILJ_GgT3TeOPvNfPAapHE8RgxHGD7WIwJLNl1AcVeE8CTz5Brs7PMwl73T-xeA0huh9v5h950t-NCOnZ9vP4fZRdAF3vz0XdN-c6bKCNViKFlnXs13HWEI2ZElCW58a41mCdLfq1TX8-8UpaHMstIYSNGZ6ZqzLWmh7HBLdvgG7u38h)
 
 As shown above, all inputs are secret for HollowDB prover, although `curHash` and `nextHash` are immediately provided as an output.
 

@@ -4,9 +4,8 @@ import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
 import fs from 'fs';
 import path from 'path';
-import {SDK, Admin, Prover} from '../src';
+import {SDK, Admin, Prover, computeKey} from '../src';
 import type {CacheType} from '../src/sdk/types';
-import poseidon from 'poseidon-lite';
 import {randomBytes} from 'crypto';
 import {prepareSDKs} from './utils';
 
@@ -48,7 +47,7 @@ describe('hollowdb', () => {
     let warp: Warp;
 
     const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-    const KEY = poseidon([KEY_PREIMAGE]).toString();
+    const KEY = computeKey(KEY_PREIMAGE);
     const VALUE_TX = randomBytes(10).toString('hex');
     const NEXT_VALUE_TX = randomBytes(10).toString('hex');
 
@@ -207,7 +206,7 @@ describe('hollowdb', () => {
 
     describe('tests with proofs disabled', () => {
       const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-      const KEY = poseidon([KEY_PREIMAGE]).toString();
+      const KEY = computeKey(KEY_PREIMAGE);
       const VALUE_TX = randomBytes(10).toString('hex');
       const NEXT_VALUE_TX = randomBytes(10).toString('hex');
 
@@ -243,7 +242,7 @@ describe('hollowdb', () => {
         let aliceAddress: string;
 
         const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-        const KEY = poseidon([KEY_PREIMAGE]).toString();
+        const KEY = computeKey(KEY_PREIMAGE);
         const VALUE_TX = randomBytes(10).toString('hex');
         const NEXT_VALUE_TX = randomBytes(10).toString('hex');
 

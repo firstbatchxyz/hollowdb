@@ -1,12 +1,12 @@
-const {SDK} = require('hollowdb');
+const {SDK, computeKey} = require('hollowdb');
 const {WarpFactory} = require('warp-contracts');
-const {contractTxId, jwk} = require('./utils/config');
+const {contractTxId, jwk, wasmPath, proverKeyPath} = require('./utils/config');
 
 async function main() {
-  //create a warp instance for feeding into hollowdb
+  // create a warp instance for hollowdb
   const warp = WarpFactory.forMainnet();
 
-  //create a hollowdb instance
+  // create a hollowdb instance
   const db = new SDK({
     warp: warp,
     contractTxId: contractTxId,
@@ -14,28 +14,23 @@ async function main() {
     cacheType: 'lmdb',
   });
 
-  //create a key preferably using some sort of hash function like sha256 to avoid collisions.
-  //hollowdb does not allow duplicate keys
-  const key = 'your-low-collision-key';
+  // your key, as a hash of your secret
+  const key = computeKey('your-secret');
 
-  //payload can be anything you want to store, but it must not exceed 2kb
-  //if you need to store more than 2kb, you can use bundlr to store the data on arweave and store the txid in hollowdb
+  // value can be anything you want to store, but it must not exceed 2kb
+  // if you need to store more than 2kb, you can use bundlr to store the data on arweave and store the txid in hollowdb
   const payload = {
     name: 'John Doe',
     age: 21,
     address: '123 Main St',
   };
 
-  //put the key and payload into hollowdb
+  // put the key and payload into hollowdb
   await db.put(key, payload);
 
-  //get the payload from hollowdb
+  // get the payload from hollowdb
   const result = await db.get(key);
-
-  //print the result
-  console.log('Get Result: ', result);
-
-  //done!
+  console.log(result);
 }
 
 main();

@@ -1,5 +1,5 @@
 import {readFileSync} from 'fs';
-import {Prover} from '../src';
+import {Prover, computeKey} from '../src';
 const snarkjs = require('snarkjs');
 
 // WASM and prover key for generating proofs
@@ -40,6 +40,9 @@ describe('hollow-authz circuit', () => {
     correctCurValueHash = fullProof.publicSignals[0];
     correctNewValueHash = fullProof.publicSignals[1];
     correctKey = fullProof.publicSignals[2];
+
+    // computeKey should find the same result
+    expect(correctKey).toEqual(computeKey(preimage));
   });
 
   it('should verify proof', async () => {
