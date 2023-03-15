@@ -47,6 +47,7 @@ HollowDB exposes the following:
 - an `SDK` class to allow ease of development with its functionalities
 - an `Admin` class that handles higher authorized operations.
 - a `Prover` class that provides a utility function to generate proofs for HollowDB.
+- a `computeKey` function to compute the key without generating a proof.
 
 ```ts
 import {SDK, Admin} from 'hollowdb';
@@ -64,21 +65,33 @@ const sdk = new SDK(args);
 const admin = new Admin(args);
 ```
 
-As shown in example, you must provide 4 required arguments:
+As shown in example, you must provide the 4 required arguments to Admin or SDK:
 
-- `jwk`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you .gitignore your wallet files!
-- `contractTxId`: the transaction id of the contract. You can **connect to an existing contract**, or deploy one of your own and provide it's id here.
+- `jwk`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you `.gitignore` your wallet files!
+- `contractTxId`: the transaction id of the contract. You can connect to an existing contract, or deploy one of your own and provide it's id here.
 - `cacheType`: type of cache to be used, i.e. `lmdb` or `redis`.
   - if this is `redis`, then you must also provide a Redis client object via `redisClient` argument.
   - you can enable contract & state caching with the optional boolean arguments `useContractCache` and `useStateCache`; both are falsy by default.
   - you can specify a `limitOptions` object with the fields `minEntriesPerContract` and `maxEntriesPerContract` that specify a limit of [sortKey](https://academy.warp.cc/docs/sdk/advanced/bundled-interaction#1-generates-a-sort-key) caches per key.
 - `warp`: the Warp instance to be used, could be for mainnet, testnet or local.
 
+You can also provide the following optional arguments:
+
+- `useStateCache` enables state cache, falsy by default.
+- `useContractCache` enables state cache, falsy by default.
+- `limitOptions` overrides the cache limit settings, it has two properties:
+  - `minEntriesPerContract` defines the minimum number of keys to be stored (default 10)
+  - `maxEntriesPerContract` defines the maximum number of keys to be stored (default 100)
+  - after `max` is reach, `max-min` oldest keys are deleted, thus `min` many keys remain in the cache
+
 ### SDK Operations
 
 SDK provides the basic CRUD functionality.
 
 ```ts
+// compute the key from your secret
+const key = computeKey(yourSecret);
+
 // GET is open to everyone
 await sdk.get(key);
 
@@ -87,7 +100,7 @@ await sdk.put(key, value);
 
 // UPDATE with a proof
 let {proof} = await prover.generateProof(keyPreimage, curValue, newValue);
-await sdk.update(key, newValue, proof);
+await sdk.update(key, newValue, updateProof);
 
 // UPDATE without a proof
 await sdk.update(key, newValue);
@@ -160,7 +173,7 @@ We use such an approach in our [HollowDB gRPC server](https://github.com/firstba
 
 HollowDB is a **key-value** database where each **key** in the database is the [Poseidon hash](https://www.poseidon-hash.info/) of some preimage. The client provides a "preimage knowledge proof" to update or remove a value at that key. Additional constraints on the current value and next value to be written are also given to the proof as a preventive measure against replay attacks and middle-man attacks.
 
-[![hollow-authz](https://mermaid.ink/img/pako:eNpdkLtuwzAMRX9F4OQACZBk9NCpQ4dO7WhlYCQ6ImI9oAfaNMi_V7bT1O0mnnsgXPIKymuCFvrBfyiDMYvXN-mECNyFchxYSenYhZLTYcS8bUIktniildhsnkTiLpGKlP95u0aV-ILJ_GgT3TeOPvNfPAapHE8RgxHGD7WIwJLNl1AcVeE8CTz5Brs7PMwl73T-xeA0huh9v5h950t-NCOnZ9vP4fZRdAF3vz0XdN-c6bKCNViKFlnXs13HWEI2ZElCW58a41mCdLfq1TX8-8UpaHMstIYSNGZ6ZqzLWmh7HBLdvgG7u38h?type=png)](https://mermaid.live/edit#pako:eNpdkLtuwzAMRX9F4OQACZBk9NCpQ4dO7WhlYCQ6ImI9oAfaNMi_V7bT1O0mnnsgXPIKymuCFvrBfyiDMYvXN-mECNyFchxYSenYhZLTYcS8bUIktniildhsnkTiLpGKlP95u0aV-ILJ_GgT3TeOPvNfPAapHE8RgxHGD7WIwJLNl1AcVeE8CTz5Brs7PMwl73T-xeA0huh9v5h950t-NCOnZ9vP4fZRdAF3vz0XdN-c6bKCNViKFlnXs13HWEI2ZElCW58a41mCdLfq1TX8-8UpaHMstIYSNGZ6ZqzLWmh7HBLdvgG7u38h)
+[![hollow-authz-mermaidjs](https://mermaid.ink/img/pako:eNpdkLtuwzAMRX9F4OQACZBk9NCpQ4dO7WhlYCQ6ImI9oAfaNMi_V7bT1O0mnnsgXPIKymuCFvrBfyiDMYvXN-mECNyFchxYSenYhZLTYcS8bUIktniildhsnkTiLpGKlP95u0aV-ILJ_GgT3TeOPvNfPAapHE8RgxHGD7WIwJLNl1AcVeE8CTz5Brs7PMwl73T-xeA0huh9v5h950t-NCOnZ9vP4fZRdAF3vz0XdN-c6bKCNViKFlnXs13HWEI2ZElCW58a41mCdLfq1TX8-8UpaHMstIYSNGZ6ZqzLWmh7HBLdvgG7u38h?type=png)](https://mermaid.live/edit#pako:eNpdkLtuwzAMRX9F4OQACZBk9NCpQ4dO7WhlYCQ6ImI9oAfaNMi_V7bT1O0mnnsgXPIKymuCFvrBfyiDMYvXN-mECNyFchxYSenYhZLTYcS8bUIktniildhsnkTiLpGKlP95u0aV-ILJ_GgT3TeOPvNfPAapHE8RgxHGD7WIwJLNl1AcVeE8CTz5Brs7PMwl73T-xeA0huh9v5h950t-NCOnZ9vP4fZRdAF3vz0XdN-c6bKCNViKFlnXs13HWEI2ZElCW58a41mCdLfq1TX8-8UpaHMstIYSNGZ6ZqzLWmh7HBLdvgG7u38h)
 
 As shown above, all inputs are secret for HollowDB prover, although `curHash` and `nextHash` are immediately provided as an output.
 
@@ -177,7 +190,7 @@ You can obtain all these files from this repository:
 Here is how to use the prover class:
 
 ```ts
-import {SDK, Prover} from 'hollowdb';
+import {SDK, Prover, computeKey} from 'hollowdb';
 
 // instantiate the SDK, shown above
 // ...
@@ -192,19 +205,17 @@ const keyPreimage = BigInt(1122334455);
 const curValue = 'previously-stored-value';
 const newValue = 'new-awesome-value';
 
-// generate the `fullProof`, which has `proof` and `publicSignals`
+// generate the `fullProof` using Groth16, which has `proof` and `publicSignals`
 // the name comes from SnarkJS's `fullProve` function
 // values are hashed inside the `generateProof` function,
-// so you don't have to worry about that part
+// so you don't have to worry about hashing yourself
 let fullProof = await prover.generateProof(preimage, curValue, newValue);
 
-// get the key (hash of preimage) from the circuit outputs
-// publicSignals[0] --> current value hash
-// publicSignals[1] --> next value hash
-// publicSignals[2] --> key
-const key = fullProof.publicSignals[2];
+// compute key
+// you can also get this from fullProof.publicSignals[2]
+const key = computeKey(preimage);
 
-// get actual proof object
+// get the actual proof object
 const proof = fullProof.proof;
 
 // update the value at this key!
