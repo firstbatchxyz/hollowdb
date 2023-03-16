@@ -6,11 +6,10 @@ import initialState from '../common/initialState';
 import fs from 'fs';
 import path from 'path';
 import {Admin, SDK} from '../src';
+import constants from './constants';
 
 // arbitrarily long timeout
-jest.setTimeout(30000);
-
-const ARWEAVE_PORT = 3169;
+jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
 describe('hollowdb evolve', () => {
   let arlocal: ArLocal;
@@ -22,7 +21,11 @@ describe('hollowdb evolve', () => {
   let ownerJWK: JWKInterface;
 
   beforeAll(async () => {
-    arlocal = new ArLocal(ARWEAVE_PORT, false);
+    /**
+     * TODO: we are creating a new arlocal instance here, otherwise it clashes with the other one
+     * we may use fixtures as a fix here
+     */
+    arlocal = new ArLocal(constants.ARWEAVE_PORT + 1, false);
     await arlocal.start();
 
     LoggerFactory.INST.logLevel('error');
@@ -31,7 +34,7 @@ describe('hollowdb evolve', () => {
     newContractSource = dummyContractSource;
 
     // setup warp factory for local arweave
-    warp = WarpFactory.forLocal(ARWEAVE_PORT).use(new DeployPlugin());
+    warp = WarpFactory.forLocal(constants.ARWEAVE_PORT + 1).use(new DeployPlugin());
 
     // get accounts
     const ownerWallet = await warp.generateWallet();

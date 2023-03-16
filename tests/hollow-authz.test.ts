@@ -1,13 +1,7 @@
 import {readFileSync} from 'fs';
 import {Prover, computeKey} from '../src';
+import constants from './constants';
 const snarkjs = require('snarkjs');
-
-// WASM and prover key for generating proofs
-const WASM_PATH = './circuits/hollow-authz/hollow-authz.wasm';
-const PROVERKEY_PATH = './circuits/hollow-authz/prover_key.zkey';
-
-// verification key to verify the proofs
-const VERIFICATIONKEY_PATH = './circuits/hollow-authz/verification_key.json';
 
 const preimage = BigInt(1122334455);
 const curValue = {
@@ -31,8 +25,8 @@ describe('hollow-authz circuit', () => {
 
   beforeAll(async () => {
     // prepare prover and verification key
-    prover = new Prover(WASM_PATH, PROVERKEY_PATH);
-    verificationKey = JSON.parse(readFileSync(VERIFICATIONKEY_PATH).toString());
+    prover = new Prover(constants.WASM_PATH, constants.PROVERKEY_PATH);
+    verificationKey = JSON.parse(readFileSync(constants.VERIFICATIONKEY_PATH).toString());
 
     // generate a proof
     const fullProof = await prover.generateProof(preimage, curValue, newValue);

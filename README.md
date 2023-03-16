@@ -56,10 +56,10 @@ import {WarpFactory} from 'warp-contracts';
 
 const warp = WarpFactory.forMainnet();
 const args: HollowDbSdkArgs = {
-  jwk,
-  contractTxId,
-  cacheType,
-  warp,
+  jwk, // read a wallet
+  contractTxId, // contract to connect to
+  cacheType, // lmdb or redis
+  warp, // mainnet, testnet, or local
 };
 const sdk = new SDK(args);
 const admin = new Admin(args);
@@ -222,7 +222,24 @@ const proof = fullProof.proof;
 await sdk.update(key, newValue, proof);
 ```
 
-You might notice that the `key` is being read from the public signals. This is because we need to hash the preimage with Poseidon hash to make this request. If you do not have the key in the first place, you can use a package such as [Poseidon Lite](https://www.npmjs.com/package/poseidon-lite) to easily find the hash of your preimage.
+### Proving in Browser
+
+Since proof generation is using SnarkJS in the background, you might need to add some settings to your web app to run it. See the [SnarkJS docs](https://github.com/iden3/snarkjs#in-the-browser) for this. For example, you could have an option like the following within your NextJS config file:
+
+```js
+webpack: (config, { isServer }) => {
+  if (!isServer) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      fs: false, // added for SnarkJS
+      readline: false, // added for SnarkJS
+    };
+  }
+  // added to run WASM for SnarkJS
+  config.experiments = { asyncWebAssembly: true };
+  return config;
+},
+```
 
 ## Testing
 
