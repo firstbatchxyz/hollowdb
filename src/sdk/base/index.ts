@@ -101,7 +101,7 @@ export class Base {
     // SnarkJS extension is required for proof verification
     warp = warp.use(new SnarkjsExtension());
 
-    // Ethers extension is required for SHA256
+    // Ethers extension is required for hashing
     warp = warp.use(new EthersExtension());
 
     // instantiate HollowDB

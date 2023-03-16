@@ -8388,10 +8388,10 @@ pkg-dir@^5.0.0:
   dependencies:
     find-up "^5.0.0"
 
-poseidon-lite@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/poseidon-lite/-/poseidon-lite-0.0.2.tgz#dc1a7c57f9393a586c5c9efc21b72b77e2c1acb6"
-  integrity sha512-bGdDPTOQkJbBjbtSEWc3gY+YhqlGTxGlZ8041F8TGGg5QyGGp1Cfs4b8AEnFFjHbkPg6WdWXUgEjU1GKOKWAPw==
+poseidon-lite@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/poseidon-lite/-/poseidon-lite-0.1.0.tgz#385f9c229e2e5325911e0cf5a70c623310ff4e34"
+  integrity sha512-aYKHQPpLaSrEOllS6MwGtch6xHViS0MlpwHiKOUI7h7geVsmg3FC13LzY8bpIndBRNNpOJM2j/9VtS6ZmALQNw==
 
 postcss-value-parser@^4.2.0:
   version "4.2.0"
