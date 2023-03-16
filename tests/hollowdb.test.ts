@@ -4,18 +4,13 @@ import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
 import fs from 'fs';
 import path from 'path';
-import {SDK, Admin, Prover} from '../src';
+import {SDK, Admin, Prover, computeKey} from '../src';
 import type {CacheType} from '../src/sdk/types';
-import poseidon from 'poseidon-lite';
 import {randomBytes} from 'crypto';
 import {prepareSDKs} from './utils';
+import constants from './constants';
 
-// WASM and prover key for generating proofs
-const WASM_PATH = './circuits/hollow-authz/hollow-authz.wasm';
-const PROVERKEY_PATH = './circuits/hollow-authz/prover_key.zkey';
-
-// arbitrarily long timeout
-jest.setTimeout(30000);
+jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
 enum PublicSignal {
   CurValueHash = 0,
@@ -23,22 +18,20 @@ enum PublicSignal {
   Key = 2,
 }
 
-const ARWEAVE_PORT = 3169;
-
 describe('hollowdb', () => {
   let arlocal: ArLocal;
   let contractSource: string;
   let prover: Prover;
 
   beforeAll(async () => {
-    arlocal = new ArLocal(ARWEAVE_PORT, false);
+    arlocal = new ArLocal(constants.ARWEAVE_PORT, false);
     await arlocal.start();
 
     LoggerFactory.INST.logLevel('error');
 
     contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
 
-    prover = new Prover(WASM_PATH, PROVERKEY_PATH);
+    prover = new Prover(constants.WASM_PATH, constants.PROVERKEY_PATH);
   });
 
   describe.each<CacheType>(['lmdb', 'redis'])('using %s cache, proofs enabled', cacheType => {
@@ -48,13 +41,13 @@ describe('hollowdb', () => {
     let warp: Warp;
 
     const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-    const KEY = poseidon([KEY_PREIMAGE]).toString();
+    const KEY = computeKey(KEY_PREIMAGE);
     const VALUE_TX = randomBytes(10).toString('hex');
     const NEXT_VALUE_TX = randomBytes(10).toString('hex');
 
     beforeAll(async () => {
       // setup warp factory for local arweave
-      warp = WarpFactory.forLocal(ARWEAVE_PORT).use(new DeployPlugin());
+      warp = WarpFactory.forLocal(constants.ARWEAVE_PORT).use(new DeployPlugin());
 
       // get accounts
       const ownerWallet = await warp.generateWallet();
@@ -207,7 +200,7 @@ describe('hollowdb', () => {
 
     describe('tests with proofs disabled', () => {
       const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-      const KEY = poseidon([KEY_PREIMAGE]).toString();
+      const KEY = computeKey(KEY_PREIMAGE);
       const VALUE_TX = randomBytes(10).toString('hex');
       const NEXT_VALUE_TX = randomBytes(10).toString('hex');
 
@@ -243,7 +236,7 @@ describe('hollowdb', () => {
         let aliceAddress: string;
 
         const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-        const KEY = poseidon([KEY_PREIMAGE]).toString();
+        const KEY = computeKey(KEY_PREIMAGE);
         const VALUE_TX = randomBytes(10).toString('hex');
         const NEXT_VALUE_TX = randomBytes(10).toString('hex');
 
