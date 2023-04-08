@@ -246,7 +246,10 @@ webpack: (config, { isServer }) => {
 There are Jest test suites for HollowDB operations that operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). To run:
 
 ```sh
+# run all tests
 yarn test
+# run a specific test
+yarn test <path>
 ```
 
 The test will run for both LMDB cache and Redis cache. For Redis, you need to have a server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
@@ -261,3 +264,11 @@ yarn format
 # linting with eslint
 yarn lint
 ```
+
+## Join our Dev Server!
+
+We'd love for you to be a part of our dev community! If you have any questions, want to discuss HollowDB, or simply want to connect with like-minded individuals, feel free to join our Discord server.
+
+[![Join our Discord server!](https://invidget.switchblade.xyz/2wuU9ym6fq)](http://discord.gg/2wuU9ym6fq)
+
+Click the badge above to receive an invitation to our Discord server.

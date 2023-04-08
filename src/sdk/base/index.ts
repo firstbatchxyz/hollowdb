@@ -1,11 +1,23 @@
-import {defaultCacheOptions, LoggerFactory, Warp, Contract, ArWallet} from 'warp-contracts';
+import {
+  defaultCacheOptions,
+  LoggerFactory,
+  Warp,
+  Contract,
+  ArWallet,
+  CustomSignature,
+  SignatureType,
+} from 'warp-contracts';
 import {LmdbCache} from 'warp-contracts-lmdb';
 import {RedisCache} from 'warp-contracts-redis';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
+import {EvmSignatureVerificationWebPlugin} from 'warp-contracts-plugin-signature';
 
+/**
+ * Default options for limiting cache usage per key.
+ */
 const defaultLimitOptions = {
   lmdb: {
     minEntriesPerContract: 10,
@@ -18,21 +30,28 @@ const defaultLimitOptions = {
 };
 
 export class Base {
-  warp: Warp;
-  hollowDB: Contract<HollowDBState>;
-  contractTxId: string;
-  jwk: ArWallet;
+  protected readonly logger = LoggerFactory.INST.logLevel('none');
+  readonly warp: Warp;
+  readonly hollowDB: Contract<HollowDBState>;
+  readonly contractTxId: string;
+  readonly signer: ArWallet | CustomSignature;
+  readonly signatureType: SignatureType;
 
   constructor(args: HollowDbSdkArgs) {
-    this.jwk = args.jwk;
+    this.signer = args.signer;
+    if (Object.prototype.hasOwnProperty.call(this.signer, 'type')) {
+      this.signatureType = (this.signer as CustomSignature).type;
+    } else {
+      this.signatureType = 'arweave';
+    }
     this.contractTxId = args.contractTxId;
     args.limitOptions = args.limitOptions || defaultLimitOptions[args.cacheType];
 
+    // check redis
     if (args.cacheType === 'redis' && args.redisClient === undefined) {
       throw new Error('Provide a Redis client if you want cacheType redis.');
     }
 
-    LoggerFactory.INST.logLevel('none');
     let warp = args.warp;
 
     // State Cache extension is recommended
@@ -54,7 +73,7 @@ export class Base {
       warp = warp.useStateCache(stateCache);
     }
 
-    // Contract Cache extension is recommended
+    // ContractCache extension is recommended
     if (args.useContractCache) {
       const contractCache = {
         lmdb: {
@@ -104,6 +123,11 @@ export class Base {
     // Ethers extension is required for hashing
     warp = warp.use(new EthersExtension());
 
+    // If signer is ethereum, EVM signature plugin is needed
+    if (this.signatureType === 'ethereum') {
+      warp = warp.use(new EvmSignatureVerificationWebPlugin());
+    }
+
     // instantiate HollowDB
     this.hollowDB = warp
       .contract<HollowDBState>(this.contractTxId)
@@ -111,7 +135,7 @@ export class Base {
         allowBigInt: true,
         useKVStorage: true,
       })
-      .connect(this.jwk);
+      .connect(this.signer);
 
     // expose warp
     this.warp = warp;
