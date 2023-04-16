@@ -11,9 +11,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
-  let walletName = 'wallet-main';
+  let walletName: string;
   if (process.argv.length === 3) {
     walletName = process.argv[2];
+  } else {
+    throw new Error('Usage: yarn contract:deploy <wallet-name>');
   }
 
   // read wallet

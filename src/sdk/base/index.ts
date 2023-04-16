@@ -5,7 +5,7 @@ import {
   Contract,
   ArWallet,
   CustomSignature,
-  SignatureType,
+  EvalStateResult,
 } from 'warp-contracts';
 import {LmdbCache} from 'warp-contracts-lmdb';
 import {RedisCache} from 'warp-contracts-redis';
@@ -13,7 +13,6 @@ import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {HollowDBState} from '../../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from '../types';
-import {EvmSignatureVerificationWebPlugin} from 'warp-contracts-plugin-signature';
 
 /**
  * Default options for limiting cache usage per key.
@@ -35,15 +34,10 @@ export class Base {
   readonly hollowDB: Contract<HollowDBState>;
   readonly contractTxId: string;
   readonly signer: ArWallet | CustomSignature;
-  readonly signatureType: SignatureType;
 
   constructor(args: HollowDbSdkArgs) {
+    // extract the signer type from the arguments
     this.signer = args.signer;
-    if (Object.prototype.hasOwnProperty.call(this.signer, 'type')) {
-      this.signatureType = (this.signer as CustomSignature).type;
-    } else {
-      this.signatureType = 'arweave';
-    }
     this.contractTxId = args.contractTxId;
     args.limitOptions = args.limitOptions || defaultLimitOptions[args.cacheType];
 
@@ -57,14 +51,14 @@ export class Base {
     // State Cache extension is recommended
     if (args.useStateCache) {
       const stateCache = {
-        lmdb: new LmdbCache(
+        lmdb: new LmdbCache<EvalStateResult<unknown>>(
           {
             ...defaultCacheOptions,
             dbLocation: './cache/warp/state',
           },
           args.limitOptions
         ),
-        redis: new RedisCache({
+        redis: new RedisCache<EvalStateResult<unknown>>({
           client: args.redisClient!,
           prefix: `${args.contractTxId}.state`,
           ...args.limitOptions,
@@ -120,19 +114,14 @@ export class Base {
     // SnarkJS extension is required for proof verification
     warp = warp.use(new SnarkjsExtension());
 
-    // Ethers extension is required for hashing
+    // Ethers extension is required for hashing (ripemd160)
     warp = warp.use(new EthersExtension());
-
-    // If signer is ethereum, EVM signature plugin is needed
-    if (this.signatureType === 'ethereum') {
-      warp = warp.use(new EvmSignatureVerificationWebPlugin());
-    }
 
     // instantiate HollowDB
     this.hollowDB = warp
       .contract<HollowDBState>(this.contractTxId)
       .setEvaluationOptions({
-        allowBigInt: true,
+        allowBigInt: true, // bigInt is required for circuits
         useKVStorage: true,
       })
       .connect(this.signer);

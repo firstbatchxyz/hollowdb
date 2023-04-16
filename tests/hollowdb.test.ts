@@ -12,9 +12,6 @@ import {createClient} from 'redis';
 import {globals} from '../jest.config.cjs';
 import {prepareAdmin, prepareSDK} from './utils';
 
-import {Wallet} from 'ethers';
-
-const {buildEvmSignature} = require('warp-contracts-plugin-signature/build/server');
 jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
 enum PublicSignal {
@@ -37,7 +34,7 @@ describe('hollowdb', () => {
     prover = new Prover(constants.WASM_PATH, constants.PROVERKEY_PATH);
   });
 
-  const tests: CacheType[] = ['lmdb']; //'redis'];
+  const tests: CacheType[] = ['lmdb', 'redis'];
   describe.each<CacheType>(tests)('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin;
     let ownerSDK: SDK;
@@ -57,7 +54,7 @@ describe('hollowdb', () => {
 
       // get accounts
       const ownerWallet = await warp.generateWallet();
-      // ownerAddress = ownerWallet.address;
+      const aliceWallet = await warp.generateWallet();
 
       // deploy contract
       const {contractTxId: hollowDBTxId} = await Admin.deploy(
@@ -77,20 +74,10 @@ describe('hollowdb', () => {
             })
           : undefined;
 
-      // prepare SDKs, owner is using Arweave
+      // prepare SDKs
       ownerAdmin = prepareAdmin(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
       ownerSDK = prepareSDK(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
-
-      // Alice will be using Ethereum!
-      const aliceWallet = Wallet.createRandom();
-      aliceAddress = aliceWallet.address;
-      aliceSDK = prepareSDK(
-        cacheType,
-        warp,
-        hollowDBTxId,
-        {signer: buildEvmSignature(aliceWallet), type: 'ethereum'},
-        redisClient
-      );
+      aliceSDK = prepareSDK(cacheType, warp, hollowDBTxId, aliceWallet.jwk, redisClient);
 
       const contractTx = await warp.arweave.transactions.get(hollowDBTxId);
       expect(contractTx).not.toBeNull();

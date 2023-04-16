@@ -15,7 +15,7 @@ const newValue = {
   bar: false,
 };
 
-describe('hollow-authz circuit', () => {
+describe('hollowdb circuits', () => {
   let prover: Prover;
   let verificationKey: object;
   let proof: object;

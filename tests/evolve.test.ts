@@ -67,7 +67,7 @@ describe('hollowdb evolve', () => {
 
     // create new SDK
     const ownerSDK = new SDK({
-      jwk: ownerJWK,
+      signer: ownerJWK,
       contractTxId: newContractTxId,
       cacheType: 'lmdb',
       warp,

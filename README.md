@@ -4,6 +4,7 @@
 ![Style Workflow](https://github.com/firstbatchxyz/hollowdb/actions/workflows/style.yml/badge.svg?branch=master)
 [![Formatter: Prettier](https://img.shields.io/badge/formatter-prettier-f8bc45?logo=prettier)](https://prettier.io/)
 [![Linter: ESLint](https://img.shields.io/badge/linter-eslint-8080f2?logo=eslint)](https://eslint.org/)
+[![Discord](https://dcbadge.vercel.app/api/server/2wuU9ym6fq?style=flat)](https://discord.gg/2wuU9ym6fq)
 
 # HollowDB
 
@@ -24,7 +25,7 @@ HollowDB has two modus operandi: **proofs** and **whitelisting**. Both can be en
 
 The table below summarizes the requirements to make a transaction on HollowDB:
 
-| Requirements          | **Put**       | **Update**           | **Remove**           | **Read** |
+| **Requirements**      | **Put**       | **Update**           | **Remove**           | **Read** |
 | --------------------- | ------------- | -------------------- | -------------------- | -------- |
 | **with Proofs**       | -             | Zero-Knowledge Proof | Zero-Knowledge Proof | -        |
 | **with Whitelisting** | PUT whitelist | UPDATE whitelist     | UPDATE whitelist     | -        |
@@ -264,11 +265,3 @@ yarn format
 # linting with eslint
 yarn lint
 ```
-
-## Join our Dev Server!
-
-We'd love for you to be a part of our dev community! If you have any questions, want to discuss HollowDB, or simply want to connect with like-minded individuals, feel free to join our Discord server.
-
-[![Join our Discord server!](https://invidget.switchblade.xyz/2wuU9ym6fq)](http://discord.gg/2wuU9ym6fq)
-
-Click the badge above to receive an invitation to our Discord server.

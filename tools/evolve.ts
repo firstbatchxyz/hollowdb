@@ -10,14 +10,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function evolve() {
-  let walletName = 'wallet-main';
+  let walletName: string;
   let contractTxId: string;
 
   if (process.argv.length === 4) {
     walletName = process.argv[2];
     contractTxId = process.argv[3];
   } else {
-    throw new Error('Usage: yarn evolve <wallet-name> <contract-tx-id>');
+    throw new Error('Usage: yarn contract:evolve <wallet-name> <contract-tx-id>');
   }
 
   // read wallet
