@@ -1,6 +1,6 @@
 import errors from '../../errors';
 import type {HollowDBContractFunction} from '../../types';
-import {valueToBigInt, verifyProof} from '../../../utils';
+import {valueToBigInt, verifyProof} from '../../utils';
 
 export type HollowDBRemove = {
   function: 'remove';
@@ -20,7 +20,7 @@ export const remove: HollowDBContractFunction<HollowDBRemove> = async (state, ac
   }
 
   // there must be a value at the key
-  const dbValue = await SmartWeave.kv.get<string>(key);
+  const dbValue = await SmartWeave.kv.get(key);
   if (dbValue === null) {
     throw errors.KeyNotExistsError;
   }

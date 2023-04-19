@@ -17,7 +17,7 @@ export const put: HollowDBContractFunction<HollowDBPut> = async (state, action) 
   }
 
   // must be an empty value
-  if ((await SmartWeave.kv.get<string>(key)) !== null) {
+  if ((await SmartWeave.kv.get(key)) !== null) {
     throw errors.KeyExistsError;
   }
 

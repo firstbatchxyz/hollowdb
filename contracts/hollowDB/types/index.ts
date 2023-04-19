@@ -1,21 +1,24 @@
-import {HollowDBGet} from '../actions/read/get';
-import {HollowDBEvolve} from '../actions/write/evolve';
-import {HollowDBPut} from '../actions/write/put';
-import {HollowDBRemove} from '../actions/write/remove';
-import {HollowDBUpdate} from '../actions/write/update';
-import {HollowDBUpdateState} from '../actions/write/updateState';
-import {HollowDBUpdateWhitelist} from '../actions/write/updateWhitelist';
+import {HollowDBGet} from '../actions/crud/get';
+import {HollowDBPut} from '../actions/crud/put';
+import {HollowDBRemove} from '../actions/crud/remove';
+import {HollowDBUpdate} from '../actions/crud/update';
+import {HollowDBUpdateState} from '../actions/state/updateState';
+import {HollowDBUpdateWhitelist} from '../actions/state/updateWhitelist';
+import {HollowDBEvolve} from '../actions/evolve';
 
 /**
  * Union of all HollowDB input types
  */
 export type HollowDBInput =
+  // crud
   | HollowDBGet
   | HollowDBRemove
   | HollowDBPut
   | HollowDBUpdate
+  // state
   | HollowDBUpdateState
   | HollowDBUpdateWhitelist
+  // evolve
   | HollowDBEvolve;
 
 /**

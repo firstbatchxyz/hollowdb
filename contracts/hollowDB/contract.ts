@@ -1,11 +1,13 @@
-import {get} from './actions/read/get.js';
-import {put} from './actions/write/put.js';
-import {update} from './actions/write/update.js';
-import {remove} from './actions/write/remove.js';
-import {evolve} from './actions/write/evolve.js';
-
-import {updateState} from './actions/write/updateState.js';
-import {updateWhitelist} from './actions/write/updateWhitelist.js';
+// CRUD operations
+import {get} from './actions/crud/get.js';
+import {put} from './actions/crud/put.js';
+import {update} from './actions/crud/update.js';
+import {remove} from './actions/crud/remove.js';
+// Evolve functionality
+import {evolve} from './actions/evolve.js';
+// State updates
+import {updateState} from './actions/state/updateState.js';
+import {updateWhitelist} from './actions/state/updateWhitelist.js';
 
 import type {HollowDBContractFunction} from './types/index.js';
 import errors from './errors/index.js';

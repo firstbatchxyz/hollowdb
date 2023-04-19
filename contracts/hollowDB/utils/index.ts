@@ -20,6 +20,6 @@ export const verifyProof = async (
  * @see https://docs.circom.io/background/background/#signals-of-a-circuit
  * @param value any kind of value
  */
-export const valueToBigInt = (value: string): bigint => {
+export const valueToBigInt = (value: unknown): bigint => {
   return BigInt(SmartWeave.extensions.ethers.utils.ripemd160(Buffer.from(JSON.stringify(value))));
 };

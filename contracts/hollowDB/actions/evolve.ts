@@ -1,5 +1,5 @@
-import errors from '../../errors';
-import type {HollowDBContractFunction} from '../../types';
+import errors from '../errors';
+import type {HollowDBContractFunction} from '../types';
 
 export type HollowDBEvolve = {
   function: 'evolve';
