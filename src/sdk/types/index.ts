@@ -4,7 +4,7 @@ import {ArWallet, CustomSignature, Warp} from 'warp-contracts';
 export type CacheType = 'lmdb' | 'redis';
 
 export type HollowDbSdkArgs = {
-  signer: ArWallet | CustomSignature;
+  signer: ArWallet | CustomSignature; // TODO
   contractTxId: string;
   cacheType: CacheType;
   warp: Warp;

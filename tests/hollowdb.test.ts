@@ -38,7 +38,6 @@ describe('hollowdb', () => {
   describe.each<CacheType>(tests)('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin;
     let ownerSDK: SDK;
-    // let ownerAddress: string;
     let aliceSDK: SDK;
     let aliceAddress: string;
     let warp: Warp;

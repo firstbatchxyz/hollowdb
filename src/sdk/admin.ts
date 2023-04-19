@@ -1,7 +1,7 @@
 import {ArWallet, EvaluationManifest, JWKInterface, Warp} from 'warp-contracts';
-import {Base} from '../base';
-import {HollowDBInput, HollowDBState} from '../../../contracts/hollowDB/types';
-import type {HollowDbSdkArgs} from '../types';
+import {Base} from './base';
+import {HollowDBInput, HollowDBState} from '../../contracts/hollowDB/types';
+import type {HollowDbSdkArgs} from './types';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
 /**

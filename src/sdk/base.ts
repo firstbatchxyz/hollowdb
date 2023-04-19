@@ -11,22 +11,9 @@ import {LmdbCache} from 'warp-contracts-lmdb';
 import {RedisCache} from 'warp-contracts-redis';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
-import type {HollowDBState} from '../../../contracts/hollowDB/types';
-import type {HollowDbSdkArgs} from '../types';
-
-/**
- * Default options for limiting cache usage per key.
- */
-const defaultLimitOptions = {
-  lmdb: {
-    minEntriesPerContract: 10,
-    maxEntriesPerContract: 100,
-  },
-  redis: {
-    minEntriesPerContract: 10,
-    maxEntriesPerContract: 100,
-  },
-};
+import type {HollowDBState} from '../../contracts/hollowDB/types';
+import type {HollowDbSdkArgs} from './types';
+import constants from './constants';
 
 export class Base {
   protected readonly logger = LoggerFactory.INST.logLevel('none');
@@ -36,10 +23,9 @@ export class Base {
   readonly signer: ArWallet | CustomSignature;
 
   constructor(args: HollowDbSdkArgs) {
-    // extract the signer type from the arguments
     this.signer = args.signer;
     this.contractTxId = args.contractTxId;
-    args.limitOptions = args.limitOptions || defaultLimitOptions[args.cacheType];
+    const limitOptions = args.limitOptions || constants.DEFAULT_LIMIT_OPTS[args.cacheType];
 
     // check redis
     if (args.cacheType === 'redis' && args.redisClient === undefined) {
@@ -51,17 +37,17 @@ export class Base {
     // State Cache extension is recommended
     if (args.useStateCache) {
       const stateCache = {
-        lmdb: new LmdbCache<EvalStateResult<unknown>>(
+        lmdb: new LmdbCache(
           {
             ...defaultCacheOptions,
             dbLocation: './cache/warp/state',
           },
-          args.limitOptions
+          limitOptions
         ),
-        redis: new RedisCache<EvalStateResult<unknown>>({
+        redis: new RedisCache({
           client: args.redisClient!,
           prefix: `${args.contractTxId}.state`,
-          ...args.limitOptions,
+          ...limitOptions,
         }),
       }[args.cacheType];
       warp = warp.useStateCache(stateCache);
@@ -84,12 +70,12 @@ export class Base {
           definition: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.contract`,
-            ...args.limitOptions,
+            ...limitOptions,
           }),
           src: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.src`,
-            ...args.limitOptions,
+            ...limitOptions,
           }),
         },
       }[args.cacheType];
@@ -106,7 +92,7 @@ export class Base {
       redis: (contractTxId: string) =>
         new RedisCache({
           client: args.redisClient!,
-          prefix: `${this.contractTxId}.${contractTxId}`,
+          prefix: `${this.contractTxId}.${contractTxId}`, // TODO: @faruk, why this convention?
         }),
     }[args.cacheType];
     warp = warp.useKVStorageFactory(kvStorageFactory);
