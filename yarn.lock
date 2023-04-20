@@ -10054,10 +10054,31 @@ warp-contracts-redis@^0.1.2:
     redis "^4.6.4"
     warp-contracts "^1.2.52"
 
-warp-contracts@^1.2.52, warp-contracts@^1.4.1:
+warp-contracts@^1.2.52:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/warp-contracts/-/warp-contracts-1.4.1.tgz#ba4c0101eda170fe54c3bbfdd836252817786f72"
   integrity sha512-NQE83O6waKKIH74oBoBITK5KQrA60WurnCFx4LCZ5tUSX683lodCHPeNbyuioFUBebfEULQRfUkcbmnCiKxoaA==
+  dependencies:
+    "@idena/vrf-js" "^1.0.1"
+    archiver "^5.3.0"
+    arweave "^1.12.4"
+    async-mutex "^0.4.0"
+    bignumber.js "9.1.1"
+    elliptic "^6.5.4"
+    events "3.3.0"
+    fast-copy "^3.0.0"
+    level "^8.0.0"
+    memory-level "^1.0.0"
+    safe-stable-stringify "2.4.1"
+    stream-buffers "^3.0.2"
+    unzipit "^1.4.0"
+    warp-isomorphic "1.0.4"
+    warp-wasm-metering "1.0.1"
+
+warp-contracts@^1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/warp-contracts/-/warp-contracts-1.4.2.tgz#d8fb1da5fa1ea1da2dd83052b7a2e24170fefb2e"
+  integrity sha512-YCZNT2rzODy9gcSAOXC6j4PWGlxA9oCV/Gydkcoz4VK2OXwo05P7bzqyatWBIb/oHcYqN0dcEBDc+XWqJdlo2Q==
   dependencies:
     "@idena/vrf-js" "^1.0.1"
     archiver "^5.3.0"

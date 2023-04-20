@@ -1,12 +1,4 @@
-import {
-  defaultCacheOptions,
-  LoggerFactory,
-  Warp,
-  Contract,
-  ArWallet,
-  CustomSignature,
-  EvalStateResult,
-} from 'warp-contracts';
+import {defaultCacheOptions, LoggerFactory, Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import {LmdbCache} from 'warp-contracts-lmdb';
 import {RedisCache} from 'warp-contracts-redis';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
@@ -92,7 +84,7 @@ export class Base {
       redis: (contractTxId: string) =>
         new RedisCache({
           client: args.redisClient!,
-          prefix: `${this.contractTxId}.${contractTxId}`, // TODO: @faruk, why this convention?
+          prefix: `${args.contractTxId}.${contractTxId}`,
         }),
     }[args.cacheType];
     warp = warp.useKVStorageFactory(kvStorageFactory);
@@ -105,7 +97,7 @@ export class Base {
 
     // instantiate HollowDB
     this.hollowDB = warp
-      .contract<HollowDBState>(this.contractTxId)
+      .contract<HollowDBState>(args.contractTxId)
       .setEvaluationOptions({
         allowBigInt: true, // bigInt is required for circuits
         useKVStorage: true,

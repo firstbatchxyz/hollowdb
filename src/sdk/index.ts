@@ -1,4 +1,3 @@
-import {poseidon1} from 'poseidon-lite';
 import {HollowDBInput} from '../../contracts/hollowDB/types';
 import {Base} from './base';
 import type {HollowDbSdkArgs} from './types';
@@ -72,9 +71,9 @@ export class SDK extends Base {
 
   /**
    * Updates the value of given key.
-   * @param key The key of the value to be updated.
-   * @param value The new value.
-   * @param proof Proof of the value to be updated.
+   * @param key key of the value to be updated
+   * @param value new value
+   * @param proof proof of preimage knowledge of the key
    */
   async update(key: string, value: string, proof: object = {}) {
     const result = await this.hollowDB.dryWrite<HollowDBInput>({
@@ -133,10 +132,16 @@ export class SDK extends Base {
    * @returns An array of all the keys in the database
    */
   async getAllKeys() {
-    const contractValues = this.warp.kvStorageFactory(this.contractTxId);
-    const keys = await contractValues.keys();
-    await contractValues.close();
-    return keys;
+    const response = await this.hollowDB.viewState<HollowDBInput>({
+      function: 'getAllKeys',
+      data: {},
+    });
+
+    if (response.type !== 'ok') {
+      throw new Error('Contract Error [getAllKeys]: ' + response.errorMessage);
+    }
+
+    return response.result;
   }
 
   /**
@@ -146,13 +151,4 @@ export class SDK extends Base {
   async readState() {
     return await this.hollowDB.readState();
   }
-}
-
-/**
- * Compute the key that only you can know the preimage of.
- * @param preimage your secret, the preimage of the key
- * @returns key, as the Poseidon hash of your secret
- */
-export function computeKey(preimage: bigint): string {
-  return poseidon1([preimage]).toString();
 }

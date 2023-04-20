@@ -47,8 +47,6 @@ HollowDB exposes the following:
 
 - an `SDK` class to allow ease of development with its functionalities
 - an `Admin` class that handles higher authorized operations.
-- a `Prover` class that provides a utility function to generate proofs for HollowDB.
-- a `computeKey` function to compute the key without generating a proof.
 
 ```ts
 import {SDK, Admin} from 'hollowdb';
@@ -57,7 +55,7 @@ import {WarpFactory} from 'warp-contracts';
 
 const warp = WarpFactory.forMainnet();
 const args: HollowDbSdkArgs = {
-  jwk, // read a wallet
+  signer, // a wallet
   contractTxId, // contract to connect to
   cacheType, // lmdb or redis
   warp, // mainnet, testnet, or local
@@ -68,7 +66,7 @@ const admin = new Admin(args);
 
 As shown in example, you must provide the 4 required arguments to Admin or SDK:
 
-- `jwk`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you `.gitignore` your wallet files!
+- `signer`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you `.gitignore` your wallet files!
 - `contractTxId`: the transaction id of the contract. You can connect to an existing contract, or deploy one of your own and provide it's id here.
 - `cacheType`: type of cache to be used, i.e. `lmdb` or `redis`.
   - if this is `redis`, then you must also provide a Redis client object via `redisClient` argument.
@@ -90,8 +88,9 @@ You can also provide the following optional arguments:
 SDK provides the basic CRUD functionality.
 
 ```ts
-// compute the key from your secret
-const key = computeKey(yourSecret);
+// the key is Poseidon hash of your secret
+import {poseidon1} from 'poseidon-lite';
+const key = poseidon1([yourSecret]);
 
 // GET is open to everyone
 await sdk.get(key);
@@ -117,7 +116,7 @@ await sdk.remove(key);
 const {cachedValue} = await sdk.readState();
 ```
 
-For more detailed explanation on the `Prover`, see the related section below.
+For more detailed explanation on the `prover`, see the related section below.
 
 ### Admin Operations
 
@@ -178,49 +177,50 @@ HollowDB is a **key-value** database where each **key** in the database is the [
 
 As shown above, all inputs are secret for HollowDB prover, although `curHash` and `nextHash` are immediately provided as an output.
 
-### Generating Proofs with Prover
+### Generating Proofs
 
-HollowDB provides a `Prover` class to ease the generation of proofs. First, you must make sure to have the circuit WASM file and prover key in your device, the paths to these files are required by the prover. Verification is done at the contract side, with the verification key being stored in the state of the contract itself.
+**TODO TODO**
 
-You can obtain all these files from this repository:
+You can obtain the necessary files from this repository:
 
 - [WASM Circuit](./circuits/hollow-authz/hollow-authz.wasm): required by the Prover
 - [Prover Key](./circuits/hollow-authz/prover_key.zkey): required by the Prover
 - [Verification Key](./circuits/hollow-authz/verification_key.json): required by the contract if you would like to write your own
 
-Here is how to use the prover class:
-
 ```ts
-import {SDK, Prover, computeKey} from 'hollowdb';
+import {ripemd160} from '@ethersproject/sha2';
+const snarkjs = require('snarkjs');
 
-// instantiate the SDK, shown above
-// ...
+export class Prover {
+  private readonly wasmPath: string;
+  private readonly proverKey: string;
+  constructor(wasmPath: string, proverKey: string) {
+    this.wasmPath = wasmPath;
+    this.proverKey = proverKey;
+  }
 
-// instantiate the prover
-const wasmPath = '/some/path/to/hollow-authz.wasm';
-const proverkeyPath = '/some/path/to/prover_key.zkey';
-const prover = new Prover(wasmPath, proverkeyPath);
+  async generateProof(
+    preimage: bigint,
+    curValue: unknown | null,
+    nextValue: unknown | null
+  ): Promise<{proof: object; publicSignals: [curValueHashOut: string, nextValueHashOut: string, key: string]}> {
+    const fullProof = await snarkjs.groth16.fullProve(
+      // field names of this JSON object must match the input signal names of the circuit
+      {
+        preimage: preimage,
+        curValueHash: curValue ? this.valueToBigInt(curValue) : 0n,
+        nextValueHash: nextValue ? this.valueToBigInt(nextValue) : 0n,
+      },
+      this.wasmPath,
+      this.proverKey
+    );
+    return fullProof;
+  }
 
-// your key preimage and values
-const keyPreimage = BigInt(1122334455);
-const curValue = 'previously-stored-value';
-const newValue = 'new-awesome-value';
-
-// generate the `fullProof` using Groth16, which has `proof` and `publicSignals`
-// the name comes from SnarkJS's `fullProve` function
-// values are hashed inside the `generateProof` function,
-// so you don't have to worry about hashing yourself
-let fullProof = await prover.generateProof(preimage, curValue, newValue);
-
-// compute key
-// you can also get this from fullProof.publicSignals[2]
-const key = computeKey(preimage);
-
-// get the actual proof object
-const proof = fullProof.proof;
-
-// update the value at this key!
-await sdk.update(key, newValue, proof);
+  valueToBigInt = (value: unknown): bigint => {
+    return BigInt(ripemd160(Buffer.from(JSON.stringify(value))));
+  };
+}
 ```
 
 ### Proving in Browser

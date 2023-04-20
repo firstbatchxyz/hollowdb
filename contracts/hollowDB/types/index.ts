@@ -2,6 +2,7 @@ import {HollowDBGet} from '../actions/crud/get';
 import {HollowDBPut} from '../actions/crud/put';
 import {HollowDBRemove} from '../actions/crud/remove';
 import {HollowDBUpdate} from '../actions/crud/update';
+import {HollowDBGetKeys} from '../actions/state/getAllKeys';
 import {HollowDBUpdateState} from '../actions/state/updateState';
 import {HollowDBUpdateWhitelist} from '../actions/state/updateWhitelist';
 import {HollowDBEvolve} from '../actions/evolve';
@@ -16,6 +17,7 @@ export type HollowDBInput =
   | HollowDBPut
   | HollowDBUpdate
   // state
+  | HollowDBGetKeys
   | HollowDBUpdateState
   | HollowDBUpdateWhitelist
   // evolve
@@ -53,9 +55,12 @@ export type HollowDBAction<InputType> = {
 };
 
 /**
- * A result from a read request can be a value at the given key, that is a string or null if none exists.
+ * A result from a read request.
  */
-export type HollowDBResult = string | null;
+export type HollowDBResult =
+  | string[] // a list of keys
+  | string // an existing value
+  | null; // non-existing value
 
 /**
  * A generic HollowDB contract function. Functions can specify their

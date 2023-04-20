@@ -1,5 +1,6 @@
 import {readFileSync} from 'fs';
-import {Prover, computeKey} from '../src';
+import {Prover} from './utils/prover';
+import {computeKey} from './utils/computeKey';
 import constants from './constants';
 const snarkjs = require('snarkjs');
 

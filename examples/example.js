@@ -1,15 +1,19 @@
 const {SDK, computeKey} = require('hollowdb');
 const {WarpFactory} = require('warp-contracts');
-const {contractTxId, jwk, wasmPath, proverKeyPath} = require('./utils/config');
 
 async function main() {
+  // your wallet, probably read from disk in a .gitignore'd folder!
+  const jwk = {
+    /*your wallet here*/
+  };
+
   // create a warp instance for hollowdb
   const warp = WarpFactory.forMainnet();
 
   // create a hollowdb instance
   const db = new SDK({
     warp: warp,
-    contractTxId: contractTxId,
+    contractTxId: 'your-contract-txid-here',
     jwk: jwk,
     cacheType: 'lmdb',
   });

@@ -119,6 +119,7 @@ export class Admin extends Base {
    * @returns transaction ids
    */
   static async deploy(
+    // TODO: we may allow "signer" type from arbundle, which would allow any wallet to deploy a contract https://github.com/Bundlr-Network/arbundles
     owner: JWKInterface,
     initialState: HollowDBState,
     contractSource: string,
@@ -126,6 +127,7 @@ export class Admin extends Base {
     disableBundling = false
   ): Promise<{contractTxId: string; srcTxId: string | undefined}> {
     // default owner becomes the deployer, and is also whitelisted
+    // although whitelisting is not enabled, this is done just in case*
     const ownerAddress = await warp.arweave.wallets.jwkToAddress(owner);
     initialState.owner = ownerAddress;
     initialState.whitelist['put'][ownerAddress] = true;
