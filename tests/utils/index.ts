@@ -1,8 +1,7 @@
-import {ArWallet, CustomSignature, Warp} from 'warp-contracts';
-import {JWKInterface} from 'arweave/node/lib/wallet';
+import {ArWallet, CustomSignature, Warp, JWKInterface} from 'warp-contracts';
 import {Admin, SDK} from '../../src';
 import {CacheType} from '../../src/sdk/types';
-import {createClient} from 'redis';
+import {createClient} from '@redis/client';
 
 /**
  * Add funds to any wallet.

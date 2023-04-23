@@ -12,20 +12,6 @@
     "Faruk Can Özkan <farukcan@firstbatch.xyz>",
     "Erhan Tezcan <erhan@firstbatch.xyz>"
   ],
-  "keywords": [
-    "key-value store",
-    "storage",
-    "database",
-    "zksnark",
-    "blockchain",
-    "smart-contracts",
-    "arweave",
-    "anonymous",
-    "smartweave",
-    "circom",
-    "warp-contracts",
-    "zero-knowledge"
-  ],
   "cjs": "lib/index.cjs",
   "mjs": "lib/index.mjs",
   "exports": {
@@ -82,13 +68,10 @@
     "yalc:publish": "yarn build && yalc publish --push"
   },
   "dependencies": {
-    "@ethersproject/sha2": "^5.7.0",
-    "poseidon-lite": "^0.1.0",
-    "redis": "^4.6.4",
+    "@redis/client": "^1.5.6",
     "safe-stable-stringify": "^2.4.3",
-    "snarkjs": "^0.6.1",
     "warp-contracts": "^1.4.2",
-    "warp-contracts-lmdb": "^1.1.9",
+    "warp-contracts-lmdb": "^1.1.10",
     "warp-contracts-plugin-deploy": "^1.0.4",
     "warp-contracts-plugin-ethers": "^1.0.7",
     "warp-contracts-plugin-signature": "^1.0.10",
@@ -96,6 +79,7 @@
     "warp-contracts-redis": "^0.1.2"
   },
   "devDependencies": {
+    "@ethersproject/sha2": "^5.7.0",
     "@parcel/packager-ts": "2.8.3",
     "@parcel/transformer-typescript-tsc": "^2.8.3",
     "@parcel/transformer-typescript-types": "2.8.3",
@@ -114,11 +98,27 @@
     "gts": "^3.1.1",
     "jest": "^29.4.3",
     "parcel": "^2.8.3",
+    "poseidon-lite": "^0.1.0",
     "prettier": "2.8.3",
     "replace-in-file": "^6.3.5",
     "rimraf": "^4.1.2",
+    "snarkjs": "^0.6.1",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
-  }
+  },
+  "keywords": [
+    "key-value store",
+    "storage",
+    "database",
+    "zksnark",
+    "blockchain",
+    "smart-contracts",
+    "arweave",
+    "anonymous",
+    "smartweave",
+    "circom",
+    "warp-contracts",
+    "zero-knowledge"
+  ]
 }

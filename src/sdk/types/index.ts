@@ -1,10 +1,10 @@
-import {createClient} from 'redis';
+import {createClient} from '@redis/client';
 import {ArWallet, CustomSignature, Warp} from 'warp-contracts';
 
 export type CacheType = 'lmdb' | 'redis';
 
 export type HollowDbSdkArgs = {
-  signer: ArWallet | CustomSignature; // TODO
+  signer: ArWallet | CustomSignature;
   contractTxId: string;
   cacheType: CacheType;
   warp: Warp;

@@ -10,9 +10,10 @@ import {computeKey} from './utils/computeKey';
 import type {CacheType} from '../src/sdk/types';
 import {randomBytes} from 'crypto';
 import constants from './constants';
-import {createClient} from 'redis';
+import {createClient} from '@redis/client';
 import {globals} from '../jest.config.cjs';
 import {prepareAdmin, prepareSDK} from './utils';
+import {HollowDBState} from '../contracts/hollowDB/types';
 
 jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
@@ -94,7 +95,7 @@ describe('hollowdb', () => {
     });
 
     describe('admin operations', () => {
-      let verificationKey: object;
+      let verificationKey: HollowDBState['verificationKey'];
 
       beforeAll(() => {
         verificationKey = JSON.parse(

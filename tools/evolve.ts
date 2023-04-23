@@ -1,24 +1,19 @@
-import {WarpFactory} from 'warp-contracts';
+import {WarpFactory, JWKInterface} from 'warp-contracts';
 import {Admin} from '../src/sdk';
 import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
-import type {JWKInterface} from 'warp-contracts/lib/types/utils/types/arweave-types';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function evolve() {
-  let walletName: string;
-  let contractTxId: string;
-
-  if (process.argv.length === 4) {
-    walletName = process.argv[2];
-    contractTxId = process.argv[3];
-  } else {
+  if (process.argv.length !== 4) {
     throw new Error('Usage: yarn contract:evolve <wallet-name> <contract-tx-id>');
   }
+  const walletName = process.argv[2];
+  const contractTxId = process.argv[3];
 
   // read wallet
   const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';

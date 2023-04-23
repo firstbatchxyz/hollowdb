@@ -1,3 +1,6 @@
+import errors from '../errors';
+import type {HollowDBState} from '../types';
+
 /**
  * Verify a zero-knowledge proof.
  * @param proof a proof object
@@ -8,9 +11,15 @@
 export const verifyProof = async (
   proof: object,
   psignals: [curValueHash: bigint, nextValueHash: bigint, key: bigint],
-  verificationKey: object
+  verificationKey: HollowDBState['verificationKey']
 ): Promise<boolean> => {
-  return await SmartWeave.extensions.groth16.verify(verificationKey, psignals, proof);
+  if (verificationKey === null) {
+    throw errors.NoVerificationKeyError;
+  }
+  if (verificationKey.protocol !== 'groth16' && verificationKey.protocol !== 'plonk') {
+    throw errors.UnknownProofSystemError;
+  }
+  return await SmartWeave.extensions[verificationKey.protocol].verify(verificationKey, psignals, proof);
 };
 
 /**

@@ -1,6 +1,6 @@
-import {ArWallet, EvaluationManifest, JWKInterface, Warp} from 'warp-contracts';
+import {EvaluationManifest, JWKInterface, Warp} from 'warp-contracts';
 import {Base} from './base';
-import {HollowDBInput, HollowDBState} from '../../contracts/hollowDB/types';
+import type {HollowDBInput, HollowDBState} from '../../contracts/hollowDB/types';
 import type {HollowDbSdkArgs} from './types';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
@@ -16,10 +16,10 @@ export class Admin extends Base {
 
   /**
    * Sets the owner as the given wallet address.
-   * @param jwk wallet of the new owner
+   * @param newOwnerAddress address of the new owner, make sure that this is correct!
    */
-  async changeOwner(jwk: ArWallet) {
-    const newOwnerAddress = await this.warp.arweave.wallets.jwkToAddress(jwk);
+  async changeOwner(newOwnerAddress: HollowDBState['owner']) {
+    // TODO: add regex check for arweave & ethereum addresses
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
       data: {
@@ -34,7 +34,7 @@ export class Admin extends Base {
    * Updates the verification key.
    * @param verificationKey verification key
    */
-  async setVerificationKey(verificationKey: object) {
+  async setVerificationKey(verificationKey: HollowDBState['verificationKey']) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
       data: {
@@ -45,7 +45,7 @@ export class Admin extends Base {
     });
   }
 
-  async setWhitelistRequirement(isWhitelistRequired: {put: boolean; update: boolean}) {
+  async setWhitelistRequirement(isWhitelistRequired: HollowDBState['isWhitelistRequired']) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
       data: {
@@ -62,7 +62,7 @@ export class Admin extends Base {
    * - otherwise, proofs will be ignored
    * @param isProofRequired true if you want ZKP to be mandatory
    */
-  async setProofRequirement(isProofRequired: boolean) {
+  async setProofRequirement(isProofRequired: HollowDBState['isProofRequired']) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
       data: {

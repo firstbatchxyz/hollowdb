@@ -21,7 +21,7 @@ HollowDB has two modus operandi: **proofs** and **whitelisting**. Both can be en
 
   - Anyone can **read**.
   - To **put**, the user must have been whitelisted by the contract owner to do PUT operations.
-  - To **update** or **remove**, the user must have been whitelisted by the contract owner to do UPDATE operations. There is no additional whitelist for **remove** since it is equivalent to updating a value as `null`.
+  - To **update** or **remove**, the user must have been whitelisted by the contract owner to do UPDATE operations.
 
 The table below summarizes the requirements to make a transaction on HollowDB:
 

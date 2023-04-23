@@ -27,7 +27,7 @@ export type HollowDBInput =
  * HollowDB contract state.
  */
 export interface HollowDBState {
-  verificationKey: object;
+  verificationKey: (object & {protocol: ProofSystem}) | null;
   owner: string;
   isProofRequired: boolean;
   isWhitelistRequired: {
@@ -53,6 +53,11 @@ export type HollowDBAction<InputType> = {
   input: InputType;
   caller: string;
 };
+
+/**
+ * Protocol used in SnarkJS, can also be retrieved from `verificationKey.protocol`.
+ */
+export type ProofSystem = 'groth16' | 'plonk';
 
 /**
  * A result from a read request.

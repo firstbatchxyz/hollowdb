@@ -2,7 +2,7 @@ import type {HollowDBState} from '../contracts/hollowDB/types';
 
 const initialState: HollowDBState = {
   owner: '',
-  verificationKey: {},
+  verificationKey: null,
   isProofRequired: true,
   canEvolve: true,
   whitelist: {
