@@ -1,18 +1,22 @@
 import {ripemd160} from '@ethersproject/sha2';
 const snarkjs = require('snarkjs');
 
+export type ProofSystem = 'groth16' | 'plonk';
+
 export class Prover {
   private readonly wasmPath: string;
   private readonly proverKey: string;
+  public readonly proofSystem: ProofSystem;
 
   /**
    * Create a prover with the given WASM path and prover key path.
    * @param wasmPath path to the circuit's WASM file
    * @param proverKey path to the prover key
    */
-  constructor(wasmPath: string, proverKey: string) {
+  constructor(wasmPath: string, proverKey: string, proofSystem: ProofSystem) {
     this.wasmPath = wasmPath;
     this.proverKey = proverKey;
+    this.proofSystem = proofSystem;
   }
 
   /**
@@ -28,7 +32,7 @@ export class Prover {
     curValue: unknown | null,
     nextValue: unknown | null
   ): Promise<{proof: object; publicSignals: [curValueHashOut: string, nextValueHashOut: string, key: string]}> {
-    const fullProof = await snarkjs.groth16.fullProve(
+    const fullProof = await snarkjs[this.proofSystem].fullProve(
       // field names of this JSON object must match the input signal names of the circuit
       {
         preimage: preimage,

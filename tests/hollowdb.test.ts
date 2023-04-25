@@ -34,7 +34,7 @@ describe('hollowdb', () => {
 
     LoggerFactory.INST.logLevel('error');
     contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
-    prover = new Prover(constants.WASM_PATH, constants.PROVERKEY_PATH);
+    prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, 'groth16');
   });
 
   const tests: CacheType[] = ['lmdb', 'redis'];
@@ -42,6 +42,7 @@ describe('hollowdb', () => {
     let ownerAdmin: Admin;
     let ownerSDK: SDK;
     let aliceSDK: SDK;
+    let ownerAddress: string;
     let aliceAddress: string;
     let warp: Warp;
 
@@ -66,7 +67,7 @@ describe('hollowdb', () => {
         warp,
         true // bundling is disabled during testing
       );
-      console.log('Deployed contract: ', hollowDBTxId);
+      console.log('Deployed contract:', hollowDBTxId);
 
       // setup Redis if needed
       const redisClient =
@@ -80,6 +81,8 @@ describe('hollowdb', () => {
       ownerAdmin = prepareAdmin(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
       ownerSDK = prepareSDK(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
       aliceSDK = prepareSDK(cacheType, warp, hollowDBTxId, aliceWallet.jwk, redisClient);
+      ownerAddress = ownerWallet.address;
+      aliceAddress = aliceWallet.address;
 
       const contractTx = await warp.arweave.transactions.get(hollowDBTxId);
       expect(contractTx).not.toBeNull();
@@ -87,11 +90,11 @@ describe('hollowdb', () => {
 
     it('should succesfully deploy with correct state', async () => {
       const {cachedValue} = await ownerSDK.readState();
-      expect(cachedValue.state.verificationKey).toEqual({});
+      expect(cachedValue.state.verificationKey).toEqual(null);
       expect(cachedValue.state.isProofRequired).toEqual(true);
       expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
       expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
-      // expect(cachedValue.state.owner).toEqual(await warp.arweave.wallets.getAddress(ownerAdmin.signer));
+      expect(cachedValue.state.owner).toEqual(ownerAddress);
     });
 
     describe('admin operations', () => {
@@ -99,7 +102,7 @@ describe('hollowdb', () => {
 
       beforeAll(() => {
         verificationKey = JSON.parse(
-          fs.readFileSync(path.join(__dirname, '../circuits/hollow-authz/verification_key.json'), 'utf8')
+          fs.readFileSync(path.join(__dirname, '../' + constants.GROTH16_VERIFICATIONKEY_PATH), 'utf8')
         );
       });
 

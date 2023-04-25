@@ -1,5 +1,5 @@
 import {readFileSync} from 'fs';
-import {Prover} from './utils/prover';
+import {Prover, ProofSystem} from './utils/prover';
 import {computeKey} from './utils/computeKey';
 import constants from './constants';
 const snarkjs = require('snarkjs');
@@ -16,7 +16,7 @@ const newValue = {
   bar: false,
 };
 
-describe('hollowdb circuits', () => {
+describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits', proofSystem => {
   let prover: Prover;
   let verificationKey: object;
   let proof: object;
@@ -26,8 +26,13 @@ describe('hollowdb circuits', () => {
 
   beforeAll(async () => {
     // prepare prover and verification key
-    prover = new Prover(constants.WASM_PATH, constants.PROVERKEY_PATH);
-    verificationKey = JSON.parse(readFileSync(constants.VERIFICATIONKEY_PATH).toString());
+    if (proofSystem === 'groth16') {
+      prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, proofSystem);
+      verificationKey = JSON.parse(readFileSync(constants.GROTH16_VERIFICATIONKEY_PATH).toString());
+    } else {
+      prover = new Prover(constants.PLONK_WASM_PATH, constants.PLONK_PROVERKEY_PATH, proofSystem);
+      verificationKey = JSON.parse(readFileSync(constants.PLONK_VERIFICATIONKEY_PATH).toString());
+    }
 
     // generate a proof
     const fullProof = await prover.generateProof(preimage, curValue, newValue);
@@ -40,8 +45,8 @@ describe('hollowdb circuits', () => {
     expect(correctKey).toEqual(computeKey(preimage));
   });
 
-  it('should verify proof', async () => {
-    const result = await snarkjs.groth16.verify(
+  it('should verify proof (' + proofSystem + ')', async () => {
+    const result = await snarkjs[proofSystem].verify(
       verificationKey,
       [correctCurValueHash, correctNewValueHash, correctKey],
       proof
@@ -50,17 +55,25 @@ describe('hollowdb circuits', () => {
   });
 
   it('should NOT verify proof with wrong current value', async () => {
-    const result = await snarkjs.groth16.verify(verificationKey, ['12345', correctNewValueHash, correctKey], proof);
+    const result = await snarkjs[proofSystem].verify(
+      verificationKey,
+      ['12345', correctNewValueHash, correctKey],
+      proof
+    );
     expect(result).toEqual(false);
   });
 
   it('should NOT verify proof with wrong new value', async () => {
-    const result = await snarkjs.groth16.verify(verificationKey, [correctCurValueHash, '12345', correctKey], proof);
+    const result = await snarkjs[proofSystem].verify(
+      verificationKey,
+      [correctCurValueHash, '12345', correctKey],
+      proof
+    );
     expect(result).toEqual(false);
   });
 
   it('should NOT verify proof with wrong key', async () => {
-    const result = await snarkjs.groth16.verify(
+    const result = await snarkjs[proofSystem].verify(
       verificationKey,
       [correctCurValueHash, correctNewValueHash, '12345'],
       proof
