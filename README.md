@@ -145,21 +145,15 @@ await admin.addUsersToWhitelist([aliceAddr, bobAddr], 'put');
 await admin.removeUsersFromWhitelist([bobAddr], 'put');
 ```
 
-### Building & deploying the contract
+### Contract Operations
 
-The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. To build your contract, a shorthand script is provided within this repository:
+We do not immediately provide contract operations from the package; however, if you are to clone the repository you will find the following utility scripts:
 
-```sh
-yarn contract:build
-```
+- `yarn contract:build` will build the contract from source. The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. This will generate the built contract under `build/hollowDB/contract.js`.
 
-This will generate the built contract under `build/hollowDB/contract.js`. To deploy this contract, you need an Arweave wallet. Download your wallet as JWK and save it under [config/wallet](./config/wallet/) folder. Afterwards, use the following script:
+- `yarn contract:deploy <wallet-name>` will deploy your contract, where it will look for an Arweave wallet at `./config/wallet/wallet-name.json`. If no wallet name is provided, `wallet-main` is used by default.
 
-```bash
-yarn contract:deploy <wallet-name>
-```
-
-This runs the deployment code under the [tools](./src/tools/) folder, which internally uses the static deploy function of the `Admin` toolkit. It will use the wallet `./config/wallet/<wallet-name>.json` with `wallet-main` as the default name.
+- `yarn contract:evolve <wallet-name> <contract-tx-id>` will evolve your contract, it takes a wallet name and the contract txId of the old contract.
 
 ### Values larger than 2KB
 
@@ -179,33 +173,44 @@ As shown above, all inputs are secret for HollowDB prover, although `curHash` an
 
 ### Generating Proofs
 
-**TODO TODO**
-
-You can obtain the necessary files from this repository:
-
-- [WASM Circuit](./circuits/hollow-authz/hollow-authz.wasm): required by the Prover
-- [Prover Key](./circuits/hollow-authz/prover_key.zkey): required by the Prover
-- [Verification Key](./circuits/hollow-authz/verification_key.json): required by the contract if you would like to write your own
+To generate proofs, you need a WASM circuit file and a prover key. To verify them, you need the verification key. All of these can be found under the [circuits](./circuits/) folder, for both Groth16 and PLONK proof systems! You can use the snippet below to create a prover class that can generate proofs for HollowDB:
 
 ```ts
 import {ripemd160} from '@ethersproject/sha2';
 const snarkjs = require('snarkjs');
 
+export type ProofSystem = 'groth16' | 'plonk';
+
 export class Prover {
   private readonly wasmPath: string;
   private readonly proverKey: string;
-  constructor(wasmPath: string, proverKey: string) {
+  public readonly proofSystem: ProofSystem;
+
+  /**
+   * Create a prover with the given WASM path and prover key path.
+   * @param wasmPath path to the circuit's WASM file
+   * @param proverKey path to the prover key
+   */
+  constructor(wasmPath: string, proverKey: string, proofSystem: ProofSystem) {
     this.wasmPath = wasmPath;
     this.proverKey = proverKey;
+    this.proofSystem = proofSystem;
   }
 
+  /**
+   * Generate a proof for HollowDB.
+   * If a value is given as null, it will be put as 0 in the proof.
+   * @param preimage preimage of the key to be written at
+   * @param curValue value currently stored
+   * @param nextValue new value to be stored
+   * @returns a fullProof object with the proof and public signals
+   */
   async generateProof(
     preimage: bigint,
     curValue: unknown | null,
     nextValue: unknown | null
   ): Promise<{proof: object; publicSignals: [curValueHashOut: string, nextValueHashOut: string, key: string]}> {
-    const fullProof = await snarkjs.groth16.fullProve(
-      // field names of this JSON object must match the input signal names of the circuit
+    const fullProof = await snarkjs[this.proofSystem].fullProve(
       {
         preimage: preimage,
         curValueHash: curValue ? this.valueToBigInt(curValue) : 0n,
@@ -217,6 +222,13 @@ export class Prover {
     return fullProof;
   }
 
+  /**
+   * Convert a value into bigint using `ripemd160`.
+   * - `ripemd160` outputs a hex string, which can be converted into a `bigint`.
+   * - Since the result is 160 bits, it is for sure within the finite field of BN128.
+   * @see https://docs.circom.io/background/background/#signals-of-a-circuit
+   * @param value any kind of value
+   */
   valueToBigInt = (value: unknown): bigint => {
     return BigInt(ripemd160(Buffer.from(JSON.stringify(value))));
   };

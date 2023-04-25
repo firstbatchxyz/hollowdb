@@ -34,11 +34,13 @@ export class Base {
             ...defaultCacheOptions,
             dbLocation: './cache/warp/state',
           },
+
           limitOptions
         ),
         redis: new RedisCache({
           client: args.redisClient!,
           prefix: `${args.contractTxId}.state`,
+          allowAtomics: false,
           ...limitOptions,
         }),
       }[args.cacheType];
@@ -62,11 +64,13 @@ export class Base {
           definition: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.contract`,
+            allowAtomics: false,
             ...limitOptions,
           }),
           src: new RedisCache({
             client: args.redisClient!,
             prefix: `${args.contractTxId}.src`,
+            allowAtomics: false,
             ...limitOptions,
           }),
         },
@@ -85,6 +89,7 @@ export class Base {
         new RedisCache({
           client: args.redisClient!,
           prefix: `${args.contractTxId}.${contractTxId}`,
+          allowAtomics: false,
         }),
     }[args.cacheType];
     warp = warp.useKVStorageFactory(kvStorageFactory);

@@ -12,6 +12,7 @@ export class Prover {
    * Create a prover with the given WASM path and prover key path.
    * @param wasmPath path to the circuit's WASM file
    * @param proverKey path to the prover key
+   * @param proofSystem underlying proof system
    */
   constructor(wasmPath: string, proverKey: string, proofSystem: ProofSystem) {
     this.wasmPath = wasmPath;
