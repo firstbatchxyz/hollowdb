@@ -4,11 +4,16 @@ import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
 import fs from 'fs';
 import path from 'path';
-import {SDK, Admin, Prover, computeKey} from '../src';
+import {SDK, Admin} from '../src';
+import {Prover} from './utils/prover';
+import {computeKey} from './utils/computeKey';
 import type {CacheType} from '../src/sdk/types';
 import {randomBytes} from 'crypto';
-import {prepareSDKs} from './utils';
 import constants from './constants';
+import {createClient} from '@redis/client';
+import {globals} from '../jest.config.cjs';
+import {prepareAdmin, prepareSDK} from './utils';
+import {HollowDBState} from '../contracts/hollowDB/types';
 
 jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
@@ -28,16 +33,17 @@ describe('hollowdb', () => {
     await arlocal.start();
 
     LoggerFactory.INST.logLevel('error');
-
     contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
-
-    prover = new Prover(constants.WASM_PATH, constants.PROVERKEY_PATH);
+    prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, 'groth16');
   });
 
-  describe.each<CacheType>(['lmdb', 'redis'])('using %s cache, proofs enabled', cacheType => {
+  const tests: CacheType[] = ['lmdb', 'redis'];
+  describe.each<CacheType>(tests)('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin;
     let ownerSDK: SDK;
     let aliceSDK: SDK;
+    let ownerAddress: string;
+    let aliceAddress: string;
     let warp: Warp;
 
     const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
@@ -61,10 +67,22 @@ describe('hollowdb', () => {
         warp,
         true // bundling is disabled during testing
       );
-      console.log('Deployed contract: ', hollowDBTxId);
+      console.log('Deployed contract:', hollowDBTxId);
+
+      // setup Redis if needed
+      const redisClient =
+        cacheType === 'redis'
+          ? createClient({
+              url: globals.__REDIS_URL__,
+            })
+          : undefined;
 
       // prepare SDKs
-      [ownerAdmin, ownerSDK, aliceSDK] = prepareSDKs(cacheType, warp, hollowDBTxId, ownerWallet.jwk, aliceWallet.jwk);
+      ownerAdmin = prepareAdmin(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
+      ownerSDK = prepareSDK(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
+      aliceSDK = prepareSDK(cacheType, warp, hollowDBTxId, aliceWallet.jwk, redisClient);
+      ownerAddress = ownerWallet.address;
+      aliceAddress = aliceWallet.address;
 
       const contractTx = await warp.arweave.transactions.get(hollowDBTxId);
       expect(contractTx).not.toBeNull();
@@ -72,19 +90,19 @@ describe('hollowdb', () => {
 
     it('should succesfully deploy with correct state', async () => {
       const {cachedValue} = await ownerSDK.readState();
-      expect(cachedValue.state.verificationKey).toEqual({});
+      expect(cachedValue.state.verificationKey).toEqual(null);
       expect(cachedValue.state.isProofRequired).toEqual(true);
       expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
       expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
-      expect(cachedValue.state.owner).toEqual(await warp.arweave.wallets.getAddress(ownerAdmin.jwk));
+      expect(cachedValue.state.owner).toEqual(ownerAddress);
     });
 
     describe('admin operations', () => {
-      let verificationKey: object;
+      let verificationKey: HollowDBState['verificationKey'];
 
       beforeAll(() => {
         verificationKey = JSON.parse(
-          fs.readFileSync(path.join(__dirname, '../circuits/hollow-authz/verification_key.json'), 'utf8')
+          fs.readFileSync(path.join(__dirname, '../' + constants.GROTH16_VERIFICATIONKEY_PATH), 'utf8')
         );
       });
 
@@ -233,8 +251,6 @@ describe('hollowdb', () => {
       });
 
       describe('tests with whitelisting', () => {
-        let aliceAddress: string;
-
         const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
         const KEY = computeKey(KEY_PREIMAGE);
         const VALUE_TX = randomBytes(10).toString('hex');
@@ -252,9 +268,6 @@ describe('hollowdb', () => {
           const {cachedValue: newCachedValue} = await ownerSDK.readState();
           expect(newCachedValue.state.isWhitelistRequired.put).toEqual(true);
           expect(newCachedValue.state.isWhitelistRequired.update).toEqual(true);
-
-          // get address of user to be whitelisted
-          aliceAddress = await warp.arweave.wallets.getAddress(aliceSDK.jwk);
         });
 
         it('should NOT put/update/remove when NOT whitelisted', async () => {

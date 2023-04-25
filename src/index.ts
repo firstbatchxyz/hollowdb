@@ -1,3 +1,2 @@
-export {SDK, Admin, computeKey} from './sdk';
-export {Prover} from './prover';
+export {SDK, Admin} from './sdk';
 export type {HollowDbSdkArgs, CacheType} from './sdk';

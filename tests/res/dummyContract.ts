@@ -1,4 +1,5 @@
-const dummyContractSource = `
+// eslint-disable-next-line @typescript-eslint/no-inferrable-types
+const dummyContractSource: string = `
 // contracts/hollowDB/actions/read/get.ts
 var get = async (state, action) => {
   const {key} = action.input.data;
