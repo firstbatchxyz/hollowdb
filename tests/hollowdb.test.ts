@@ -37,7 +37,7 @@ describe('hollowdb', () => {
     prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, 'groth16');
   });
 
-  const tests: CacheType[] = ['lmdb', 'redis'];
+  const tests: CacheType[] = ['lmdb', 'redis', 'default'];
   describe.each<CacheType>(tests)('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin;
     let ownerSDK: SDK;

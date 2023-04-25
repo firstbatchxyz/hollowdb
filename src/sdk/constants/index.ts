@@ -9,6 +9,10 @@ const constants = {
       minEntriesPerContract: 10,
       maxEntriesPerContract: 100,
     },
+    default: {
+      minEntriesPerContract: 10,
+      maxEntriesPerContract: 100,
+    },
   },
 };
 
