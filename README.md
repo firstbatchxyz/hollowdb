@@ -55,10 +55,10 @@ import {WarpFactory} from 'warp-contracts';
 
 const warp = WarpFactory.forMainnet();
 const args: HollowDbSdkArgs = {
-  signer, // a wallet
-  contractTxId, // contract to connect to
-  cacheType, // lmdb or redis
-  warp, // mainnet, testnet, or local
+  signer,
+  contractTxId,
+  cacheType,
+  warp,
 };
 const sdk = new SDK(args);
 const admin = new Admin(args);
@@ -66,9 +66,9 @@ const admin = new Admin(args);
 
 As shown in example, you must provide the 4 required arguments to Admin or SDK:
 
-- `signer`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you `.gitignore` your wallet files!
+- `signer`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you `.gitignore` your wallet files! You can also provide a CustomSignature here, such as your EVM wallet.
 - `contractTxId`: the transaction id of the contract. You can connect to an existing contract, or deploy one of your own and provide it's id here.
-- `cacheType`: type of cache to be used, i.e. `lmdb` or `redis`.
+- `cacheType`: type of cache to be used, i.e. `lmdb` or `redis`. You can also leave this as `default` to use the underlying cache, which is LevelDB for NodeJS and IndexedDB for browser.
   - if this is `redis`, then you must also provide a Redis client object via `redisClient` argument.
   - you can enable contract & state caching with the optional boolean arguments `useContractCache` and `useStateCache`; both are falsy by default.
   - you can specify a `limitOptions` object with the fields `minEntriesPerContract` and `maxEntriesPerContract` that specify a limit of [sortKey](https://academy.warp.cc/docs/sdk/advanced/bundled-interaction#1-generates-a-sort-key) caches per key.

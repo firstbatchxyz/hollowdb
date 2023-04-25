@@ -4,7 +4,7 @@ import {RedisCache} from 'warp-contracts-redis';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {HollowDBState} from '../../contracts/hollowDB/types';
-import type {HollowDbSdkArgs} from './types';
+import type {CacheType, HollowDbSdkArgs} from './types';
 import constants from './constants';
 
 export class Base {
@@ -13,10 +13,12 @@ export class Base {
   readonly hollowDB: Contract<HollowDBState>;
   readonly contractTxId: string;
   readonly signer: ArWallet | CustomSignature;
+  readonly cacheType: CacheType;
 
   constructor(args: HollowDbSdkArgs) {
     this.signer = args.signer;
     this.contractTxId = args.contractTxId;
+    this.cacheType = args.cacheType;
     const limitOptions = args.limitOptions || constants.DEFAULT_LIMIT_OPTS[args.cacheType];
 
     // check redis
@@ -27,7 +29,7 @@ export class Base {
     let warp = args.warp;
 
     // State Cache extension is recommended
-    if (args.useStateCache) {
+    if (args.useStateCache && args.cacheType !== 'default') {
       const stateCache = {
         lmdb: new LmdbCache(
           {
@@ -48,7 +50,7 @@ export class Base {
     }
 
     // ContractCache extension is recommended
-    if (args.useContractCache) {
+    if (args.useContractCache && args.cacheType !== 'default') {
       const contractCache = {
         lmdb: {
           definition: new LmdbCache({
@@ -78,21 +80,22 @@ export class Base {
       warp = warp.useContractCache(contractCache.definition, contractCache.src);
     }
 
-    // KV Storage extension is required
-    const kvStorageFactory = {
-      lmdb: (contractTxId: string) =>
-        new LmdbCache({
-          ...defaultCacheOptions,
-          dbLocation: `./cache/warp/kv/lmdb_2/${contractTxId}`,
-        }),
-      redis: (contractTxId: string) =>
-        new RedisCache({
-          client: args.redisClient!,
-          prefix: `${args.contractTxId}.${contractTxId}`,
-          allowAtomics: false,
-        }),
-    }[args.cacheType];
-    warp = warp.useKVStorageFactory(kvStorageFactory);
+    if (args.cacheType !== 'default') {
+      const kvStorageFactory = {
+        lmdb: (contractTxId: string) =>
+          new LmdbCache({
+            ...defaultCacheOptions,
+            dbLocation: `./cache/warp/kv/lmdb_2/${contractTxId}`,
+          }),
+        redis: (contractTxId: string) =>
+          new RedisCache({
+            client: args.redisClient!,
+            prefix: `${args.contractTxId}.${contractTxId}`,
+            allowAtomics: false,
+          }),
+      }[args.cacheType];
+      warp = warp.useKVStorageFactory(kvStorageFactory);
+    }
 
     // SnarkJS extension is required for proof verification
     warp = warp.use(new SnarkjsExtension());
