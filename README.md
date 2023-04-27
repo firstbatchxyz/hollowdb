@@ -149,7 +149,7 @@ await admin.removeUsersFromWhitelist([bobAddr], 'put');
 
 We do not immediately provide contract operations from the package; however, if you are to clone the repository you will find the following utility scripts:
 
-- `yarn contract:build` will build the contract from source. The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. This will generate the built contract under `build/hollowDB/contract.js`.
+- `yarn contract:build` will build the contract from source. The contract is written in TypeScript, but to deploy using Warp you require the JS implementation, for which we use ESBuild. This will generate the built contract under `build/hollowDB/contract.js`. Node version ">=18" is needed.
 
 - `yarn contract:deploy <wallet-name>` will deploy your contract, where it will look for an Arweave wallet at `./config/wallet/wallet-name.json`. If no wallet name is provided, `wallet-main` is used by default.
 
@@ -252,6 +252,21 @@ webpack: (config, { isServer }) => {
   config.experiments = { asyncWebAssembly: true };
   return config;
 },
+```
+
+## Examples
+
+There are various examples to demonstrate the basic operations of the HollowDB. A jwk must be provided inside the examples/config/wallet.js file to run.
+
+Check out the example.js and exampleBundlr.js and configure the variables. To run:
+
+```sh
+# go to examples folder
+cd examples
+# install dependencies
+yarn install
+#
+node example
 ```
 
 ## Testing
