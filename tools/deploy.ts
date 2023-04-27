@@ -9,10 +9,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
-  if (process.argv.length !== 3) {
-    throw new Error('Usage: yarn contract:deploy <wallet-name>');
+  let walletName = 'wallet-main';
+  if (process.argv.length === 3) {
+    walletName = process.argv[2];
   }
-  const walletName: string = process.argv[2];
 
   // read wallet
   const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
