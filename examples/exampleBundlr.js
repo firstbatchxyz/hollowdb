@@ -1,6 +1,12 @@
-const {SDK, computeKey} = require('hollowdb');
+const {SDK} = require('hollowdb');
 const {WarpFactory} = require('warp-contracts');
+const {poseidon1} = require('poseidon-lite') ;
+const {jwk} = require('./config/wallet');
 const Bundlr = require('@bundlr-network/client');
+
+function computeKey(preimage) {
+  return poseidon1([preimage]).toString();
+}
 
 // for more information on bundlr, visit https://bundlr.network
 async function upload(jwk, payload) {
@@ -26,24 +32,31 @@ async function upload(jwk, payload) {
 }
 
 async function main() {
-  // your wallet, probably read from disk in a .gitignore'd folder!
-  const jwk = {
-    /*your wallet here*/
-  };
-
-  // create a warp instance for hollowdb
+    /* either put your jwk in config/wallet folder (see line 4)
+    or write it inside a variable in this file below */ 
+  // const jwk = {};
+    
+  // create a warp instance on mainnet for hollowdb
   const warp = WarpFactory.forMainnet();
+
+  /* To deploy a hollowDB contract run yarn contract:deploy in the root directory. 
+     but don't forget to put your wallet inside the config/wallet folder */
+
+  // paste contract tx id here
+  const contractTxId= '';
 
   // create a hollowdb instance
   const db = new SDK({
     warp: warp,
-    contractTxId: 'your-contract-txid-here',
-    jwk: jwk,
+    contractTxId: contractTxId,
+    signer: jwk,
     cacheType: 'lmdb',
-  });
+  }); 
 
-  // your key, as a hash of your secret
-  const key = computeKey('your-secret');
+  // create a secret, this can be a signature/number or anything you want
+  const secret = BigInt(321);
+  // prepare your key, as a hash of your secret
+  const key = computeKey(secret);
 
   // perhaps a much larger payload, more than 2KB in particular!
   const payload = {
