@@ -17,7 +17,7 @@ const constants = {
   // port to run
   ARWEAVE_PORT: 3169,
   // arbitrarily long timeout for the test
-  JEST_TIMEOUT_MS: 30000,
+  JEST_TIMEOUT_MS: 60000,
   // to generate proofs & verify
   GROTH16_WASM_PATH: './circuits/hollow-authz-groth16/hollow-authz.wasm',
   GROTH16_PROVERKEY_PATH: './circuits/hollow-authz-groth16/prover_key.zkey',

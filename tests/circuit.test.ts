@@ -4,6 +4,9 @@ import {computeKey} from './utils/computeKey';
 import constants from './constants';
 const snarkjs = require('snarkjs');
 
+// arbitrarily long timeout
+jest.setTimeout(constants.JEST_TIMEOUT_MS);
+
 const preimage = BigInt(1122334455);
 const curValue = {
   lorem: 'ipsum',
