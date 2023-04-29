@@ -1,5 +1,5 @@
 import {WarpFactory, JWKInterface} from 'warp-contracts';
-import {Admin} from '../src/sdk';
+import {Admin} from '../src/';
 import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
