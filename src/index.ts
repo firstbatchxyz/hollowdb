@@ -1,2 +1,2 @@
-export {SDK, Admin} from './sdk';
-export type {HollowDbSdkArgs, CacheType} from './sdk';
+export {SDK} from './sdk';
+export {Admin} from './admin';

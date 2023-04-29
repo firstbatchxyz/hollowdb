@@ -66,12 +66,7 @@ describe('hollowdb evolve', () => {
     );
 
     // create new SDK
-    const ownerSDK = new SDK({
-      signer: ownerJWK,
-      contractTxId: newContractTxId,
-      cacheType: 'lmdb',
-      warp,
-    });
+    const ownerSDK = new SDK(ownerJWK, newContractTxId, warp);
 
     // state should have the new source id within its "evolve" field
     const {cachedValue} = await ownerSDK.readState();

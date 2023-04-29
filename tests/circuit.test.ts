@@ -16,7 +16,7 @@ const newValue = {
   bar: false,
 };
 
-describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits', proofSystem => {
+describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits (%s)', proofSystem => {
   let prover: Prover;
   let verificationKey: object;
   let proof: object;
@@ -45,7 +45,7 @@ describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits', proofSyste
     expect(correctKey).toEqual(computeKey(preimage));
   });
 
-  it('should verify proof (' + proofSystem + ')', async () => {
+  it('should verify proof', async () => {
     const result = await snarkjs[proofSystem].verify(
       verificationKey,
       [correctCurValueHash, correctNewValueHash, correctKey],

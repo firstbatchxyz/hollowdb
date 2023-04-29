@@ -1,18 +1,11 @@
-import {HollowDBInput} from '../../contracts/hollowDB/types';
+import {HollowDBInput} from '../contracts/hollowDB/types';
 import {Base} from './base';
-import type {HollowDbSdkArgs} from './types';
-export {Admin} from './admin';
-export type {HollowDbSdkArgs, CacheType} from './types';
 
 /**
  * HollowDB function wrappers, exposing basic key-value database
  * functions.
  */
 export class SDK extends Base {
-  constructor(args: HollowDbSdkArgs) {
-    super(args);
-  }
-
   /**
    * Returns the value of the given key.
    * @param key The key of the value to be returned.
@@ -40,6 +33,16 @@ export class SDK extends Base {
    */
   async getMany(keys: string[]) {
     return await Promise.all(keys.map(async key => this.get(key)));
+  }
+
+  /**
+   * Alternative method of getting key values.
+   * Uses the underlying `getStorageValues` function.
+   * @param keys The keys of the values to be returned.
+   * @returns The values of the given keys.
+   */
+  async getStorageValues(keys: string[]) {
+    return await this.hollowDB.getStorageValues(keys);
   }
 
   /**

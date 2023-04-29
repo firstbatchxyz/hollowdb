@@ -45,8 +45,8 @@ npm install hollowdb
 
 HollowDB exposes the following:
 
-- an `SDK` class to allow ease of development with its functionalities
-- an `Admin` class that handles higher authorized operations.
+- an `SDK` class that exposes basic operations, such as CRUD.
+- an `Admin` class that additionally exposes higher authorized operations, such as state updates and ownership changes.
 
 ```ts
 import {SDK, Admin} from 'hollowdb';
@@ -54,34 +54,15 @@ import type {HollowDbSdkArgs} from 'hollowdb';
 import {WarpFactory} from 'warp-contracts';
 
 const warp = WarpFactory.forMainnet();
-const args: HollowDbSdkArgs = {
-  signer,
-  contractTxId,
-  cacheType,
-  warp,
-};
-const sdk = new SDK(args);
-const admin = new Admin(args);
+const sdk = new SDK(signer, contractTxId, warp);
+const admin = new Admin(signer, contractTxId, warp);
 ```
 
 As shown in example, you must provide the 4 required arguments to Admin or SDK:
 
 - `signer`: your wallet, possibly read from disk in JSON format, or given in code. Make sure you `.gitignore` your wallet files! You can also provide a CustomSignature here, such as your EVM wallet.
 - `contractTxId`: the transaction id of the contract. You can connect to an existing contract, or deploy one of your own and provide it's id here.
-- `cacheType`: type of cache to be used, i.e. `lmdb` or `redis`. You can also leave this as `default` to use the underlying cache, which is LevelDB for NodeJS and IndexedDB for browser.
-  - if this is `redis`, then you must also provide a Redis client object via `redisClient` argument.
-  - you can enable contract & state caching with the optional boolean arguments `useContractCache` and `useStateCache`; both are falsy by default.
-  - you can specify a `limitOptions` object with the fields `minEntriesPerContract` and `maxEntriesPerContract` that specify a limit of [sortKey](https://academy.warp.cc/docs/sdk/advanced/bundled-interaction#1-generates-a-sort-key) caches per key.
 - `warp`: the Warp instance to be used, could be for mainnet, testnet or local.
-
-You can also provide the following optional arguments:
-
-- `useStateCache` enables state cache, falsy by default.
-- `useContractCache` enables state cache, falsy by default.
-- `limitOptions` overrides the cache limit settings, it has two properties:
-  - `minEntriesPerContract` defines the minimum number of keys to be stored (default 10)
-  - `maxEntriesPerContract` defines the maximum number of keys to be stored (default 100)
-  - after `max` is reach, `max-min` oldest keys are deleted, thus `min` many keys remain in the cache
 
 ### SDK Operations
 
@@ -162,6 +143,80 @@ Currently [Warp Contracts](https://warp.cc/) only support transactions that are 
 In other words, you will store `key, valueTxId` instead of `key, value`! This will enable you to store arbitary amounts of data, and retrieve them with respect to their transaction ids, also while reducing the overall size of the contract.
 
 We use such an approach in our [HollowDB gRPC server](https://github.com/firstbatchxyz/HollowDB-grpc), for more details please refer to [this document](https://github.com/firstbatchxyz/HollowDB-grpc/blob/master/docs/bundlr.md).
+
+### Caching Options
+
+Warp allows additional cache types, such as `useStateCache` and `useContractCache`; as well as overriding the underlying key-value storage. For all of these, you can pass in [LMDB](https://www.npmjs.com/package/warp-contracts-lmdb) or [Redis](https://www.npmjs.com/package/warp-contracts-redis) caches made for Warp.
+
+You can do this as shown below, and you just have to pass in the resulting `warp` instance to HollowDB.
+
+```ts
+import {defaultCacheOptions} from 'warp-contracts';
+import {LmdbCache} from 'warp-contracts-lmdb';
+import {RedisCache} from 'warp-contracts-redis';
+
+// using LMDB
+warp
+  .useStateCache(
+    new LmdbCache(
+      {
+        ...defaultCacheOptions,
+        dbLocation: './cache/warp/state',
+      },
+      LIMIT_OPTS
+    )
+  )
+  .useContractCache(
+    new LmdbCache({
+      ...defaultCacheOptions,
+      dbLocation: './cache/warp/contract',
+    }),
+    new LmdbCache({
+      ...defaultCacheOptions,
+      dbLocation: './cache/warp/src',
+    })
+  )
+  .useKVStorageFactory(
+    (contractTxId: string) =>
+      new LmdbCache({
+        ...defaultCacheOptions,
+        dbLocation: `./cache/warp/kv/lmdb_2/${contractTxId}`,
+      })
+  );
+
+// or using Redis
+warp
+  .useStateCache(
+    new RedisCache({
+      client: redisClient,
+      prefix: `${hollowDBTxId}.state`,
+      allowAtomics: false,
+      ...LIMIT_OPTS,
+    })
+  )
+  .useContractCache(
+    new RedisCache({
+      client: redisClient,
+      prefix: `${hollowDBTxId}.contract`,
+      allowAtomics: false,
+      ...LIMIT_OPTS,
+    }),
+    new RedisCache({
+      client: redisClient,
+      prefix: `${hollowDBTxId}.src`,
+      allowAtomics: false,
+      ...LIMIT_OPTS,
+    })
+  )
+  .useKVStorageFactory(
+    (contractTxId: string) =>
+      new RedisCache({
+        client: redisClient,
+        prefix: `${hollowDBTxId}.${contractTxId}`,
+        allowAtomics: false,
+      })
+  );
+```
 
 ## Zero-Knowledge Proofs
 
@@ -280,7 +335,7 @@ yarn test
 yarn test <path>
 ```
 
-The test will run for both LMDB cache and Redis cache. For Redis, you need to have a server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
+The test will run for both LMDB cache and Redis cache. For Redis tests to pass, you need to have a Redis server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
 
 ## Styling
 

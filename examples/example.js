@@ -1,6 +1,6 @@
 const {SDK} = require('hollowdb');
 const {WarpFactory} = require('warp-contracts');
-const {poseidon1} = require('poseidon-lite') ;
+const {poseidon1} = require('poseidon-lite');
 const {jwk} = require('./config/wallet');
 
 function computeKey(preimage) {
@@ -9,9 +9,9 @@ function computeKey(preimage) {
 
 async function main() {
   /* either put your jwk in config/wallet folder (see line 4)
-    or write it inside a variable in this file below */ 
+    or write it inside a variable in this file below */
   // const jwk = {};
-    
+
   // create a warp instance on mainnet for hollowdb
   const warp = WarpFactory.forMainnet();
 
@@ -19,21 +19,16 @@ async function main() {
      but don't forget to put your wallet inside the config/wallet folder */
 
   // paste contract tx id here
-  const contractTxId= '';
+  const contractTxId = '';
 
   // create a hollowdb instance
-  const db = new SDK({
-    warp: warp,
-    contractTxId: contractTxId,
-    signer: jwk,
-    cacheType: 'lmdb',
-  }); 
+  const db = new SDK(jwk, contractTxId, warp);
 
   // create a secret, this can be a signature/number or anything you want
   const secret = BigInt(123);
   // prepare your key, as a hash of your secret
   const key = computeKey(secret);
- 
+
   // value can be anything you want to store, but it must not exceed 2kb
   // if you need to store more than 2kb, you can use bundlr to store the data on arweave and store the txid in hollowdb
   const payload = {

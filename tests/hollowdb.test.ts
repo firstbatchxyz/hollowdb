@@ -1,5 +1,5 @@
 import ArLocal from 'arlocal';
-import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
+import {LoggerFactory, Warp, WarpFactory, defaultCacheOptions} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
 import fs from 'fs';
@@ -7,13 +7,13 @@ import path from 'path';
 import {SDK, Admin} from '../src';
 import {Prover} from './utils/prover';
 import {computeKey} from './utils/computeKey';
-import type {CacheType} from '../src/sdk/types';
 import {randomBytes} from 'crypto';
 import constants from './constants';
 import {createClient} from '@redis/client';
 import {globals} from '../jest.config.cjs';
-import {prepareAdmin, prepareSDK} from './utils';
 import {HollowDBState} from '../contracts/hollowDB/types';
+import {LmdbCache} from 'warp-contracts-lmdb';
+import {RedisCache} from 'warp-contracts-redis';
 
 jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
@@ -37,19 +37,21 @@ describe('hollowdb', () => {
     prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, 'groth16');
   });
 
-  const tests: CacheType[] = ['lmdb', 'redis', 'default'];
-  describe.each<CacheType>(tests)('using %s cache, proofs enabled', cacheType => {
+  const tests = ['lmdb', 'redis', 'default'] as const;
+  describe.each(tests)('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin;
-    let ownerSDK: SDK;
     let aliceSDK: SDK;
     let ownerAddress: string;
     let aliceAddress: string;
     let warp: Warp;
 
+    const LIMIT_OPTS = constants.DEFAULT_LIMIT_OPTS[cacheType];
     const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
     const KEY = computeKey(KEY_PREIMAGE);
     const VALUE_TX = randomBytes(10).toString('hex');
     const NEXT_VALUE_TX = randomBytes(10).toString('hex');
+    const USE_CONTRACT_CACHE = false; // optional
+    const USE_STATE_CACHE = false; // optional
 
     beforeAll(async () => {
       // setup warp factory for local arweave
@@ -69,7 +71,7 @@ describe('hollowdb', () => {
       );
       console.log('Deployed contract:', hollowDBTxId);
 
-      // setup Redis if needed
+      // setup Redis client if needed
       const redisClient =
         cacheType === 'redis'
           ? createClient({
@@ -77,10 +79,85 @@ describe('hollowdb', () => {
             })
           : undefined;
 
-      // prepare SDKs
-      ownerAdmin = prepareAdmin(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
-      ownerSDK = prepareSDK(cacheType, warp, hollowDBTxId, ownerWallet.jwk, redisClient);
-      aliceSDK = prepareSDK(cacheType, warp, hollowDBTxId, aliceWallet.jwk, redisClient);
+      // state cache overrides
+      if (USE_STATE_CACHE) {
+        if (cacheType === 'lmdb') {
+          warp = warp.useStateCache(
+            new LmdbCache(
+              {
+                ...defaultCacheOptions,
+                dbLocation: './cache/warp/state',
+              },
+
+              LIMIT_OPTS
+            )
+          );
+        } else if (cacheType === 'redis') {
+          warp = warp.useStateCache(
+            new RedisCache({
+              client: redisClient,
+              prefix: `${hollowDBTxId}.state`,
+              allowAtomics: false,
+              ...LIMIT_OPTS,
+            })
+          );
+        }
+      }
+
+      // contract cache overrides
+      if (USE_CONTRACT_CACHE) {
+        if (cacheType === 'lmdb') {
+          warp = warp.useContractCache(
+            new LmdbCache({
+              ...defaultCacheOptions,
+              dbLocation: './cache/warp/contract',
+            }),
+            new LmdbCache({
+              ...defaultCacheOptions,
+              dbLocation: './cache/warp/src',
+            })
+          );
+        } else if (cacheType === 'redis') {
+          warp = warp.useContractCache(
+            new RedisCache({
+              client: redisClient,
+              prefix: `${hollowDBTxId}.contract`,
+              allowAtomics: false,
+              ...LIMIT_OPTS,
+            }),
+            new RedisCache({
+              client: redisClient,
+              prefix: `${hollowDBTxId}.src`,
+              allowAtomics: false,
+              ...LIMIT_OPTS,
+            })
+          );
+        }
+      }
+
+      // key-value storage overrides
+      if (cacheType === 'lmdb') {
+        warp = warp.useKVStorageFactory(
+          (contractTxId: string) =>
+            new LmdbCache({
+              ...defaultCacheOptions,
+              dbLocation: `./cache/warp/kv/lmdb_2/${contractTxId}`,
+            })
+        );
+      } else if (cacheType === 'redis') {
+        warp = warp.useKVStorageFactory(
+          (contractTxId: string) =>
+            new RedisCache({
+              client: redisClient,
+              prefix: `${hollowDBTxId}.${contractTxId}`,
+              allowAtomics: false,
+            })
+        );
+      }
+
+      // prepare Admin & SDK
+      ownerAdmin = new Admin(ownerWallet.jwk, hollowDBTxId, warp);
+      aliceSDK = new SDK(aliceWallet.jwk, hollowDBTxId, warp);
       ownerAddress = ownerWallet.address;
       aliceAddress = aliceWallet.address;
 
@@ -89,7 +166,7 @@ describe('hollowdb', () => {
     });
 
     it('should succesfully deploy with correct state', async () => {
-      const {cachedValue} = await ownerSDK.readState();
+      const {cachedValue} = await ownerAdmin.readState();
       expect(cachedValue.state.verificationKey).toEqual(null);
       expect(cachedValue.state.isProofRequired).toEqual(true);
       expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
@@ -108,20 +185,20 @@ describe('hollowdb', () => {
 
       it('should set verification key', async () => {
         await ownerAdmin.setVerificationKey(verificationKey);
-        const {cachedValue} = await ownerSDK.readState();
+        const {cachedValue} = await ownerAdmin.readState();
         expect(cachedValue.state.verificationKey).toEqual(verificationKey);
       });
     });
 
     describe('put operations', () => {
       it('should put a value to a key & read it', async () => {
-        expect(await ownerSDK.get(KEY)).toEqual(null);
-        await ownerSDK.put(KEY, VALUE_TX);
-        expect(await ownerSDK.get(KEY)).toEqual(VALUE_TX);
+        expect(await ownerAdmin.get(KEY)).toEqual(null);
+        await ownerAdmin.put(KEY, VALUE_TX);
+        expect(await ownerAdmin.get(KEY)).toEqual(VALUE_TX);
       });
 
       it('should NOT put a value to the same key', async () => {
-        await expect(ownerSDK.put(KEY, VALUE_TX)).rejects.toThrow(
+        await expect(ownerAdmin.put(KEY, VALUE_TX)).rejects.toThrow(
           'Contract Error [put]: Key already exists, use update instead'
         );
       });
@@ -133,9 +210,9 @@ describe('hollowdb', () => {
         for (let i = 0; i < values.length; ++i) {
           const k = KEY + i;
           const v = values[i];
-          expect(await ownerSDK.get(k)).toEqual(null);
-          await ownerSDK.put(k, v);
-          expect(await ownerSDK.get(k)).toEqual(v);
+          expect(await ownerAdmin.get(k)).toEqual(null);
+          await ownerAdmin.put(k, v);
+          expect(await ownerAdmin.get(k)).toEqual(v);
         }
       });
     });
@@ -224,19 +301,19 @@ describe('hollowdb', () => {
 
       // disable proofs
       beforeAll(async () => {
-        const {cachedValue} = await ownerSDK.readState();
+        const {cachedValue} = await ownerAdmin.readState();
         expect(cachedValue.state.isProofRequired).toEqual(true);
 
         await ownerAdmin.setProofRequirement(false);
 
-        const {cachedValue: newCachedValue} = await ownerSDK.readState();
+        const {cachedValue: newCachedValue} = await ownerAdmin.readState();
         expect(newCachedValue.state.isProofRequired).toEqual(false);
       });
 
       it('should put a value to a key & read it', async () => {
-        expect(await ownerSDK.get(KEY)).toEqual(null);
-        await ownerSDK.put(KEY, VALUE_TX);
-        expect(await ownerSDK.get(KEY)).toEqual(VALUE_TX);
+        expect(await ownerAdmin.get(KEY)).toEqual(null);
+        await ownerAdmin.put(KEY, VALUE_TX);
+        expect(await ownerAdmin.get(KEY)).toEqual(VALUE_TX);
       });
 
       it('should update an existing value without proof', async () => {
@@ -257,15 +334,15 @@ describe('hollowdb', () => {
         const NEXT_VALUE_TX = randomBytes(10).toString('hex');
 
         beforeAll(async () => {
-          // enabe whitelisting
-          const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+          // enable whitelisting
+          const {cachedValue: oldCachedValue} = await ownerAdmin.readState();
           expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(false);
           expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(false);
           await ownerAdmin.setWhitelistRequirement({
             put: true,
             update: true,
           });
-          const {cachedValue: newCachedValue} = await ownerSDK.readState();
+          const {cachedValue: newCachedValue} = await ownerAdmin.readState();
           expect(newCachedValue.state.isWhitelistRequired.put).toEqual(true);
           expect(newCachedValue.state.isWhitelistRequired.update).toEqual(true);
         });
@@ -320,7 +397,7 @@ describe('hollowdb', () => {
 
         afterAll(async () => {
           // disable whitelisting
-          const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+          const {cachedValue: oldCachedValue} = await ownerAdmin.readState();
           expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(true);
           expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(true);
 
@@ -329,7 +406,7 @@ describe('hollowdb', () => {
             update: false,
           });
 
-          const {cachedValue: newCachedValue} = await ownerSDK.readState();
+          const {cachedValue: newCachedValue} = await ownerAdmin.readState();
           expect(newCachedValue.state.isWhitelistRequired.put).toEqual(false);
           expect(newCachedValue.state.isWhitelistRequired.update).toEqual(false);
         });
@@ -337,12 +414,12 @@ describe('hollowdb', () => {
 
       afterAll(async () => {
         // enable proofs
-        const {cachedValue: oldCachedValue} = await ownerSDK.readState();
+        const {cachedValue: oldCachedValue} = await ownerAdmin.readState();
         expect(oldCachedValue.state.isProofRequired).toEqual(false);
 
         await ownerAdmin.setProofRequirement(true);
 
-        const {cachedValue: newCachedValue} = await ownerSDK.readState();
+        const {cachedValue: newCachedValue} = await ownerAdmin.readState();
         expect(newCachedValue.state.isProofRequired).toEqual(true);
       });
     });

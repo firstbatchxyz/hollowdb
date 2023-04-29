@@ -1,19 +1,14 @@
 import {EvaluationManifest, JWKInterface, Warp} from 'warp-contracts';
-import {Base} from './base';
-import type {HollowDBInput, HollowDBState} from '../../contracts/hollowDB/types';
-import type {HollowDbSdkArgs} from './types';
+import type {HollowDBInput, HollowDBState} from '../contracts/hollowDB/types';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
+import {SDK} from './sdk';
 
 /**
  * HollowDB admin that can set owner and set verification key.
  * For both operations, the admin wallet address must match the
  * owner in the contract state.
  */
-export class Admin extends Base {
-  constructor(args: HollowDbSdkArgs) {
-    super(args);
-  }
-
+export class Admin extends SDK {
   /**
    * Sets the owner as the given wallet address.
    * @param newOwnerAddress address of the new owner, make sure that this is correct!
@@ -45,6 +40,12 @@ export class Admin extends Base {
     });
   }
 
+  /**
+   * Set the whitelist requirement condition.
+   * - if true, certain operations will require callers to be whitelisted
+   * - otherwise, whitelisting will be ignored
+   * @param isProofRequired true if you want whitelisting
+   */
   async setWhitelistRequirement(isWhitelistRequired: HollowDBState['isWhitelistRequired']) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
@@ -60,7 +61,7 @@ export class Admin extends Base {
    * Set the proof requirement condition.
    * - if true, certain operations will require zero-knowledge proofs (ZKP)
    * - otherwise, proofs will be ignored
-   * @param isProofRequired true if you want ZKP to be mandatory
+   * @param isProofRequired true if you want zero-knowledge proofs
    */
   async setProofRequirement(isProofRequired: HollowDBState['isProofRequired']) {
     await this.hollowDB.writeInteraction<HollowDBInput>({
@@ -173,6 +174,7 @@ export class Admin extends Base {
     const contract = warp.contract(contractTxId).connect(owner);
 
     // create a new source
+    // TODO: we may allow "signer" type from arbundle, which would allow any wallet to deploy a contract https://github.com/Bundlr-Network/arbundles
     const newSource = await warp.createSource(
       {src: contractSource},
       disableBundling ? owner : new ArweaveSigner(owner)

@@ -3,15 +3,15 @@ import {get} from './actions/crud/get.js';
 import {put} from './actions/crud/put.js';
 import {update} from './actions/crud/update.js';
 import {remove} from './actions/crud/remove.js';
-// Evolve functionality
+// evolve functionality
 import {evolve} from './actions/evolve.js';
-// State updates
+// state updates
 import {getAllKeys} from './actions/state/getAllKeys.js';
 import {updateState} from './actions/state/updateState.js';
 import {updateWhitelist} from './actions/state/updateWhitelist.js';
-
-import type {HollowDBContractFunction} from './types/index.js';
+// others
 import errors from './errors/index.js';
+import type {HollowDBContractFunction} from './types/index.js';
 
 export const handle: HollowDBContractFunction = (state, action) => {
   switch (action.input.function) {

@@ -1,4 +1,19 @@
 const constants = {
+  // limit options for cache
+  DEFAULT_LIMIT_OPTS: {
+    lmdb: {
+      minEntriesPerContract: 10,
+      maxEntriesPerContract: 100,
+    },
+    redis: {
+      minEntriesPerContract: 10,
+      maxEntriesPerContract: 100,
+    },
+    default: {
+      minEntriesPerContract: 10,
+      maxEntriesPerContract: 100,
+    },
+  },
   // port to run
   ARWEAVE_PORT: 3169,
   // arbitrarily long timeout for the test
