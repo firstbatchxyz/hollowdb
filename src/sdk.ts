@@ -1,18 +1,11 @@
-import {HollowDBInput} from '../../contracts/hollowDB/types';
+import {HollowDBInput} from '../contracts/hollowDB/types';
 import {Base} from './base';
-import type {HollowDbSdkArgs} from './types';
-export {Admin} from './admin';
-export type {HollowDbSdkArgs, CacheType} from './types';
 
 /**
  * HollowDB function wrappers, exposing basic key-value database
  * functions.
  */
 export class SDK extends Base {
-  constructor(args: HollowDbSdkArgs) {
-    super(args);
-  }
-
   /**
    * Returns the value of the given key.
    * @param key The key of the value to be returned.

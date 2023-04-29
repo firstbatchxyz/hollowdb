@@ -1,7 +1,4 @@
-import {ArWallet, CustomSignature, Warp, JWKInterface} from 'warp-contracts';
-import {Admin, SDK} from '../../src';
-import {CacheType} from '../../src/sdk/types';
-import {createClient} from '@redis/client';
+import {Warp, JWKInterface} from 'warp-contracts';
 
 /**
  * Add funds to any wallet.
@@ -16,46 +13,4 @@ export async function addFunds(warp: Warp, wallet: JWKInterface) {
  */
 export async function mineBlock(warp: Warp) {
   await warp.arweave.api.get('mine');
-}
-
-/**
- * Utility function to create an SDK for HollowDB contract.
- */
-export function prepareSDK(
-  cacheType: CacheType,
-  warp: Warp,
-  contractTxId: string,
-  signer: ArWallet | CustomSignature,
-  redisClient?: ReturnType<typeof createClient>
-): SDK {
-  return new SDK({
-    signer,
-    contractTxId,
-    cacheType,
-    warp,
-    useContractCache: false,
-    useStateCache: false,
-    redisClient,
-  });
-}
-
-/**
- * Utility function to create an Admin for HollowDB contract.
- */
-export function prepareAdmin(
-  cacheType: CacheType,
-  warp: Warp,
-  contractTxId: string,
-  signer: ArWallet | CustomSignature,
-  redisClient?: ReturnType<typeof createClient>
-) {
-  return new Admin({
-    signer,
-    contractTxId,
-    cacheType,
-    warp,
-    useContractCache: false,
-    useStateCache: false,
-    redisClient,
-  });
 }
