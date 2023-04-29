@@ -36,6 +36,16 @@ export class SDK extends Base {
   }
 
   /**
+   * Alternative method of getting key values.
+   * Uses the underlying `getStorageValues` function.
+   * @param keys The keys of the values to be returned.
+   * @returns The values of the given keys.
+   */
+  async getStorageValues(keys: string[]) {
+    return await this.hollowDB.getStorageValues(keys);
+  }
+
+  /**
    * Inserts the given value into database.
    * @param key The key of the value to be inserted.
    * @param value The value to be inserted.

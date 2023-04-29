@@ -144,9 +144,79 @@ In other words, you will store `key, valueTxId` instead of `key, value`! This wi
 
 We use such an approach in our [HollowDB gRPC server](https://github.com/firstbatchxyz/HollowDB-grpc), for more details please refer to [this document](https://github.com/firstbatchxyz/HollowDB-grpc/blob/master/docs/bundlr.md).
 
-### Optional Caching
+### Caching Options
 
-Warp allows additional cache types, such as `useStateCache` and `useContractCache`.
+Warp allows additional cache types, such as `useStateCache` and `useContractCache`; as well as overriding the underlying key-value storage. For all of these, you can pass in [LMDB](https://www.npmjs.com/package/warp-contracts-lmdb) or [Redis](https://www.npmjs.com/package/warp-contracts-redis) caches made for Warp.
+
+You can do this as shown below, and you just have to pass in the resulting `warp` instance to HollowDB.
+
+```ts
+import {defaultCacheOptions} from 'warp-contracts';
+import {LmdbCache} from 'warp-contracts-lmdb';
+import {RedisCache} from 'warp-contracts-redis';
+
+// using LMDB
+warp
+  .useStateCache(
+    new LmdbCache(
+      {
+        ...defaultCacheOptions,
+        dbLocation: './cache/warp/state',
+      },
+      LIMIT_OPTS
+    )
+  )
+  .useContractCache(
+    new LmdbCache({
+      ...defaultCacheOptions,
+      dbLocation: './cache/warp/contract',
+    }),
+    new LmdbCache({
+      ...defaultCacheOptions,
+      dbLocation: './cache/warp/src',
+    })
+  )
+  .useKVStorageFactory(
+    (contractTxId: string) =>
+      new LmdbCache({
+        ...defaultCacheOptions,
+        dbLocation: `./cache/warp/kv/lmdb_2/${contractTxId}`,
+      })
+  );
+
+// or using Redis
+warp
+  .useStateCache(
+    new RedisCache({
+      client: redisClient,
+      prefix: `${hollowDBTxId}.state`,
+      allowAtomics: false,
+      ...LIMIT_OPTS,
+    })
+  )
+  .useContractCache(
+    new RedisCache({
+      client: redisClient,
+      prefix: `${hollowDBTxId}.contract`,
+      allowAtomics: false,
+      ...LIMIT_OPTS,
+    }),
+    new RedisCache({
+      client: redisClient,
+      prefix: `${hollowDBTxId}.src`,
+      allowAtomics: false,
+      ...LIMIT_OPTS,
+    })
+  )
+  .useKVStorageFactory(
+    (contractTxId: string) =>
+      new RedisCache({
+        client: redisClient,
+        prefix: `${hollowDBTxId}.${contractTxId}`,
+        allowAtomics: false,
+      })
+  );
+```
 
 ## Zero-Knowledge Proofs
 
