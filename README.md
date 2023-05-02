@@ -50,7 +50,6 @@ HollowDB exposes the following:
 
 ```ts
 import {SDK, Admin} from 'hollowdb';
-import type {HollowDbSdkArgs} from 'hollowdb';
 import {WarpFactory} from 'warp-contracts';
 
 const warp = WarpFactory.forMainnet();
@@ -336,6 +335,13 @@ yarn test <path>
 ```
 
 The test will run for both LMDB cache and Redis cache. For Redis tests to pass, you need to have a Redis server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
+
+## Examples
+
+We have some example applications that you might want to check out!
+
+- [A Perma-calendar App](https://github.com/firstbatchxyz/hollowdb-nextjs-calendar), uses whitelisting
+- [Simple NextJS Demo](https://github.com/firstbatchxyz/hollowdb-nextjs-simple), uses proofs
 
 ## Styling
 
