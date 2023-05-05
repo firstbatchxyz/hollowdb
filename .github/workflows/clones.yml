@@ -1,0 +1,21 @@
+name: CRON for clone count
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm i -g @hyperjumptech/export-github-clones-views
+      - shell: bash
+        env:
+          GITHUB_USERNAME: ${{ secrets.CC_GITHUB_USERNAME }}
+          GITHUB_PASSWORD: ${{ secrets.CC_GITHUB_ACCESS_TOKEN }}
+          MONGODB_URI: ${{ secrets.CC_MONGODB_URI }}
+        run: |
+          export-github-clones-views firstbatchxyz/HollowDB
