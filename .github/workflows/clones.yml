@@ -15,7 +15,7 @@ jobs:
       - shell: bash
         env:
           GITHUB_USERNAME: ${{ secrets.CC_GITHUB_USERNAME }}
-          GITHUB_PASSWORD: ${{ secrets.CC_GITHUB_PASSWORD }}
+          GITHUB_PASSWORD: ${{ secrets.CC_GITHUB_ACCESS_TOKEN }}
           MONGODB_URI: ${{ secrets.CC_MONGODB_URI }}
         run: |
-          export-github-clones-views hyperjumptech/export-github-clones-views hyperjumptech/hansip-web hyperjumptech/procheck hyperjumptech/branch-preview hyperjumptech/grule-rule-engine hyperjumptech/hansip hyperjumptech/procheck-configs hyperjumptech/firebase-cronjob hyperjumptech/beda hyperjumptech/react-native-confetti hyperjumptech/js-urai hyperjumptech/universal-update-checker hyperjumptech/jiffy
+          export-github-clones-views firstbatchxyz/HollowDB

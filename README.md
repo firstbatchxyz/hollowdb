@@ -79,15 +79,15 @@ await sdk.get(key);
 await sdk.put(key, value);
 
 // UPDATE with a proof
-let {proof} = await prover.generateProof(keyPreimage, curValue, newValue);
+let {proof: updateProof} = await prover.generateProof(keyPreimage, curValue, newValue);
 await sdk.update(key, newValue, updateProof);
 
 // UPDATE without a proof
 await sdk.update(key, newValue);
 
 // REMOVE with a proof
-let {proof} = await prover.generateProof(keyPreimage, curValue, null);
-await sdk.remove(key, proof);
+let {proof: removalProof} = await prover.generateProof(keyPreimage, curValue, null);
+await sdk.remove(key, removalProof);
 
 // REMOVE without a proof
 await sdk.remove(key);
@@ -100,7 +100,7 @@ For more detailed explanation on the `prover`, see the related section below.
 
 ### Admin Operations
 
-The admin can change the contract state, but it does not have SDK functions in it as we don't expect the Admin to be used in such a way; Admin should only be instantiated when a major change such as changing the owner or the verification key is required.
+The admin has all capabilities of the SDK, and in addition to those, it can alter the contract state!
 
 ```ts
 // verification key is an object obtained from Circom & SnarkJS
@@ -310,18 +310,21 @@ webpack: (config, { isServer }) => {
 
 ## Examples
 
-There are various examples to demonstrate the basic operations of the HollowDB. A jwk must be provided inside the examples/config/wallet.js file to run.
-
-Check out the example.js and exampleBundlr.js and configure the variables. To run:
+There are various examples to demonstrate the basic operations of the HollowDB. A JWK file must be provided inside `examples/config/wallet.js`. Check out `example.js` and `exampleBundlr.js` and configure the variables. To run:
 
 ```sh
 # go to examples folder
 cd examples
 # install dependencies
 yarn install
-#
+# run the example
 node example
 ```
+
+We also some example applications that you might want to check out:
+
+- [A Perma-calendar App](https://github.com/firstbatchxyz/hollowdb-nextjs-calendar), uses whitelisting
+- [Simple NextJS Demo](https://github.com/firstbatchxyz/hollowdb-nextjs-simple), uses proofs
 
 ## Testing
 
@@ -335,13 +338,6 @@ yarn test <path>
 ```
 
 The test will run for both LMDB cache and Redis cache. For Redis tests to pass, you need to have a Redis server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
-
-## Examples
-
-We have some example applications that you might want to check out!
-
-- [A Perma-calendar App](https://github.com/firstbatchxyz/hollowdb-nextjs-calendar), uses whitelisting
-- [Simple NextJS Demo](https://github.com/firstbatchxyz/hollowdb-nextjs-simple), uses proofs
 
 ## Styling
 
