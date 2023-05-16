@@ -1,4 +1,4 @@
-import {LoggerFactory, Warp, Contract, ArWallet, CustomSignature, LogLevel} from 'warp-contracts';
+import {LoggerFactory, Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {HollowDBState} from '../contracts/hollowDB/types';
