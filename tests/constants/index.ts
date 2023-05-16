@@ -1,4 +1,4 @@
-const constants = {
+export default {
   // limit options for cache
   DEFAULT_LIMIT_OPTS: {
     lmdb: {
@@ -25,6 +25,4 @@ const constants = {
   PLONK_WASM_PATH: './circuits/hollow-authz-plonk/hollow-authz.wasm',
   PLONK_PROVERKEY_PATH: './circuits/hollow-authz-plonk/prover_key.zkey',
   PLONK_VERIFICATIONKEY_PATH: './circuits/hollow-authz-plonk/verification_key.json',
-};
-
-export default constants as Readonly<typeof constants>;
+} as const;

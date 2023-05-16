@@ -1,16 +1,22 @@
-import {LoggerFactory, Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
+import {LoggerFactory, Warp, Contract, ArWallet, CustomSignature, LogLevel} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {HollowDBState} from '../contracts/hollowDB/types';
 
 export class Base {
-  protected readonly logger = LoggerFactory.INST.logLevel('none');
   readonly warp: Warp;
   readonly hollowDB: Contract<HollowDBState>;
   readonly contractTxId: string;
   readonly signer: ArWallet | CustomSignature;
 
+  /**
+   * Connects to the given contract via the provided Warp instance using the provided signer.
+   * @param signer a Signer, such as Arweave wallet or Ethereum CustomSignature
+   * @param contractTxId contract txId to connect to
+   * @param warp a Warp instace, such as `WarpFactory.forMainnet()`
+   */
   constructor(signer: ArWallet | CustomSignature, contractTxId: string, warp: Warp) {
+    LoggerFactory.INST.logLevel('none');
     this.signer = signer;
     this.contractTxId = contractTxId;
     this.warp = warp
