@@ -48,8 +48,8 @@ describe('hollowdb', () => {
     const LIMIT_OPTS = constants.DEFAULT_LIMIT_OPTS[cacheType];
     const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
     const KEY = computeKey(KEY_PREIMAGE);
-    const VALUE_TX = randomBytes(10).toString('hex');
-    const NEXT_VALUE_TX = randomBytes(10).toString('hex');
+    const VALUE = randomBytes(10).toString('hex');
+    const NEXT_VALUE = randomBytes(10).toString('hex');
     const USE_CONTRACT_CACHE = false; // optional
     const USE_STATE_CACHE = false; // optional
 
@@ -193,12 +193,12 @@ describe('hollowdb', () => {
     describe('put operations', () => {
       it('should put a value to a key & read it', async () => {
         expect(await ownerAdmin.get(KEY)).toEqual(null);
-        await ownerAdmin.put(KEY, VALUE_TX);
-        expect(await ownerAdmin.get(KEY)).toEqual(VALUE_TX);
+        await ownerAdmin.put(KEY, VALUE);
+        expect(await ownerAdmin.get(KEY)).toEqual(VALUE);
       });
 
       it('should NOT put a value to the same key', async () => {
-        await expect(ownerAdmin.put(KEY, VALUE_TX)).rejects.toThrow(
+        await expect(ownerAdmin.put(KEY, VALUE)).rejects.toThrow(
           'Contract Error [put]: Key already exists, use update instead'
         );
       });
@@ -222,12 +222,12 @@ describe('hollowdb', () => {
 
       beforeAll(async () => {
         const currentValue = (await aliceSDK.get(KEY)) as string;
-        const fullProof = await prover.generateProof(KEY_PREIMAGE, currentValue, NEXT_VALUE_TX);
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, currentValue, NEXT_VALUE);
         proof = fullProof.proof;
         expect(prover.valueToBigInt(currentValue).toString()).toEqual(
           fullProof.publicSignals[PublicSignal.CurValueHash]
         );
-        expect(prover.valueToBigInt(NEXT_VALUE_TX).toString()).toEqual(
+        expect(prover.valueToBigInt(NEXT_VALUE).toString()).toEqual(
           fullProof.publicSignals[PublicSignal.NextValueHash]
         );
         expect(KEY).toEqual(fullProof.publicSignals[PublicSignal.Key]);
@@ -235,33 +235,33 @@ describe('hollowdb', () => {
 
       it('should NOT update with a proof using wrong current value', async () => {
         // generate a proof with wrong next value
-        const fullProof = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE_TX);
-        await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
       });
 
       it('should NOT update with a proof using wrong next value', async () => {
         // generate a proof with wrong next value
-        const fullProof = await prover.generateProof(KEY_PREIMAGE, VALUE_TX, 'abcdefg');
-        await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, VALUE, 'abcdefg');
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
       });
 
       it('should NOT update with a proof using wrong preimage', async () => {
         // generate a proof with wrong preimage
-        const fullProof = await prover.generateProof(1234567n, VALUE_TX, NEXT_VALUE_TX);
-        await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, fullProof.proof)).rejects.toThrow();
+        const fullProof = await prover.generateProof(1234567n, VALUE, NEXT_VALUE);
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
       });
 
       it('should NOT update an existing value without a proof', async () => {
-        await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, {})).rejects.toThrow();
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, {})).rejects.toThrow();
       });
 
       it('should update an existing value with proof', async () => {
-        await aliceSDK.update(KEY, NEXT_VALUE_TX, proof);
-        expect(await aliceSDK.get(KEY)).toEqual(NEXT_VALUE_TX);
+        await aliceSDK.update(KEY, NEXT_VALUE, proof);
+        expect(await aliceSDK.get(KEY)).toEqual(NEXT_VALUE);
       });
 
       it('should NOT update an existing value with the same proof', async () => {
-        await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, proof)).rejects.toThrow(
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow(
           'Contract Error [update]: Proof verification failed in: update'
         );
       });
@@ -296,8 +296,8 @@ describe('hollowdb', () => {
     describe('tests with proofs disabled', () => {
       const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
       const KEY = computeKey(KEY_PREIMAGE);
-      const VALUE_TX = randomBytes(10).toString('hex');
-      const NEXT_VALUE_TX = randomBytes(10).toString('hex');
+      const VALUE = randomBytes(10).toString('hex');
+      const NEXT_VALUE = randomBytes(10).toString('hex');
 
       // disable proofs
       beforeAll(async () => {
@@ -312,13 +312,13 @@ describe('hollowdb', () => {
 
       it('should put a value to a key & read it', async () => {
         expect(await ownerAdmin.get(KEY)).toEqual(null);
-        await ownerAdmin.put(KEY, VALUE_TX);
-        expect(await ownerAdmin.get(KEY)).toEqual(VALUE_TX);
+        await ownerAdmin.put(KEY, VALUE);
+        expect(await ownerAdmin.get(KEY)).toEqual(VALUE);
       });
 
       it('should update an existing value without proof', async () => {
-        await aliceSDK.update(KEY, NEXT_VALUE_TX);
-        expect(await aliceSDK.get(KEY)).toEqual(NEXT_VALUE_TX);
+        await aliceSDK.update(KEY, NEXT_VALUE);
+        expect(await aliceSDK.get(KEY)).toEqual(NEXT_VALUE);
       });
 
       it('should remove an existing value without proof', async () => {
@@ -330,8 +330,12 @@ describe('hollowdb', () => {
       describe('tests with whitelisting', () => {
         const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
         const KEY = computeKey(KEY_PREIMAGE);
-        const VALUE_TX = randomBytes(10).toString('hex');
-        const NEXT_VALUE_TX = randomBytes(10).toString('hex');
+        const VALUE = {
+          val: randomBytes(16).toString('hex'),
+        };
+        const NEXT_VALUE = {
+          val: randomBytes(16).toString('hex'),
+        };
 
         beforeAll(async () => {
           // enable whitelisting
@@ -348,10 +352,10 @@ describe('hollowdb', () => {
         });
 
         it('should NOT put/update/remove when NOT whitelisted', async () => {
-          await expect(aliceSDK.put(KEY, VALUE_TX)).rejects.toThrow(
+          await expect(aliceSDK.put(KEY, VALUE)).rejects.toThrow(
             'Contract Error [put]: User is not whitelisted for: put'
           );
-          await expect(aliceSDK.update(KEY, NEXT_VALUE_TX, {})).rejects.toThrow(
+          await expect(aliceSDK.update(KEY, NEXT_VALUE, {})).rejects.toThrow(
             'Contract Error [update]: User is not whitelisted for: update'
           );
           await expect(aliceSDK.remove(KEY, {})).rejects.toThrow(
@@ -375,8 +379,8 @@ describe('hollowdb', () => {
         });
 
         it('should put/update/remove when whitelisted', async () => {
-          await aliceSDK.put(KEY, VALUE_TX);
-          await aliceSDK.update(KEY, NEXT_VALUE_TX, {});
+          await aliceSDK.put(KEY, VALUE);
+          await aliceSDK.update(KEY, NEXT_VALUE, {});
           await aliceSDK.remove(KEY, {});
         });
 

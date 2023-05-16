@@ -5,7 +5,7 @@ export type HollowDBPut = {
   function: 'put';
   data: {
     key: string;
-    value: string;
+    value: unknown;
   };
 };
 export const put: HollowDBContractFunction<HollowDBPut> = async (state, action) => {

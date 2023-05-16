@@ -5,7 +5,8 @@ import {Base} from './base';
  * HollowDB function wrappers, exposing basic key-value database
  * functions.
  */
-export class SDK extends Base {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class SDK<V = unknown> extends Base {
   /**
    * Returns the value of the given key.
    * @param key The key of the value to be returned.
@@ -23,7 +24,7 @@ export class SDK extends Base {
       throw new Error('Contract Error [get]: ' + response.errorMessage);
     }
 
-    return response.result;
+    return response.result as V;
   }
 
   /**
@@ -31,8 +32,8 @@ export class SDK extends Base {
    * @param keys The keys of the values to be returned.
    * @returns The values of the given keys.
    */
-  async getMany(keys: string[]) {
-    return await Promise.all(keys.map(async key => this.get(key)));
+  async getMany(keys: string[]): Promise<V[]> {
+    return Promise.all(keys.map(key => this.get(key)));
   }
 
   /**
@@ -42,7 +43,7 @@ export class SDK extends Base {
    * @returns The values of the given keys.
    */
   async getStorageValues(keys: string[]) {
-    return await this.hollowDB.getStorageValues(keys);
+    return this.hollowDB.getStorageValues(keys);
   }
 
   /**
@@ -50,7 +51,7 @@ export class SDK extends Base {
    * @param key The key of the value to be inserted.
    * @param value The value to be inserted.
    */
-  async put(key: string, value: string) {
+  async put(key: string, value: V) {
     const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'put',
       data: {
@@ -78,7 +79,7 @@ export class SDK extends Base {
    * @param value new value
    * @param proof proof of preimage knowledge of the key
    */
-  async update(key: string, value: string, proof: object = {}) {
+  async update(key: string, value: V, proof: object = {}) {
     const result = await this.hollowDB.dryWrite<HollowDBInput>({
       function: 'update',
       data: {
@@ -134,7 +135,7 @@ export class SDK extends Base {
    * Returns all the keys in the database
    * @returns An array of all the keys in the database
    */
-  async getAllKeys() {
+  async getAllKeys(): Promise<string[]> {
     const response = await this.hollowDB.viewState<HollowDBInput>({
       function: 'getAllKeys',
       data: {},
@@ -144,7 +145,7 @@ export class SDK extends Base {
       throw new Error('Contract Error [getAllKeys]: ' + response.errorMessage);
     }
 
-    return response.result;
+    return response.result as string[];
   }
 
   /**
