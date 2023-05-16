@@ -7,7 +7,7 @@ export type HollowDBUpdate = {
   data: {
     key: string;
     proof: object;
-    value: string;
+    value: unknown;
   };
 };
 export const update: HollowDBContractFunction<HollowDBUpdate> = async (state, action) => {

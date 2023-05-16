@@ -27,7 +27,8 @@ export type HollowDBInput =
  * HollowDB contract state.
  */
 export interface HollowDBState {
-  verificationKey: (object & {protocol: ProofSystem}) | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  verificationKey: any;
   owner: string;
   isProofRequired: boolean;
   isWhitelistRequired: {
@@ -62,10 +63,7 @@ export type ProofSystem = 'groth16' | 'plonk';
 /**
  * A result from a read request.
  */
-export type HollowDBResult =
-  | string[] // a list of keys
-  | string // an existing value
-  | null; // non-existing value
+export type HollowDBResult = unknown;
 
 /**
  * A generic HollowDB contract function. Functions can specify their

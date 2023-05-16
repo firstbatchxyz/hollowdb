@@ -10,6 +10,6 @@ export const get: HollowDBContractFunction<HollowDBGet> = async (state, action) 
   const {key} = action.input.data;
 
   return {
-    result: (await SmartWeave.kv.get(key)) as string,
+    result: await SmartWeave.kv.get(key),
   };
 };

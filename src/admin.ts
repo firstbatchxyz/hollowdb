@@ -8,7 +8,7 @@ import {SDK} from './sdk';
  * For both operations, the admin wallet address must match the
  * owner in the contract state.
  */
-export class Admin extends SDK {
+export class Admin<V = unknown> extends SDK<V> {
   /**
    * Sets the owner as the given wallet address.
    * @param newOwnerAddress address of the new owner, make sure that this is correct!
