@@ -14,3 +14,12 @@ export async function addFunds(warp: Warp, wallet: JWKInterface) {
 export async function mineBlock(warp: Warp) {
   await warp.arweave.api.get('mine');
 }
+
+/**
+ * Convert a decimal string to hexadecimal, both belonging to a bigint.
+ * @param bigIntString a string representation of a huge decimal number
+ * @returns a hexadecimal, such as `0xa3b5...`
+ */
+export function decimalToHex(bigIntString: string): string {
+  return '0x' + BigInt(bigIntString).toString(16);
+}

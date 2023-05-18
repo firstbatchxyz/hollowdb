@@ -1,4 +1,4 @@
-import {LoggerFactory, Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
+import {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {HollowDBState} from '../contracts/hollowDB/types';
@@ -16,7 +16,6 @@ export class Base {
    * @param warp a Warp instace, such as `WarpFactory.forMainnet()`
    */
   constructor(signer: ArWallet | CustomSignature, contractTxId: string, warp: Warp) {
-    LoggerFactory.INST.logLevel('none');
     this.signer = signer;
     this.contractTxId = contractTxId;
     this.warp = warp

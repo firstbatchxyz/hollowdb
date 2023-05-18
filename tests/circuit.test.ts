@@ -2,6 +2,7 @@ import {readFileSync} from 'fs';
 import {Prover, ProofSystem} from './utils/prover';
 import {computeKey} from './utils/computeKey';
 import constants from './constants';
+import {decimalToHex} from './utils';
 const snarkjs = require('snarkjs');
 
 // arbitrarily long timeout
@@ -42,7 +43,7 @@ describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits (%s)', proof
     proof = fullProof.proof;
     correctCurValueHash = fullProof.publicSignals[0];
     correctNewValueHash = fullProof.publicSignals[1];
-    correctKey = fullProof.publicSignals[2];
+    correctKey = decimalToHex(fullProof.publicSignals[2]);
 
     // computeKey should find the same result
     expect(correctKey).toEqual(computeKey(preimage));
