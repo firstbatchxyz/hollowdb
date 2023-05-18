@@ -14,6 +14,7 @@ import {HollowDBState} from '../contracts/hollowDB/types';
 import {LmdbCache} from 'warp-contracts-lmdb';
 import {RedisCache} from 'warp-contracts-redis';
 import {Redis} from 'ioredis';
+import {decimalToHex} from './utils';
 
 jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
@@ -68,6 +69,9 @@ describe('hollowdb', () => {
       // setup warp factory for local arweave
       warp = WarpFactory.forLocal(constants.ARWEAVE_PORT).use(new DeployPlugin());
 
+      // disable Warp logs
+      LoggerFactory.INST.logLevel('none');
+
       // get accounts
       const ownerWallet = await warp.generateWallet();
       const aliceWallet = await warp.generateWallet();
@@ -110,7 +114,7 @@ describe('hollowdb', () => {
               },
               {
                 ...LIMIT_OPTS,
-                url: globals.__REDIS_URL__,
+                client: redisClient,
               }
             )
           );
@@ -131,28 +135,28 @@ describe('hollowdb', () => {
             })
           );
         } else if (cacheType === 'redis') {
-          // warp = warp.useContractCache(
-          //   new RedisCache(
-          //     {
-          //       ...redisCacheOptions,
-          //       dbLocation: `${hollowDBTxId}.contract`,
-          //     },
-          //     {
-          //       ...LIMIT_OPTS,
-          //       url: globals.__REDIS_URL__,
-          //     }
-          //   ),
-          //   new RedisCache(
-          //     {
-          //       ...redisCacheOptions,
-          //       dbLocation: `${hollowDBTxId}.src`,
-          //     },
-          //     {
-          //       ...LIMIT_OPTS,
-          //       url: globals.__REDIS_URL__,
-          //     }
-          //   )
-          // );
+          warp = warp.useContractCache(
+            new RedisCache(
+              {
+                ...redisCacheOptions,
+                dbLocation: `${hollowDBTxId}.contract`,
+              },
+              {
+                ...LIMIT_OPTS,
+                client: redisClient,
+              }
+            ),
+            new RedisCache(
+              {
+                ...redisCacheOptions,
+                dbLocation: `${hollowDBTxId}.src`,
+              },
+              {
+                ...LIMIT_OPTS,
+                client: redisClient,
+              }
+            )
+          );
         }
       }
 
@@ -262,7 +266,7 @@ describe('hollowdb', () => {
         expect(prover.valueToBigInt(NEXT_VALUE).toString()).toEqual(
           fullProof.publicSignals[PublicSignal.NextValueHash]
         );
-        expect(KEY).toEqual(fullProof.publicSignals[PublicSignal.Key]);
+        expect(KEY).toEqual(decimalToHex(fullProof.publicSignals[PublicSignal.Key]));
       });
 
       it('should NOT update with a proof using wrong current value', async () => {
@@ -310,7 +314,7 @@ describe('hollowdb', () => {
         expect(prover.valueToBigInt(currentValue).toString()).toEqual(
           fullProof.publicSignals[PublicSignal.CurValueHash]
         );
-        expect(KEY).toEqual(fullProof.publicSignals[PublicSignal.Key]);
+        expect(KEY).toEqual(decimalToHex(fullProof.publicSignals[PublicSignal.Key]));
       });
 
       it('should remove an existing value with proof', async () => {

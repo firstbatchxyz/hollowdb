@@ -36,6 +36,9 @@ describe('hollowdb evolve', () => {
     // setup warp factory for local arweave
     warp = WarpFactory.forLocal(constants.ARWEAVE_PORT + 1).use(new DeployPlugin());
 
+    // disable logging
+    LoggerFactory.INST.logLevel('none');
+
     // get accounts
     const ownerWallet = await warp.generateWallet();
     ownerJWK = ownerWallet.jwk;
