@@ -30,9 +30,7 @@ export const remove: HollowDBContractFunction<HollowDBRemove> = async (state, ac
     !state.isProofRequired ||
     (await verifyProof(proof, [valueToBigInt(dbValue), 0n, BigInt(key)], state.verificationKey))
   ) {
-    // TODO: we are not using `del` yet, as it may not completely remove every key in the cache
-    // there is `delete` function defined in SortKeyCache but it is not exported in KV yet.
-    await SmartWeave.kv.put(key, null);
+    await SmartWeave.kv.del(key);
   } else {
     throw errors.InvalidProofError(action.input.function);
   }

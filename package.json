@@ -77,7 +77,7 @@
     "poseidon-lite": "^0.1.0",
     "snarkjs": "^0.6.1",
     "warp-contracts-lmdb": "^1.1.10",
-    "warp-contracts-redis": "^0.2.0"
+    "warp-contracts-redis": "^0.3.0"
   },
   "devDependencies": {
     "@ethersproject/sha2": "^5.7.0",
