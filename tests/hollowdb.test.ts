@@ -1,5 +1,5 @@
 import ArLocal from 'arlocal';
-import {CacheOptions, LoggerFactory, Warp, WarpFactory, defaultCacheOptions} from 'warp-contracts';
+import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import initialState from '../common/initialState';
 import fs from 'fs';
@@ -11,10 +11,9 @@ import {randomBytes} from 'crypto';
 import constants from './constants';
 import {globals} from '../jest.config.cjs';
 import {HollowDBState} from '../contracts/hollowDB/types';
-import {LmdbCache} from 'warp-contracts-lmdb';
-import {RedisCache} from 'warp-contracts-redis';
 import {Redis} from 'ioredis';
 import {decimalToHex} from './utils';
+import {overrideCache} from './utils/cache';
 
 jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
@@ -52,7 +51,6 @@ describe('hollowdb', () => {
     let warp: Warp;
     let redisClient: Redis;
 
-    const LIMIT_OPTS = constants.DEFAULT_LIMIT_OPTS[cacheType];
     const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
     const KEY = computeKey(KEY_PREIMAGE);
     const VALUE: ValueType = {
@@ -61,9 +59,6 @@ describe('hollowdb', () => {
     const NEXT_VALUE: ValueType = {
       val: randomBytes(10).toString('hex'),
     };
-
-    const USE_CONTRACT_CACHE = false; // optional
-    const USE_STATE_CACHE = false; // optional
 
     beforeAll(async () => {
       // setup warp factory for local arweave
@@ -85,104 +80,18 @@ describe('hollowdb', () => {
         true // bundling is disabled during testing
       );
       console.log('Deployed contract:', hollowDBTxId);
-      const redisCacheOptions: CacheOptions = {
-        inMemory: false,
-        dbLocation: hollowDBTxId, // this is likely to be overwritten
-        subLevelSeparator: '|',
-      };
+
+      // setup cache
       if (cacheType === 'redis') {
         redisClient = new Redis(globals.__REDIS_URL__, {lazyConnect: true});
       }
-      if (USE_STATE_CACHE) {
-        // state cache overrides
-        if (cacheType === 'lmdb') {
-          warp = warp.useStateCache(
-            new LmdbCache(
-              {
-                ...defaultCacheOptions,
-                dbLocation: './cache/warp/state',
-              },
-              LIMIT_OPTS
-            )
-          );
-        } else if (cacheType === 'redis') {
-          warp = warp.useStateCache(
-            new RedisCache(
-              {
-                ...redisCacheOptions,
-                dbLocation: `${hollowDBTxId}.state`,
-              },
-              {
-                ...LIMIT_OPTS,
-                client: redisClient,
-              }
-            )
-          );
-        }
+      overrideCache(warp, hollowDBTxId, cacheType, {}, cacheType === 'redis' ? redisClient : undefined);
+      if (cacheType === 'redis') {
+        await redisClient.connect();
       }
 
-      // contract cache overrides
-      if (USE_CONTRACT_CACHE) {
-        if (cacheType === 'lmdb') {
-          warp = warp.useContractCache(
-            new LmdbCache({
-              ...defaultCacheOptions,
-              dbLocation: './cache/warp/contract',
-            }),
-            new LmdbCache({
-              ...defaultCacheOptions,
-              dbLocation: './cache/warp/src',
-            })
-          );
-        } else if (cacheType === 'redis') {
-          warp = warp.useContractCache(
-            new RedisCache(
-              {
-                ...redisCacheOptions,
-                dbLocation: `${hollowDBTxId}.contract`,
-              },
-              {
-                ...LIMIT_OPTS,
-                client: redisClient,
-              }
-            ),
-            new RedisCache(
-              {
-                ...redisCacheOptions,
-                dbLocation: `${hollowDBTxId}.src`,
-              },
-              {
-                ...LIMIT_OPTS,
-                client: redisClient,
-              }
-            )
-          );
-        }
-      }
-
-      // key-value storage overrides
-      if (cacheType === 'lmdb') {
-        warp = warp.useKVStorageFactory(
-          (contractTxId: string) =>
-            new LmdbCache({
-              ...defaultCacheOptions,
-              dbLocation: `./cache/warp/kv/lmdb_2/${contractTxId}`,
-            })
-        );
-      } else if (cacheType === 'redis') {
-        warp = warp.useKVStorageFactory(
-          (contractTxId: string) =>
-            new RedisCache(
-              {
-                ...redisCacheOptions,
-                dbLocation: `${contractTxId}.src`,
-              },
-              {
-                client: redisClient,
-              }
-            )
-        );
-      }
+      // log level
+      LoggerFactory.INST.logLevel('none');
 
       // prepare Admin & SDK
       ownerAdmin = new Admin(ownerWallet.jwk, hollowDBTxId, warp);
@@ -192,11 +101,6 @@ describe('hollowdb', () => {
 
       const contractTx = await warp.arweave.transactions.get(hollowDBTxId);
       expect(contractTx).not.toBeNull();
-
-      // wait a bit
-      if (cacheType === 'redis') {
-        await redisClient.connect();
-      }
     });
 
     it('should succesfully deploy with correct state', async () => {
