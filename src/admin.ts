@@ -14,7 +14,6 @@ export class Admin<V = unknown> extends SDK<V> {
    * @param newOwnerAddress address of the new owner, make sure that this is correct!
    */
   async changeOwner(newOwnerAddress: HollowDBState['owner']) {
-    // TODO: add regex check for arweave & ethereum addresses
     await this.hollowDB.writeInteraction<HollowDBInput>({
       function: 'updateState',
       data: {
@@ -134,14 +133,12 @@ export class Admin<V = unknown> extends SDK<V> {
     initialState.whitelist['put'][ownerAddress] = true;
     initialState.whitelist['update'][ownerAddress] = true;
 
-    // deploy
     const evaluationManifest: EvaluationManifest = {
       evaluationOptions: {
         allowBigInt: true,
         useKVStorage: true,
       },
     };
-
     const {contractTxId, srcTxId} = await warp.deploy(
       {
         wallet: disableBundling ? owner : new ArweaveSigner(owner),

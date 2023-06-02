@@ -13,8 +13,6 @@ export const remove: HollowDBContractFunction<HollowDBRemove> = async (state, ac
   const {key, proof} = action.input.data;
 
   // caller must be whitelisted
-  // note that we check the UPDATE whitelist, since REMOVE is equivalent to
-  // UPDATE but with null as the next value
   if (state.isWhitelistRequired.update && !state.whitelist.update[action.caller]) {
     throw errors.NotWhitelistedError(action.input.function);
   }
@@ -26,14 +24,18 @@ export const remove: HollowDBContractFunction<HollowDBRemove> = async (state, ac
   }
 
   // if required, the proof must verify
-  if (
-    !state.isProofRequired ||
-    (await verifyProof(proof, [valueToBigInt(dbValue), 0n, BigInt(key)], state.verificationKey))
-  ) {
-    await SmartWeave.kv.del(key);
-  } else {
-    throw errors.InvalidProofError(action.input.function);
+  if (state.isProofRequired) {
+    const publicSignals: [curValueHash: bigint, nextValueHash: bigint, key: bigint] = [
+      valueToBigInt(dbValue),
+      0n,
+      BigInt(key),
+    ];
+    if (!(await verifyProof(proof, publicSignals, state.verificationKey))) {
+      throw errors.InvalidProofError(action.input.function);
+    }
   }
+
+  await SmartWeave.kv.del(key);
 
   return {state};
 };

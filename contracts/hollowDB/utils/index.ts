@@ -1,5 +1,4 @@
 import errors from '../errors';
-import type {HollowDBState} from '../types';
 
 /**
  * Verify a zero-knowledge proof.
@@ -10,8 +9,9 @@ import type {HollowDBState} from '../types';
  */
 export const verifyProof = async (
   proof: object,
-  psignals: [curValueHash: bigint, nextValueHash: bigint, key: bigint],
-  verificationKey: HollowDBState['verificationKey']
+  psignals: bigint[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  verificationKey: any
 ): Promise<boolean> => {
   if (verificationKey === null) {
     throw errors.NoVerificationKeyError;
