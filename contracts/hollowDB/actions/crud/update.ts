@@ -25,14 +25,18 @@ export const update: HollowDBContractFunction<HollowDBUpdate> = async (state, ac
   }
 
   // if required, the proof must verify
-  if (
-    !state.isProofRequired ||
-    (await verifyProof(proof, [valueToBigInt(dbValue), valueToBigInt(value), BigInt(key)], state.verificationKey))
-  ) {
-    await SmartWeave.kv.put(key, value);
-  } else {
-    throw errors.InvalidProofError(action.input.function);
+  if (state.isProofRequired) {
+    const publicSignals: [curValueHash: bigint, nextValueHash: bigint, key: bigint] = [
+      valueToBigInt(dbValue),
+      valueToBigInt(value),
+      BigInt(key),
+    ];
+    if (!(await verifyProof(proof, publicSignals, state.verificationKey))) {
+      throw errors.InvalidProofError(action.input.function);
+    }
   }
+
+  await SmartWeave.kv.put(key, value);
 
   return {state};
 };

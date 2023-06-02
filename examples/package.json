@@ -1,17 +1,9 @@
 {
-  "name": "examples",
-  "version": "1.0.0",
-  "description": "",
-  "main": "example.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "name": "hollowdb-examples",
   "dependencies": {
     "@bundlr-network/client": "^0.11.0",
     "hollowdb": "^0.1.12",
     "poseidon-lite": "^0.2.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "FirstBatch Team <dev@firstbatch.xyz>"
 }

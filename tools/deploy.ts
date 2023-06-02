@@ -30,7 +30,7 @@ async function main() {
 
   // update verification key if needed
   if (proofSystem === 'groth16' || proofSystem === 'plonk') {
-    const verKeyPath = __dirname + `/../circuits/hollow-authz-${proofSystem}/verification_key.json`;
+    const verKeyPath = __dirname + `/../config/circuits/hollow-authz-${proofSystem}/verification_key.json`;
     const verKey = JSON.parse(fs.readFileSync(verKeyPath).toString());
     initialState.verificationKey = verKey;
   }

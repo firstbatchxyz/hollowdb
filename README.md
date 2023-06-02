@@ -1,8 +1,14 @@
 <p align="center">
+  <img src="./img/logo.svg" alt="logo" width="140">
+</p>
+
+<p align="center">
   <h1 align="center">
     HollowDB
   </h1>
-  <p align="center">HollowDB is a decentralized privacy-preserving key-value database on Arweave network, powered by Warp Contracts.</p>
+  <p align="center">
+    <i>HollowDB is a decentralized privacy-preserving key-value database on Arweave network, powered by Warp Contracts.</i>
+  </p>
 </p>
 
 <p align="center">
@@ -37,20 +43,17 @@ npm install hollowdb  # npm
 
 ## Documentation
 
-You can read the docs here: <https://docs.hollowdb.xyz>
+You can read the full documentation at <https://docs.hollowdb.xyz>.
 
 ## Testing
 
 There are Jest test suites for HollowDB operations that operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). To run:
 
 ```sh
-# run all tests
 yarn test
-# run a specific test
-yarn test <path>
 ```
 
-The test will run for all cache types (LMDB, Redis, LevelDB). For Redis tests to pass, you need to have a Redis server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
+The tests will run for all cache types (LMDB, Redis, LevelDB). For Redis tests to pass, you need to have a Redis server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
 
 ## Styling
 
