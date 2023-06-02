@@ -23,7 +23,6 @@ import {Base} from './base';
  * hollowdb.readState()             // read contract state
  * ```
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class SDK<V = unknown> extends Base {
   /**
    * Gets the value of the given key.
