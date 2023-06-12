@@ -9710,9 +9710,9 @@ warp-contracts-plugin-snarkjs@^0.1.6:
     snarkjs "^0.6.10"
 
 warp-contracts-redis@^0.3.0:
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/warp-contracts-redis/-/warp-contracts-redis-0.3.1.tgz#59f30b49952bc12b8a26c1f93067eed1e7477c76"
-  integrity sha512-CGCVWcg5/wfe2AhwcQh6B6RqNDhBooST5/BlMfbd12gDjX9n1CehmttBK7htR8DzmVawc85vHzo0+B2o1EcGlg==
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/warp-contracts-redis/-/warp-contracts-redis-0.3.3.tgz#320bd1b0b0f6054207704ff72ad8b141d844a1d2"
+  integrity sha512-Y6VRlUC31CHHgMs3Q9WhaAKxTvnuwmnhmDkP3aUzPZgyh4LKeZfHc9KnHZiHk49F7y0nx7nT3c7672Mg+ESoNQ==
   dependencies:
     ioredis "^5.3.2"
     safe-stable-stringify "^2.4.3"

@@ -6,7 +6,7 @@ import {remove} from './actions/crud/remove.js';
 // evolve functionality
 import {evolve} from './actions/evolve.js';
 // state updates
-import {getAllKeys} from './actions/state/getAllKeys.js';
+import {getAllKeys} from './actions/state/getKeys.js';
 import {updateState} from './actions/state/updateState.js';
 import {updateWhitelist} from './actions/state/updateWhitelist.js';
 // others

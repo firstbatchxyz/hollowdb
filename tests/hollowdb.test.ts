@@ -192,7 +192,7 @@ describe('hollowdb', () => {
       });
 
       it('should NOT update an existing value without a proof', async () => {
-        await expect(aliceSDK.update(KEY, NEXT_VALUE, {})).rejects.toThrow();
+        await expect(aliceSDK.update(KEY, NEXT_VALUE)).rejects.toThrow();
       });
 
       it('should update an existing value with proof', async () => {
