@@ -17,11 +17,11 @@ async function evolve() {
 
   // read wallet
   const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
-  const wallet = JSON.parse(fs.readFileSync(walletPath).toString()) as JWKInterface;
+  const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8')) as JWKInterface;
 
   // read the new source code
   const contractSourcePath = __dirname + '/../build/hollowDB/contract.js';
-  const contractSource = fs.readFileSync(contractSourcePath).toString();
+  const contractSource = fs.readFileSync(contractSourcePath, 'utf-8');
 
   // create a warp instance
   const warp = WarpFactory.forMainnet().use(new DeployPlugin());

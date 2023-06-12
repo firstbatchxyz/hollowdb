@@ -7,7 +7,7 @@ export type HollowDBGetKeys = {
     options?: SortKeyCacheRangeOptions;
   };
 };
-export const getAllKeys: HollowDBContractFunction<HollowDBGetKeys> = async (state, action) => {
+export const getKeys: HollowDBContractFunction<HollowDBGetKeys> = async (state, action) => {
   const {options} = action.input.data;
 
   return {

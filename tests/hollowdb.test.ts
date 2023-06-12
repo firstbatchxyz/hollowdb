@@ -133,6 +133,8 @@ describe('hollowdb', () => {
         expect(await ownerAdmin.get(KEY)).toEqual(null);
         await ownerAdmin.put(KEY, VALUE);
         expect(await ownerAdmin.get(KEY)).toEqual(VALUE);
+
+        expect((await ownerAdmin.getKVMap()).get(KEY)).toEqual(VALUE);
       });
 
       it('should NOT put a value to the same key', async () => {
@@ -153,6 +155,14 @@ describe('hollowdb', () => {
           expect(await ownerAdmin.get(k)).toEqual(null);
           await ownerAdmin.put(k, v);
           expect(await ownerAdmin.get(k)).toEqual(v);
+        }
+
+        // make sure you can get them via kvMap
+        const kvMap = await ownerAdmin.getKVMap();
+        for (let i = 0; i < values.length; ++i) {
+          const k = KEY + i;
+          const v = values[i];
+          expect(kvMap.get(k)).toEqual(v);
         }
       });
     });

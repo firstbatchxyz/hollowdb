@@ -7,7 +7,7 @@ export type HollowDBGetKVMap = {
     options?: SortKeyCacheRangeOptions;
   };
 };
-export const getAllKeys: HollowDBContractFunction<HollowDBGetKVMap> = async (state, action) => {
+export const getKVMap: HollowDBContractFunction<HollowDBGetKVMap> = async (state, action) => {
   const {options} = action.input.data;
 
   return {
