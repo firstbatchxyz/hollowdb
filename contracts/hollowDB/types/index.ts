@@ -1,15 +1,14 @@
-import {HollowDBGet} from '../actions/crud/get';
-import {HollowDBPut} from '../actions/crud/put';
-import {HollowDBRemove} from '../actions/crud/remove';
-import {HollowDBUpdate} from '../actions/crud/update';
-import {HollowDBGetKeys} from '../actions/state/getAllKeys';
-import {HollowDBUpdateState} from '../actions/state/updateState';
-import {HollowDBUpdateWhitelist} from '../actions/state/updateWhitelist';
-import {HollowDBEvolve} from '../actions/evolve';
+import type {HollowDBGet} from '../actions/crud/get';
+import type {HollowDBPut} from '../actions/crud/put';
+import type {HollowDBRemove} from '../actions/crud/remove';
+import type {HollowDBUpdate} from '../actions/crud/update';
+import type {HollowDBGetKeys} from '../actions/state/getKeys';
+import type {HollowDBUpdateState} from '../actions/state/updateState';
+import type {HollowDBUpdateWhitelist} from '../actions/state/updateWhitelist';
+import type {HollowDBEvolve} from '../actions/evolve';
+import type {HollowDBGetKVMap} from '../actions/state/getKVMap';
 
-/**
- * Union of all HollowDB input types
- */
+/** Union of all HollowDB input types. */
 export type HollowDBInput =
   // crud
   | HollowDBGet
@@ -18,14 +17,13 @@ export type HollowDBInput =
   | HollowDBUpdate
   // state
   | HollowDBGetKeys
+  | HollowDBGetKVMap
   | HollowDBUpdateState
   | HollowDBUpdateWhitelist
   // evolve
   | HollowDBEvolve;
 
-/**
- * HollowDB contract state.
- */
+/** HollowDB contract state. */
 export interface HollowDBState {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   verificationKey: any;
@@ -47,22 +45,16 @@ export interface HollowDBState {
   };
 }
 
-/**
- * A contract action, that is a caller and their input.
- */
+/** A contract action, that is a caller and their input. */
 export type HollowDBAction<InputType> = {
   input: InputType;
   caller: string;
 };
 
-/**
- * Protocol used in SnarkJS, can also be retrieved from `verificationKey.protocol`.
- */
+/** Protocol used in SnarkJS, can also be retrieved from `verificationKey.protocol`. */
 export type ProofSystem = 'groth16' | 'plonk';
 
-/**
- * A result from a read request.
- */
+/** A result from a read request. */
 export type HollowDBResult = unknown;
 
 /**

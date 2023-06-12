@@ -6,7 +6,8 @@ import {remove} from './actions/crud/remove.js';
 // evolve functionality
 import {evolve} from './actions/evolve.js';
 // state updates
-import {getAllKeys} from './actions/state/getAllKeys.js';
+import {getKeys} from './actions/state/getKeys.js';
+import {getKVMap} from './actions/state/getKVMap.js';
 import {updateState} from './actions/state/updateState.js';
 import {updateWhitelist} from './actions/state/updateWhitelist.js';
 // others
@@ -17,8 +18,10 @@ export const handle: HollowDBContractFunction = (state, action) => {
   switch (action.input.function) {
     case 'get':
       return get(state, action);
-    case 'getAllKeys':
-      return getAllKeys(state, action);
+    case 'getKeys':
+      return getKeys(state, action);
+    case 'getKVMap':
+      return getKVMap(state, action);
     case 'put':
       return put(state, action);
     case 'update':

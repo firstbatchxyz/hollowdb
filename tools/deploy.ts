@@ -22,16 +22,16 @@ async function main() {
 
   // read wallet
   const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
-  const wallet = JSON.parse(fs.readFileSync(walletPath).toString()) as JWKInterface;
+  const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8')) as JWKInterface;
 
   // read source code
   const contractSourcePath = __dirname + '/../build/hollowDB/contract.js';
-  const contractSource = fs.readFileSync(contractSourcePath).toString();
+  const contractSource = fs.readFileSync(contractSourcePath, 'utf-8');
 
   // update verification key if needed
   if (proofSystem === 'groth16' || proofSystem === 'plonk') {
-    const verKeyPath = __dirname + `/../config/circuits/hollow-authz-${proofSystem}/verification_key.json`;
-    const verKey = JSON.parse(fs.readFileSync(verKeyPath).toString());
+    const verKeyPath = __dirname + `/../circuits/hollow-authz-${proofSystem}/verification_key.json`;
+    const verKey = JSON.parse(fs.readFileSync(verKeyPath, 'utf-8'));
     initialState.verificationKey = verKey;
   }
 

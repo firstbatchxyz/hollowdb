@@ -1,6 +1,7 @@
 import {InteractionResult, WriteInteractionResponse} from 'warp-contracts';
 import {HollowDBInput, HollowDBState} from '../contracts/hollowDB/types';
 import {Base} from './base';
+import {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
 
 /**
  * HollowDB function wrappers, exposing basic key-value database
@@ -66,12 +67,39 @@ export class SDK<V = unknown> extends Base {
    * @returns an array of all the keys in the database
    */
   async getAllKeys(): Promise<string[]> {
+    return this.getKeys();
+  }
+
+  /**
+   * Returns keys with respect to a range option. If no option is provided,
+   * this function is equivalent to {@link getAllKeys}.
+   */
+  async getKeys(options?: SortKeyCacheRangeOptions): Promise<string[]> {
     const response = await this.hollowDB.viewState<HollowDBInput, string[]>({
-      function: 'getAllKeys',
-      data: {},
+      function: 'getKeys',
+      data: {
+        options,
+      },
     });
     if (response.type !== 'ok') {
-      throw new Error('Contract Error [getAllKeys]: ' + response.errorMessage);
+      throw new Error('Contract Error [getKeys]: ' + response.errorMessage);
+    }
+    return response.result;
+  }
+
+  /**
+   * Returns a mapping of keys and values with respect to a range option. If no option is provided,
+   * all values are returned.
+   */
+  async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V>> {
+    const response = await this.hollowDB.viewState<HollowDBInput, Map<string, V>>({
+      function: 'getKVMap',
+      data: {
+        options,
+      },
+    });
+    if (response.type !== 'ok') {
+      throw new Error('Contract Error [getKVMap]: ' + response.errorMessage);
     }
     return response.result;
   }
