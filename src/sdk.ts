@@ -1,48 +1,8 @@
-import {InteractionResult, WriteInteractionResponse} from 'warp-contracts';
-import {HollowDBInput, HollowDBState} from '../contracts/hollowDB/types';
 import {Base} from './base';
-import {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
+import type {ContractInput} from '../contracts/common/types/contract';
+import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
 
-/**
- * HollowDB function wrappers, exposing basic key-value database
- * functions.
- *
- * ```ts
- * const hollowdb = new SDK<YourValueType>(...)
- * hollowd.put(key, value)
- * hollowd.get(key)
- * hollowd.update(key, value, proof?)
- * hollowd.remove(key, proof?)
- * ```
- *
- * For more fine-grained control over the underlying control,
- * the SDK also exposes the following:
- *
- * ```ts
- * hollowdb.dryWrite(input)         // write on local state
- * hollowdb.writeInteraction(input) // write on updated state
- * hollowdb.readState()             // read contract state
- * ```
- */
 export class SDK<V = unknown> extends Base {
-  /**
-   * Gets the value of the given key.
-   * @param key the key of the value to be returned
-   * @returns the value of the given key
-   */
-  async get(key: string): Promise<V> {
-    const response = await this.hollowDB.viewState<HollowDBInput, V>({
-      function: 'get',
-      data: {
-        key,
-      },
-    });
-    if (response.type !== 'ok') {
-      throw new Error('Contract Error [get]: ' + response.errorMessage);
-    }
-    return response.result;
-  }
-
   /**
    * Gets the values of the given keys.
    * @param keys an array of keys
@@ -59,7 +19,7 @@ export class SDK<V = unknown> extends Base {
    * @returns the values of the given keys
    */
   async getStorageValues(keys: string[]) {
-    return await this.hollowDB.getStorageValues(keys);
+    return await this.contract.getStorageValues(keys);
   }
 
   /**
@@ -75,7 +35,7 @@ export class SDK<V = unknown> extends Base {
    * this function is equivalent to {@link getAllKeys}.
    */
   async getKeys(options?: SortKeyCacheRangeOptions): Promise<string[]> {
-    const response = await this.hollowDB.viewState<HollowDBInput, string[]>({
+    const response = await this.viewState<string[]>({
       function: 'getKeys',
       data: {
         options,
@@ -92,7 +52,7 @@ export class SDK<V = unknown> extends Base {
    * all values are returned.
    */
   async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V>> {
-    const response = await this.hollowDB.viewState<HollowDBInput, Map<string, V>>({
+    const response = await this.viewState<Map<string, V>>({
       function: 'getKVMap',
       data: {
         options,
@@ -105,33 +65,21 @@ export class SDK<V = unknown> extends Base {
   }
 
   /**
-   * Return the latest contract state.
-   * @returns contract state
+   * Gets the value of the given key.
+   * @param key the key of the value to be returned
+   * @returns the value of the given key
    */
-  async readState() {
-    return await this.hollowDB.readState();
-  }
-
-  /**
-   * A typed wrapper around `dryWrite`, which evaluates a given input
-   * on the local state, without creating a transaction. This may provide
-   * better UX for some use-cases.
-   * @param input input in the form of `{function, data}`
-   * @returns interaction result
-   */
-  async dryWrite(input: HollowDBInput): Promise<InteractionResult<HollowDBState, unknown>> {
-    return await this.hollowDB.dryWrite<HollowDBInput>(input);
-  }
-
-  /**
-   * A typed wrapper around `writeInteraction`, which creates a
-   * transaction. You are likely to use this after `dryWrite`, or you
-   * may directly call this function.
-   * @param input input in the form of `{function, data}`
-   * @returns interaction response
-   */
-  async writeInteraction(input: HollowDBInput): Promise<WriteInteractionResponse | null> {
-    return await this.hollowDB.writeInteraction<HollowDBInput>(input);
+  async get(key: string): Promise<V> {
+    const response = await this.viewState<V>({
+      function: 'get',
+      data: {
+        key,
+      },
+    });
+    if (response.type !== 'ok') {
+      throw new Error('Contract Error [get]: ' + response.errorMessage);
+    }
+    return response.result;
   }
 
   /**
@@ -140,7 +88,7 @@ export class SDK<V = unknown> extends Base {
    * @param value the value to be inserted
    */
   async put(key: string, value: V): Promise<void> {
-    const input: HollowDBInput = {
+    const input: ContractInput = {
       function: 'put',
       data: {
         key,
@@ -161,7 +109,7 @@ export class SDK<V = unknown> extends Base {
    * @param proof optional zero-knowledge proof
    */
   async update(key: string, value: V, proof: object = {}): Promise<void> {
-    const input: HollowDBInput = {
+    const input: ContractInput = {
       function: 'update',
       data: {
         key,
@@ -183,14 +131,14 @@ export class SDK<V = unknown> extends Base {
    * @param proof optional zero-knowledge proof
    */
   async remove(key: string, proof: object = {}): Promise<void> {
-    const input: HollowDBInput = {
+    const input: ContractInput = {
       function: 'remove',
       data: {
         key,
         proof,
       },
     };
-    const result = await this.hollowDB.dryWrite(input);
+    const result = await this.dryWrite(input);
     if (result.type !== 'ok') {
       throw new Error('Contract Error [remove]: ' + result.errorMessage);
     }

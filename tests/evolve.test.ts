@@ -2,14 +2,11 @@ import ArLocal from 'arlocal';
 import {JWKInterface, LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import dummyContractSource from './res/dummyContract';
-import initialState from '../common/initialState';
+import initialState from '../contracts/states/hollowdb';
 import fs from 'fs';
 import path from 'path';
 import {Admin, SDK} from '../src';
 import constants from './constants';
-
-// arbitrarily long timeout
-jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
 describe('hollowdb evolve', () => {
   let arlocal: ArLocal;
@@ -21,16 +18,12 @@ describe('hollowdb evolve', () => {
   let ownerJWK: JWKInterface;
 
   beforeAll(async () => {
-    /**
-     * TODO: we are creating a new arlocal instance here, otherwise it clashes with the other one
-     * we may use fixtures as a fix here
-     */
     arlocal = new ArLocal(constants.ARWEAVE_PORT + 1, false);
     await arlocal.start();
 
     LoggerFactory.INST.logLevel('error');
 
-    contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
+    contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowdb.js'), 'utf8');
     newContractSource = dummyContractSource;
 
     // setup warp factory for local arweave
@@ -77,5 +70,9 @@ describe('hollowdb evolve', () => {
 
     // calling a non-existent function in the new contract should give error
     await expect(ownerSDK.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
+  });
+
+  afterAll(async () => {
+    await arlocal.stop();
   });
 });

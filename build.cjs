@@ -1,7 +1,7 @@
 const {build} = require('esbuild');
 const replace = require('replace-in-file');
 
-const contracts = ['hollowDB/contract.ts'];
+const contracts = ['hollowdb.ts'];
 
 build({
   entryPoints: contracts.map(source => {

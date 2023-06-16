@@ -5,9 +5,6 @@ import constants from './constants';
 import {decimalToHex} from './utils';
 const snarkjs = require('snarkjs');
 
-// arbitrarily long timeout
-jest.setTimeout(constants.JEST_TIMEOUT_MS);
-
 const preimage = BigInt(1122334455);
 const curValue = {
   lorem: 'ipsum',
@@ -32,10 +29,10 @@ describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits (%s)', proof
     // prepare prover and verification key
     if (proofSystem === 'groth16') {
       prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, proofSystem);
-      verificationKey = JSON.parse(readFileSync(constants.GROTH16_VERIFICATIONKEY_PATH).toString());
+      verificationKey = JSON.parse(readFileSync(constants.GROTH16_VERIFICATIONKEY_PATH, 'utf-8'));
     } else {
       prover = new Prover(constants.PLONK_WASM_PATH, constants.PLONK_PROVERKEY_PATH, proofSystem);
-      verificationKey = JSON.parse(readFileSync(constants.PLONK_VERIFICATIONKEY_PATH).toString());
+      verificationKey = JSON.parse(readFileSync(constants.PLONK_VERIFICATIONKEY_PATH, 'utf-8'));
     }
 
     // generate a proof

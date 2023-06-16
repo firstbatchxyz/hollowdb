@@ -10,4 +10,5 @@ module.exports = {
   globals: {
     __REDIS_URL__: 'redis://default:redispw@localhost:6379',
   },
+  testTimeout: 60000,
 };

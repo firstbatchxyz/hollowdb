@@ -1,4 +1,4 @@
-const errors = {
+export const errors = {
   KeyExistsError: new ContractError('Key already exists, use update instead'),
   KeyNotExistsError: new ContractError('Key does not exist'),
   CantEvolveError: new ContractError('Evolving is disabled'),
@@ -8,6 +8,4 @@ const errors = {
   UnknownFunctionError: (f: string) => new ContractError('Unknown function: ', f),
   InvalidProofError: (f: string) => new ContractError('Proof verification failed in: ' + f),
   NotOwnerError: (f: string) => new ContractError('Only the contract owner has access to: ' + f),
-};
-
-export default errors as Readonly<typeof errors>;
+} as const;

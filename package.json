@@ -80,7 +80,6 @@
     "warp-contracts-redis": "^0.3.0"
   },
   "devDependencies": {
-    "@ethersproject/sha2": "^5.7.0",
     "@parcel/packager-ts": "^2.8.3",
     "@parcel/transformer-typescript-tsc": "^2.8.3",
     "@parcel/transformer-typescript-types": "^2.8.3",

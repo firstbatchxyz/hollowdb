@@ -20,7 +20,7 @@ async function evolve() {
   const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8')) as JWKInterface;
 
   // read the new source code
-  const contractSourcePath = __dirname + '/../build/hollowDB/contract.js';
+  const contractSourcePath = __dirname + '/../build/hollowdb.js';
   const contractSource = fs.readFileSync(contractSourcePath, 'utf-8');
 
   // create a warp instance

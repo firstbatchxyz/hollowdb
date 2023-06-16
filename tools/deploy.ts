@@ -3,7 +3,7 @@ import {Admin} from '../src';
 import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
-import initialState from '../common/initialState';
+import initialState from '../contracts/states/hollowdb';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,14 +25,14 @@ async function main() {
   const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8')) as JWKInterface;
 
   // read source code
-  const contractSourcePath = __dirname + '/../build/hollowDB/contract.js';
+  const contractSourcePath = __dirname + '/../build/hollowdb.js';
   const contractSource = fs.readFileSync(contractSourcePath, 'utf-8');
 
   // update verification key if needed
   if (proofSystem === 'groth16' || proofSystem === 'plonk') {
-    const verKeyPath = __dirname + `/../circuits/hollow-authz-${proofSystem}/verification_key.json`;
+    const verKeyPath = __dirname + `/../config/circuits/hollow-authz-${proofSystem}/verification_key.json`;
     const verKey = JSON.parse(fs.readFileSync(verKeyPath, 'utf-8'));
-    initialState.verificationKey = verKey;
+    initialState.verificationKeys.auth = verKey;
   }
 
   // deploying to mainnet

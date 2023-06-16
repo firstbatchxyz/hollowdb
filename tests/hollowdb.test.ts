@@ -1,7 +1,7 @@
 import ArLocal from 'arlocal';
 import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-import initialState from '../common/initialState';
+import initialState from '../contracts/states/hollowdb';
 import fs from 'fs';
 import path from 'path';
 import {SDK, Admin} from '../src';
@@ -10,20 +10,12 @@ import {computeKey} from './utils/computeKey';
 import {randomBytes} from 'crypto';
 import constants from './constants';
 import {globals} from '../jest.config.cjs';
-import {HollowDBState} from '../contracts/hollowDB/types';
 import {Redis} from 'ioredis';
 import {decimalToHex} from './utils';
 import {overrideCache} from './utils/cache';
+import {addToWhitelist, disableWhitelisting, enableWhitelisting, removeFromWhitelist} from './utils/whitelisting';
+import {disableProofs, enableProofs} from './utils/proofs';
 
-jest.setTimeout(constants.JEST_TIMEOUT_MS);
-
-enum PublicSignal {
-  CurValueHash = 0,
-  NextValueHash = 1,
-  Key = 2,
-}
-
-// just an arbitrary value type
 type ValueType = {
   val: string;
 };
@@ -38,11 +30,11 @@ describe('hollowdb', () => {
     await arlocal.start();
 
     LoggerFactory.INST.logLevel('error');
-    contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowDB/contract.js'), 'utf8');
+    contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowdb.js'), 'utf8');
     prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, 'groth16');
   });
 
-  const tests = ['lmdb', 'redis', 'default'] as const;
+  const tests = ['redis', 'lmdb', 'default'] as const;
   describe.each(tests)('using %s cache, proofs enabled', cacheType => {
     let ownerAdmin: Admin<ValueType>;
     let aliceSDK: SDK<ValueType>;
@@ -79,7 +71,6 @@ describe('hollowdb', () => {
         warp,
         true // bundling is disabled during testing
       );
-      console.log('Deployed contract:', hollowDBTxId);
 
       // setup cache
       if (cacheType === 'redis') {
@@ -89,11 +80,8 @@ describe('hollowdb', () => {
       if (cacheType === 'redis') {
         await redisClient.connect();
       }
-
-      // log level
       LoggerFactory.INST.logLevel('none');
 
-      // prepare Admin & SDK
       ownerAdmin = new Admin(ownerWallet.jwk, hollowDBTxId, warp);
       aliceSDK = new SDK(aliceWallet.jwk, hollowDBTxId, warp);
       ownerAddress = ownerWallet.address;
@@ -105,15 +93,16 @@ describe('hollowdb', () => {
 
     it('should succesfully deploy with correct state', async () => {
       const {cachedValue} = await ownerAdmin.readState();
-      expect(cachedValue.state.verificationKey).toEqual(null);
-      expect(cachedValue.state.isProofRequired).toEqual(true);
+      expect(cachedValue.state.verificationKeys.auth).toEqual(null);
+      expect(cachedValue.state.isProofRequired.auth).toEqual(true);
       expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
       expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
       expect(cachedValue.state.owner).toEqual(ownerAddress);
     });
 
     describe('admin operations', () => {
-      let verificationKey: HollowDBState['verificationKey'];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let verificationKey: any;
 
       beforeAll(() => {
         verificationKey = JSON.parse(
@@ -122,9 +111,9 @@ describe('hollowdb', () => {
       });
 
       it('should set verification key', async () => {
-        await ownerAdmin.setVerificationKey(verificationKey);
+        await ownerAdmin.updateVerificationKey('auth', verificationKey);
         const {cachedValue} = await ownerAdmin.readState();
-        expect(cachedValue.state.verificationKey).toEqual(verificationKey);
+        expect(cachedValue.state.verificationKeys.auth).toEqual(verificationKey);
       });
     });
 
@@ -133,7 +122,6 @@ describe('hollowdb', () => {
         expect(await ownerAdmin.get(KEY)).toEqual(null);
         await ownerAdmin.put(KEY, VALUE);
         expect(await ownerAdmin.get(KEY)).toEqual(VALUE);
-
         expect((await ownerAdmin.getKVMap()).get(KEY)).toEqual(VALUE);
       });
 
@@ -144,8 +132,7 @@ describe('hollowdb', () => {
       });
 
       it('should put many values', async () => {
-        const count = 10;
-        const values = Array<ValueType>(count).fill({
+        const values = Array<ValueType>(10).fill({
           val: randomBytes(10).toString('hex'),
         });
 
@@ -157,7 +144,6 @@ describe('hollowdb', () => {
           expect(await ownerAdmin.get(k)).toEqual(v);
         }
 
-        // make sure you can get them via kvMap
         const kvMap = await ownerAdmin.getKVMap();
         for (let i = 0; i < values.length; ++i) {
           const k = KEY + i;
@@ -174,31 +160,24 @@ describe('hollowdb', () => {
         const currentValue = await aliceSDK.get(KEY);
         const fullProof = await prover.generateProof(KEY_PREIMAGE, currentValue, NEXT_VALUE);
         proof = fullProof.proof;
-        expect(prover.valueToBigInt(currentValue).toString()).toEqual(
-          fullProof.publicSignals[PublicSignal.CurValueHash]
-        );
-        expect(prover.valueToBigInt(NEXT_VALUE).toString()).toEqual(
-          fullProof.publicSignals[PublicSignal.NextValueHash]
-        );
-        expect(KEY).toEqual(decimalToHex(fullProof.publicSignals[PublicSignal.Key]));
+        expect(prover.valueToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[0]);
+        expect(prover.valueToBigInt(NEXT_VALUE).toString()).toEqual(fullProof.publicSignals[1]);
+        expect(KEY).toEqual(decimalToHex(fullProof.publicSignals[2]));
       });
 
       it('should NOT update with a proof using wrong current value', async () => {
-        // generate a proof with wrong next value
-        const fullProof = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
-        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
+        const {proof} = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow();
       });
 
       it('should NOT update with a proof using wrong next value', async () => {
-        // generate a proof with wrong next value
-        const fullProof = await prover.generateProof(KEY_PREIMAGE, VALUE, 'abcdefg');
-        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
+        const {proof} = await prover.generateProof(KEY_PREIMAGE, VALUE, 'abcdefg');
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow();
       });
 
       it('should NOT update with a proof using wrong preimage', async () => {
-        // generate a proof with wrong preimage
-        const fullProof = await prover.generateProof(1234567n, VALUE, NEXT_VALUE);
-        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
+        const {proof} = await prover.generateProof(1234567n, VALUE, NEXT_VALUE);
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow();
       });
 
       it('should NOT update an existing value without a proof', async () => {
@@ -225,10 +204,9 @@ describe('hollowdb', () => {
         const fullProof = await prover.generateProof(KEY_PREIMAGE, currentValue, null);
         proof = fullProof.proof;
 
-        expect(prover.valueToBigInt(currentValue).toString()).toEqual(
-          fullProof.publicSignals[PublicSignal.CurValueHash]
-        );
-        expect(KEY).toEqual(decimalToHex(fullProof.publicSignals[PublicSignal.Key]));
+        expect(prover.valueToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[0]);
+        expect('0').toEqual(fullProof.publicSignals[1]);
+        expect(KEY).toEqual(decimalToHex(fullProof.publicSignals[2]));
       });
 
       it('should remove an existing value with proof', async () => {
@@ -237,7 +215,7 @@ describe('hollowdb', () => {
         expect(await aliceSDK.get(KEY)).toEqual(null);
       });
 
-      it('should NOT remove an already remove value with proof', async () => {
+      it('should NOT remove an already removed value with proof', async () => {
         expect(await aliceSDK.get(KEY)).toEqual(null);
         await expect(aliceSDK.remove(KEY, proof)).rejects.toThrow('Key does not exist');
       });
@@ -253,15 +231,8 @@ describe('hollowdb', () => {
         val: randomBytes(10).toString('hex'),
       };
 
-      // disable proofs
       beforeAll(async () => {
-        const {cachedValue} = await ownerAdmin.readState();
-        expect(cachedValue.state.isProofRequired).toEqual(true);
-
-        await ownerAdmin.setProofRequirement(false);
-
-        const {cachedValue: newCachedValue} = await ownerAdmin.readState();
-        expect(newCachedValue.state.isProofRequired).toEqual(false);
+        await disableProofs(ownerAdmin);
       });
 
       it('should put a value to a key & read it', async () => {
@@ -292,17 +263,7 @@ describe('hollowdb', () => {
         };
 
         beforeAll(async () => {
-          // enable whitelisting
-          const {cachedValue: oldCachedValue} = await ownerAdmin.readState();
-          expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(false);
-          expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(false);
-          await ownerAdmin.setWhitelistRequirement({
-            put: true,
-            update: true,
-          });
-          const {cachedValue: newCachedValue} = await ownerAdmin.readState();
-          expect(newCachedValue.state.isWhitelistRequired.put).toEqual(true);
-          expect(newCachedValue.state.isWhitelistRequired.update).toEqual(true);
+          await enableWhitelisting(ownerAdmin);
         });
 
         it('should NOT put/update/remove when NOT whitelisted', async () => {
@@ -318,18 +279,7 @@ describe('hollowdb', () => {
         });
 
         it('should whitelist user Alice', async () => {
-          const {cachedValue: oldCachedValue} = await aliceSDK.readState();
-          expect(oldCachedValue.state.whitelist.put).not.toHaveProperty(aliceAddress);
-          expect(oldCachedValue.state.whitelist.update).not.toHaveProperty(aliceAddress);
-
-          await ownerAdmin.addUsersToWhitelist([aliceAddress], 'put');
-          await ownerAdmin.addUsersToWhitelist([aliceAddress], 'update');
-
-          const {cachedValue: newCachedValue} = await aliceSDK.readState();
-          expect(newCachedValue.state.whitelist.put).toHaveProperty(aliceAddress);
-          expect(newCachedValue.state.whitelist.update).toHaveProperty(aliceAddress);
-          expect(newCachedValue.state.whitelist.put[aliceAddress]).toEqual(true);
-          expect(newCachedValue.state.whitelist.update[aliceAddress]).toEqual(true);
+          await addToWhitelist(ownerAdmin, aliceAddress);
         });
 
         it('should put/update/remove when whitelisted', async () => {
@@ -339,46 +289,16 @@ describe('hollowdb', () => {
         });
 
         it('should remove whitelisted user Alice', async () => {
-          const {cachedValue} = await aliceSDK.readState();
-          expect(cachedValue.state.whitelist.put).toHaveProperty(aliceAddress);
-          expect(cachedValue.state.whitelist.update).toHaveProperty(aliceAddress);
-          expect(cachedValue.state.whitelist.put[aliceAddress]).toEqual(true);
-          expect(cachedValue.state.whitelist.update[aliceAddress]).toEqual(true);
-
-          await ownerAdmin.removeUsersFromWhitelist([aliceAddress], 'put');
-          await ownerAdmin.removeUsersFromWhitelist([aliceAddress], 'update');
-
-          const {cachedValue: newCachedValue} = await aliceSDK.readState();
-          expect(newCachedValue.state.whitelist.put).not.toHaveProperty(aliceAddress);
-          expect(newCachedValue.state.whitelist.update).not.toHaveProperty(aliceAddress);
+          await removeFromWhitelist(ownerAdmin, aliceAddress);
         });
 
         afterAll(async () => {
-          // disable whitelisting
-          const {cachedValue: oldCachedValue} = await ownerAdmin.readState();
-          expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(true);
-          expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(true);
-
-          await ownerAdmin.setWhitelistRequirement({
-            put: false,
-            update: false,
-          });
-
-          const {cachedValue: newCachedValue} = await ownerAdmin.readState();
-          expect(newCachedValue.state.isWhitelistRequired.put).toEqual(false);
-          expect(newCachedValue.state.isWhitelistRequired.update).toEqual(false);
+          await disableWhitelisting(ownerAdmin);
         });
       });
 
       afterAll(async () => {
-        // enable proofs
-        const {cachedValue: oldCachedValue} = await ownerAdmin.readState();
-        expect(oldCachedValue.state.isProofRequired).toEqual(false);
-
-        await ownerAdmin.setProofRequirement(true);
-
-        const {cachedValue: newCachedValue} = await ownerAdmin.readState();
-        expect(newCachedValue.state.isProofRequired).toEqual(true);
+        await enableProofs(ownerAdmin);
       });
     });
 
