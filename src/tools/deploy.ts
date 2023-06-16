@@ -1,9 +1,9 @@
 import {WarpFactory, JWKInterface} from 'warp-contracts';
-import {Admin} from '../src';
+import {Admin} from '..';
 import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
-import initialState from '../contracts/states/hollowdb';
+import initialState from '../../contracts/states/hollowdb';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,16 +21,16 @@ async function main() {
   }
 
   // read wallet
-  const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
+  const walletPath = __dirname + '/../../config/wallet/' + walletName + '.json';
   const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8')) as JWKInterface;
 
   // read source code
-  const contractSourcePath = __dirname + '/../build/hollowdb.js';
+  const contractSourcePath = __dirname + '/../../build/hollowdb.js';
   const contractSource = fs.readFileSync(contractSourcePath, 'utf-8');
 
   // update verification key if needed
   if (proofSystem === 'groth16' || proofSystem === 'plonk') {
-    const verKeyPath = __dirname + `/../config/circuits/hollow-authz-${proofSystem}/verification_key.json`;
+    const verKeyPath = __dirname + `/../../config/circuits/hollow-authz-${proofSystem}/verification_key.json`;
     const verKey = JSON.parse(fs.readFileSync(verKeyPath, 'utf-8'));
     initialState.verificationKeys.auth = verKey;
   }

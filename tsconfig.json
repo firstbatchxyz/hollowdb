@@ -4,7 +4,7 @@
     "rootDir": ".",
     "outDir": "./build",
     "strict": true,
-    "typeRoots": ["./types", "./node_modules/@types/"],
+    "typeRoots": ["./node_modules/@types/"],
     "moduleResolution": "node",
     "target": "ES2020",
     "esModuleInterop": true,
@@ -15,7 +15,7 @@
     "types": ["jest"],
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "common/**/*.ts", "contracts/**/*.ts", "tools/**/*.ts", "types/**/*.ts"],
+  "include": ["src/**/*.ts", "contracts/**/*.ts"],
   "exclude": ["./node_modules", "./lib", "./build", "./cache"],
   "ts-node": {
     "esm": true,

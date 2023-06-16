@@ -1,5 +1,5 @@
 import {WarpFactory, JWKInterface} from 'warp-contracts';
-import {Admin} from '../src/';
+import {Admin} from '..';
 import {fileURLToPath} from 'url';
 import path from 'path';
 import fs from 'fs';
@@ -16,11 +16,11 @@ async function evolve() {
   const contractTxId = process.argv[3];
 
   // read wallet
-  const walletPath = __dirname + '/../config/wallet/' + walletName + '.json';
+  const walletPath = __dirname + '/../../config/wallet/' + walletName + '.json';
   const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8')) as JWKInterface;
 
   // read the new source code
-  const contractSourcePath = __dirname + '/../build/hollowdb.js';
+  const contractSourcePath = __dirname + '/../../build/hollowdb.js';
   const contractSource = fs.readFileSync(contractSourcePath, 'utf-8');
 
   // create a warp instance
