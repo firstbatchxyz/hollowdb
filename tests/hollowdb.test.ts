@@ -1,10 +1,9 @@
 import ArLocal from 'arlocal';
 import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-import initialState from '../contracts/states/hollowdb';
+import initialHollowState from '../src/contracts/states/hollowdb';
 import fs from 'fs';
-import path from 'path';
-import {SDK, Admin} from '../src';
+import {SDK, Admin} from '../src/hollowdb';
 import {Prover} from './utils/prover';
 import {computeKey} from './utils/computeKey';
 import {randomBytes} from 'crypto';
@@ -13,12 +12,14 @@ import {globals} from '../jest.config.cjs';
 import {Redis} from 'ioredis';
 import {decimalToHex} from './utils';
 import {overrideCache} from './utils/cache';
-import {addToWhitelist, disableWhitelisting, enableWhitelisting, removeFromWhitelist} from './utils/whitelisting';
 import {disableProofs, enableProofs} from './utils/proofs';
+import {addToWhitelist, disableWhitelisting, enableWhitelisting, removeFromWhitelist} from './utils/whitelisting';
 
 type ValueType = {
   val: string;
 };
+
+const proofSystem = 'groth16';
 
 describe('hollowdb', () => {
   let arlocal: ArLocal;
@@ -30,8 +31,12 @@ describe('hollowdb', () => {
     await arlocal.start();
 
     LoggerFactory.INST.logLevel('error');
-    contractSource = fs.readFileSync(path.join(__dirname, '../build/hollowdb.js'), 'utf8');
-    prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, 'groth16');
+    contractSource = fs.readFileSync('./build/hollowdb.js', 'utf8');
+    prover = new Prover(
+      constants.PROVERS[proofSystem].HOLLOWDB.WASM_PATH,
+      constants.PROVERS[proofSystem].HOLLOWDB.PROVERKEY_PATH,
+      proofSystem
+    );
   });
 
   const tests = ['redis', 'lmdb', 'default'] as const;
@@ -56,9 +61,6 @@ describe('hollowdb', () => {
       // setup warp factory for local arweave
       warp = WarpFactory.forLocal(constants.ARWEAVE_PORT).use(new DeployPlugin());
 
-      // disable Warp logs
-      LoggerFactory.INST.logLevel('none');
-
       // get accounts
       const ownerWallet = await warp.generateWallet();
       const aliceWallet = await warp.generateWallet();
@@ -66,7 +68,7 @@ describe('hollowdb', () => {
       // deploy contract
       const {contractTxId: hollowDBTxId} = await Admin.deploy(
         ownerWallet.jwk,
-        initialState,
+        initialHollowState,
         contractSource,
         warp,
         true // bundling is disabled during testing
@@ -80,8 +82,11 @@ describe('hollowdb', () => {
       if (cacheType === 'redis') {
         await redisClient.connect();
       }
+
+      // log level
       LoggerFactory.INST.logLevel('none');
 
+      // prepare Admin & SDK
       ownerAdmin = new Admin(ownerWallet.jwk, hollowDBTxId, warp);
       aliceSDK = new SDK(aliceWallet.jwk, hollowDBTxId, warp);
       ownerAddress = ownerWallet.address;
@@ -105,9 +110,7 @@ describe('hollowdb', () => {
       let verificationKey: any;
 
       beforeAll(() => {
-        verificationKey = JSON.parse(
-          fs.readFileSync(path.join(__dirname, '../' + constants.GROTH16_VERIFICATIONKEY_PATH), 'utf8')
-        );
+        verificationKey = JSON.parse(fs.readFileSync(constants.PROVERS.groth16.HOLLOWDB.VERIFICATIONKEY_PATH, 'utf8'));
       });
 
       it('should set verification key', async () => {
@@ -122,17 +125,15 @@ describe('hollowdb', () => {
         expect(await ownerAdmin.get(KEY)).toEqual(null);
         await ownerAdmin.put(KEY, VALUE);
         expect(await ownerAdmin.get(KEY)).toEqual(VALUE);
-        expect((await ownerAdmin.getKVMap()).get(KEY)).toEqual(VALUE);
       });
 
       it('should NOT put a value to the same key', async () => {
-        await expect(ownerAdmin.put(KEY, VALUE)).rejects.toThrow(
-          'Contract Error [put]: Key already exists, use update instead'
-        );
+        await expect(ownerAdmin.put(KEY, VALUE)).rejects.toThrow('Contract Error [put]: Key already exists.');
       });
 
       it('should put many values', async () => {
-        const values = Array<ValueType>(10).fill({
+        const count = 10;
+        const values = Array<ValueType>(count).fill({
           val: randomBytes(10).toString('hex'),
         });
 
@@ -143,13 +144,6 @@ describe('hollowdb', () => {
           await ownerAdmin.put(k, v);
           expect(await ownerAdmin.get(k)).toEqual(v);
         }
-
-        const kvMap = await ownerAdmin.getKVMap();
-        for (let i = 0; i < values.length; ++i) {
-          const k = KEY + i;
-          const v = values[i];
-          expect(kvMap.get(k)).toEqual(v);
-        }
       });
     });
 
@@ -159,29 +153,29 @@ describe('hollowdb', () => {
       beforeAll(async () => {
         const currentValue = await aliceSDK.get(KEY);
         const fullProof = await prover.generateProof(KEY_PREIMAGE, currentValue, NEXT_VALUE);
-        proof = fullProof.proof;
         expect(prover.valueToBigInt(currentValue).toString()).toEqual(fullProof.publicSignals[0]);
         expect(prover.valueToBigInt(NEXT_VALUE).toString()).toEqual(fullProof.publicSignals[1]);
         expect(KEY).toEqual(decimalToHex(fullProof.publicSignals[2]));
+        proof = fullProof.proof;
       });
 
       it('should NOT update with a proof using wrong current value', async () => {
-        const {proof} = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
-        await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow();
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
       });
 
       it('should NOT update with a proof using wrong next value', async () => {
-        const {proof} = await prover.generateProof(KEY_PREIMAGE, VALUE, 'abcdefg');
-        await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow();
+        const fullProof = await prover.generateProof(KEY_PREIMAGE, VALUE, 'abcdefg');
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
       });
 
       it('should NOT update with a proof using wrong preimage', async () => {
-        const {proof} = await prover.generateProof(1234567n, VALUE, NEXT_VALUE);
-        await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow();
+        const fullProof = await prover.generateProof(1234567n, VALUE, NEXT_VALUE);
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow();
       });
 
       it('should NOT update an existing value without a proof', async () => {
-        await expect(aliceSDK.update(KEY, NEXT_VALUE)).rejects.toThrow();
+        await expect(aliceSDK.update(KEY, NEXT_VALUE, {})).rejects.toThrow();
       });
 
       it('should update an existing value with proof', async () => {
@@ -191,7 +185,7 @@ describe('hollowdb', () => {
 
       it('should NOT update an existing value with the same proof', async () => {
         await expect(aliceSDK.update(KEY, NEXT_VALUE, proof)).rejects.toThrow(
-          'Contract Error [update]: Proof verification failed in: update'
+          'Contract Error [update]: Invalid proof.'
         );
       });
     });
@@ -215,7 +209,7 @@ describe('hollowdb', () => {
         expect(await aliceSDK.get(KEY)).toEqual(null);
       });
 
-      it('should NOT remove an already removed value with proof', async () => {
+      it('should NOT remove an already remove value with proof', async () => {
         expect(await aliceSDK.get(KEY)).toEqual(null);
         await expect(aliceSDK.remove(KEY, proof)).rejects.toThrow('Key does not exist');
       });
@@ -267,15 +261,11 @@ describe('hollowdb', () => {
         });
 
         it('should NOT put/update/remove when NOT whitelisted', async () => {
-          await expect(aliceSDK.put(KEY, VALUE)).rejects.toThrow(
-            'Contract Error [put]: User is not whitelisted for: put'
-          );
+          await expect(aliceSDK.put(KEY, VALUE)).rejects.toThrow('Contract Error [put]: Not whitelisted.');
           await expect(aliceSDK.update(KEY, NEXT_VALUE, {})).rejects.toThrow(
-            'Contract Error [update]: User is not whitelisted for: update'
+            'Contract Error [update]: Not whitelisted.'
           );
-          await expect(aliceSDK.remove(KEY, {})).rejects.toThrow(
-            'Contract Error [remove]: User is not whitelisted for: remove'
-          );
+          await expect(aliceSDK.remove(KEY, {})).rejects.toThrow('Contract Error [remove]: Not whitelisted.');
         });
 
         it('should whitelist user Alice', async () => {

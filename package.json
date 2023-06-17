@@ -1,7 +1,7 @@
 {
   "name": "hollowdb",
   "version": "1.2.2",
-  "description": "A decentralized key-value database",
+  "description": "A decentralized privacy-preserving key-value database",
   "license": "MIT",
   "type": "module",
   "source": "src/index.ts",
@@ -49,11 +49,11 @@
   "scripts": {
     "build": "yarn clean:lib && parcel build && yarn check",
     "build:types": "yarn compile -b tsconfig.types.json",
-    "contract:deploy": "yarn contract:build && npx ts-node ./src/tools/deploy.ts",
-    "contract:evolve": "yarn contract:build && npx ts-node ./src/tools/evolve.ts",
     "contract:build": "node build.cjs",
+    "contract:deploy": "yarn contract:build && npx ts-node ./src/bin/deploy.ts",
+    "contract:evolve": "yarn contract:build && npx ts-node ./src/bin/evolve.ts",
+    "contract:clean": "rimraf ./build",
     "compile": "tsc",
-    "clean:build": "rimraf ./build",
     "clean:lib": "rimraf ./lib",
     "check": "tsc --noEmit",
     "test": "jest --forceExit",

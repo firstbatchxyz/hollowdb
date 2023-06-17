@@ -2,14 +2,14 @@ import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/Sort
 
 export type GetInput = {
   function: 'get';
-  data: {
+  value: {
     key: string;
   };
 };
 
 export type PutInput = {
   function: 'put';
-  data: {
+  value: {
     key: string;
     value: unknown;
   };
@@ -17,7 +17,7 @@ export type PutInput = {
 
 export type RemoveInput = {
   function: 'remove';
-  data: {
+  value: {
     key: string;
     proof: object;
   };
@@ -25,7 +25,7 @@ export type RemoveInput = {
 
 export type UpdateInput = {
   function: 'update';
-  data: {
+  value: {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
@@ -35,37 +35,43 @@ export type UpdateInput = {
 
 export type GetKeysInput = {
   function: 'getKeys';
-  data: {
+  value: {
     options?: SortKeyCacheRangeOptions;
   };
 };
 
 export type GetKVMapInput = {
   function: 'getKVMap';
-  data: {
+  value: {
     options?: SortKeyCacheRangeOptions;
   };
 };
 
 export type UpdateRequirementInput = {
   function: 'updateRequirement';
-  data: {
-    type: 'whitelist' | 'proof';
-    name: string;
-    value: boolean;
-  };
+  value:
+    | {
+        type: 'whitelist';
+        name: string; // keyof whitelist
+        value: boolean;
+      }
+    | {
+        type: 'proof';
+        name: string; // keyof proof
+        value: boolean;
+      };
 };
 
 export type UpdateOwnerInput = {
   function: 'updateOwner';
-  data: {
+  value: {
     newOwner: string;
   };
 };
 
 export type UpdateVerificationKeyInput = {
   function: 'updateVerificationKey';
-  data: {
+  value: {
     verificationKey: object;
     name: string;
   };
@@ -73,7 +79,7 @@ export type UpdateVerificationKeyInput = {
 
 export type UpdateWhitelistInput = {
   function: 'updateWhitelist';
-  data: {
+  value: {
     add: string[];
     remove: string[];
     name: string;
@@ -82,5 +88,6 @@ export type UpdateWhitelistInput = {
 
 export type EvolveInput = {
   function: 'evolve';
-  value: string; // this naming is important!
+  // NOTE: it is important that this is named `value`
+  value: string;
 };

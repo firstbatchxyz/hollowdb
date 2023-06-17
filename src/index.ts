@@ -1,2 +1,2 @@
-export {SDK} from './sdk';
-export {Admin} from './admin';
+export {SDK, Admin} from './hollowdb';
+export {BaseSDK, BaseAdmin} from './common/index';

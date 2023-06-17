@@ -1,14 +1,21 @@
-import {errors} from '../errors';
-import {ContractAction, ContractInput, ContractState} from '../types/contract';
+import {
+  InvalidProofError,
+  KeyNotExistsError,
+  NoVerificationKeyError,
+  NotOwnerError,
+  NotWhitelistedError,
+  UnknownProofSystemError,
+} from '../errors';
+import type {ContractState} from '../types/contract';
 
 /** Verifies a zero-knowledge proof. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const verifyProof = async (proof: object, psignals: bigint[], verificationKey: any): Promise<boolean> => {
+export const verifyProof = async (proof: object, psignals: bigint[], verificationKey: any): Promise<boolean> => {
   if (verificationKey === null) {
-    throw errors.NoVerificationKeyError;
+    throw NoVerificationKeyError;
   }
   if (verificationKey.protocol !== 'groth16' && verificationKey.protocol !== 'plonk') {
-    throw errors.UnknownProofSystemError;
+    throw UnknownProofSystemError;
   }
   return await SmartWeave.extensions[verificationKey.protocol].verify(verificationKey, psignals, proof);
 };
@@ -41,39 +48,38 @@ export const digestToBytes = (digest: string): number[] => {
 export const safeGet = async (key: string): Promise<unknown> => {
   const val = await SmartWeave.kv.get(key);
   if (val === null) {
-    throw errors.KeyNotExistsError;
+    throw KeyNotExistsError;
   }
   return val;
 };
 
 /** Throws an error if caller is not the contract owner. */
-export const assertOwner = (state: ContractState, action: ContractAction<ContractInput>): void => {
-  if (action.caller !== state.owner) {
-    throw errors.NotOwnerError(action.input.function);
+export function assertOwner<State extends ContractState>(state: State, caller: string): void {
+  if (caller !== state.owner) {
+    throw NotOwnerError;
   }
-};
+}
 
 /** Throws an error if the caller is not whitelisted for the given list. */
-export const assertWhitelist = (state: ContractState, action: ContractAction<ContractInput>, list: string): void => {
-  if (state.isWhitelistRequired[list] && !state.whitelists[list][action.caller]) {
-    throw errors.NotWhitelistedError(action.input.function);
+export function assertWhitelist<State extends ContractState>(state: State, caller: string, list: string): void {
+  if (state.isWhitelistRequired[list] && !state.whitelists[list][caller]) {
+    throw NotWhitelistedError;
   }
-};
+}
 
 /**
- * An auth proof is required to make updates in HollowDB. The proof is a Poseidon
+ * An auth proof is required to make updates in the database. The proof is a Poseidon
  * preimage knowledge proof that is also bound to two values, the value currently in
  * database and the new value to be written. This binding happens via including
  * constraints related to the hashes of these values.
  */
-export const verifyAuthProof = async (
-  state: ContractState,
-  action: ContractAction<ContractInput>,
+export async function verifyAuthProof<State extends ContractState>(
+  state: State,
   proof: object,
   oldValue: unknown,
   newValue: unknown,
   key: string
-): Promise<void> => {
+): Promise<void> {
   if (!state.isProofRequired.auth) return;
 
   const verificationSuccess = await verifyProof(
@@ -83,6 +89,6 @@ export const verifyAuthProof = async (
   );
 
   if (!verificationSuccess) {
-    throw errors.InvalidProofError(action.input.function);
+    throw InvalidProofError;
   }
-};
+}

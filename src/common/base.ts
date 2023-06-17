@@ -3,9 +3,8 @@ import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {ContractInput, ContractState} from '../contracts/common/types/contract';
 
-/** A Base class for constructing the SDK and exposing type-safe Warp contract functions. */
-export class Base {
-  protected readonly contract: Contract<ContractState>;
+export class Base<State extends ContractState> {
+  protected readonly contract: Contract<State>;
   readonly warp: Warp;
   readonly contractTxId: string;
   readonly signer: ArWallet | CustomSignature;
@@ -22,12 +21,11 @@ export class Base {
     this.warp = warp
       // SnarkJS extension is required for proof verification
       .use(new SnarkjsExtension())
-      // Ethers extension is required for hashing (ripemd160)
+      // Ethers utilities extension is required for hashing
       .use(new EthersExtension());
 
-    // instantiate HollowDB
     this.contract = this.warp
-      .contract<ContractState>(this.contractTxId)
+      .contract<State>(this.contractTxId)
       .setEvaluationOptions({
         allowBigInt: true, // bigInt is required for circuits
         useKVStorage: true,
@@ -50,7 +48,7 @@ export class Base {
    * @param input input in the form of `{function, data}`
    * @returns interaction result
    */
-  async dryWrite(input: ContractInput) {
+  async dryWrite<Input extends ContractInput>(input: Input) {
     return await this.contract.dryWrite(input);
   }
 
@@ -61,16 +59,46 @@ export class Base {
    * @param input input in the form of `{function, data}`
    * @returns interaction response
    */
-  async writeInteraction(input: ContractInput) {
+  async writeInteraction<Input extends ContractInput>(input: Input) {
     return await this.contract.writeInteraction(input);
   }
 
   /**
+   * A typed wrapper around `dryWrite` followed by `writeInteraction`. This
+   * function first executes the interaction locally via `dryWrite`, and if
+   * there is an error, throws an error with an optional prefix in the message.
+   * @param input
+   * @param errorPrefix
+   */
+  async dryWriteInteraction<Input extends ContractInput>(input: Input, errorPrefix = '') {
+    const result = await this.dryWrite(input);
+    if (result.type !== 'ok') {
+      throw new Error(errorPrefix + result.errorMessage);
+    }
+    await this.writeInteraction(input);
+  }
+
+  /**
+   * TODO
+   * @template V
+   * @param input
+   * @param errorPrefix
+   * @returns
+   */
+  async safeReadInteraction<Input extends ContractInput, V>(input: Input, errorPrefix = '') {
+    const response = await this.viewState<Input, V>(input);
+    if (response.type !== 'ok') {
+      throw new Error(errorPrefix + response.errorMessage);
+    }
+    return response.result;
+  }
+
+  /**
    * A typed wrapper around `viewState`, which is a read interaction.
-   * @param input input in the form of `{function, data}`
+   * @param input input in the form of `{function, value}`
    * @returns interaction result
    */
-  async viewState<V>(input: ContractInput) {
-    return this.contract.viewState<typeof input, V>(input);
+  async viewState<Input extends ContractInput, R>(input: Input) {
+    return this.contract.viewState<typeof input, R>(input);
   }
 }

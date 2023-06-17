@@ -1,14 +1,14 @@
-import {ContractState} from '../common/types/contract';
+import type {HollowState} from '../hollowdb';
 
-const initialState: ContractState = {
+export default {
   owner: '',
-  canEvolve: true,
   verificationKeys: {
     auth: null,
   },
   isProofRequired: {
     auth: true,
   },
+  canEvolve: true,
   whitelists: {
     put: {},
     update: {},
@@ -17,6 +17,4 @@ const initialState: ContractState = {
     put: false,
     update: false,
   },
-};
-
-export default initialState;
+} satisfies HollowState;

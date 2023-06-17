@@ -1,12 +1,7 @@
 import {WarpFactory, JWKInterface} from 'warp-contracts';
-import {Admin} from '..';
-import {fileURLToPath} from 'url';
-import path from 'path';
+import {Admin} from '../hollowdb';
 import fs from 'fs';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 async function evolve() {
   if (process.argv.length !== 4) {
@@ -15,18 +10,10 @@ async function evolve() {
   const walletName = process.argv[2];
   const contractTxId = process.argv[3];
 
-  // read wallet
-  const walletPath = __dirname + '/../../config/wallet/' + walletName + '.json';
-  const wallet = JSON.parse(fs.readFileSync(walletPath, 'utf-8')) as JWKInterface;
-
-  // read the new source code
-  const contractSourcePath = __dirname + '/../../build/hollowdb.js';
-  const contractSource = fs.readFileSync(contractSourcePath, 'utf-8');
-
-  // create a warp instance
+  const wallet = JSON.parse(fs.readFileSync(`./config/wallets/${walletName}.json`, 'utf-8')) as JWKInterface;
+  const contractSource = fs.readFileSync('./build/hollowdb.js', 'utf-8');
   const warp = WarpFactory.forMainnet().use(new DeployPlugin());
 
-  // evolve
   console.log('Evolving contract...');
   const result = await Admin.evolve(wallet, contractSource, contractTxId, warp);
   console.log('Evolved.', result);

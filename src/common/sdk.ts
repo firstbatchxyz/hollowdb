@@ -1,8 +1,16 @@
 import {Base} from './base';
-import type {ContractInput} from '../contracts/common/types/contract';
+import type {ContractState} from '../contracts/common/types/contract';
 import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
+import type {
+  GetInput,
+  GetKVMapInput,
+  GetKeysInput,
+  PutInput,
+  RemoveInput,
+  UpdateInput,
+} from '../contracts/common/types/inputs';
 
-export class SDK<V = unknown> extends Base {
+export class BaseSDK<State extends ContractState, V = unknown> extends Base<State> {
   /**
    * Gets the values of the given keys.
    * @param keys an array of keys
@@ -35,9 +43,9 @@ export class SDK<V = unknown> extends Base {
    * this function is equivalent to {@link getAllKeys}.
    */
   async getKeys(options?: SortKeyCacheRangeOptions): Promise<string[]> {
-    const response = await this.viewState<string[]>({
+    const response = await this.viewState<GetKeysInput, string[]>({
       function: 'getKeys',
-      data: {
+      value: {
         options,
       },
     });
@@ -52,9 +60,9 @@ export class SDK<V = unknown> extends Base {
    * all values are returned.
    */
   async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V>> {
-    const response = await this.viewState<Map<string, V>>({
+    const response = await this.viewState<GetKVMapInput, Map<string, V>>({
       function: 'getKVMap',
-      data: {
+      value: {
         options,
       },
     });
@@ -70,9 +78,9 @@ export class SDK<V = unknown> extends Base {
    * @returns the value of the given key
    */
   async get(key: string): Promise<V> {
-    const response = await this.viewState<V>({
+    const response = await this.viewState<GetInput, V>({
       function: 'get',
-      data: {
+      value: {
         key,
       },
     });
@@ -88,18 +96,16 @@ export class SDK<V = unknown> extends Base {
    * @param value the value to be inserted
    */
   async put(key: string, value: V): Promise<void> {
-    const input: ContractInput = {
-      function: 'put',
-      data: {
-        key,
-        value,
+    await this.dryWriteInteraction<PutInput>(
+      {
+        function: 'put',
+        value: {
+          key,
+          value,
+        },
       },
-    };
-    const result = await this.dryWrite(input);
-    if (result.type !== 'ok') {
-      throw new Error('Contract Error [put]: ' + result.errorMessage);
-    }
-    await this.writeInteraction(input);
+      'Contract Error [put]: '
+    );
   }
 
   /**
@@ -109,19 +115,17 @@ export class SDK<V = unknown> extends Base {
    * @param proof optional zero-knowledge proof
    */
   async update(key: string, value: V, proof: object = {}): Promise<void> {
-    const input: ContractInput = {
-      function: 'update',
-      data: {
-        key,
-        value,
-        proof,
+    await this.dryWriteInteraction<UpdateInput>(
+      {
+        function: 'update',
+        value: {
+          key,
+          value,
+          proof,
+        },
       },
-    };
-    const result = await this.dryWrite(input);
-    if (result.type !== 'ok') {
-      throw new Error('Contract Error [update]: ' + result.errorMessage);
-    }
-    await this.writeInteraction(input);
+      'Contract Error [update]: '
+    );
   }
 
   /**
@@ -131,17 +135,15 @@ export class SDK<V = unknown> extends Base {
    * @param proof optional zero-knowledge proof
    */
   async remove(key: string, proof: object = {}): Promise<void> {
-    const input: ContractInput = {
-      function: 'remove',
-      data: {
-        key,
-        proof,
+    await this.dryWriteInteraction<RemoveInput>(
+      {
+        function: 'remove',
+        value: {
+          key,
+          proof,
+        },
       },
-    };
-    const result = await this.dryWrite(input);
-    if (result.type !== 'ok') {
-      throw new Error('Contract Error [remove]: ' + result.errorMessage);
-    }
-    await this.writeInteraction(input);
+      'Contract Error [remove]: '
+    );
   }
 }

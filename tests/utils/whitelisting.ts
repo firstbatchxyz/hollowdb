@@ -1,12 +1,12 @@
-import {Admin} from '../../src';
+import {Admin} from '../../src/hollowdb';
 
 export async function enableWhitelisting(admin: Admin) {
   const {cachedValue: oldCachedValue} = await admin.readState();
   expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(false);
   expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(false);
 
-  await admin.updateRequirement('whitelist', 'put', true);
-  await admin.updateRequirement('whitelist', 'update', true);
+  await admin.updateWhitelistRequirement('put', true);
+  await admin.updateWhitelistRequirement('update', true);
 
   const {cachedValue: newCachedValue} = await admin.readState();
   expect(newCachedValue.state.isWhitelistRequired.put).toEqual(true);
@@ -18,8 +18,8 @@ export async function disableWhitelisting(admin: Admin) {
   expect(oldCachedValue.state.isWhitelistRequired.put).toEqual(true);
   expect(oldCachedValue.state.isWhitelistRequired.update).toEqual(true);
 
-  await admin.updateRequirement('whitelist', 'put', false);
-  await admin.updateRequirement('whitelist', 'update', false);
+  await admin.updateWhitelistRequirement('put', false);
+  await admin.updateWhitelistRequirement('update', false);
 
   const {cachedValue: newCachedValue} = await admin.readState();
   expect(newCachedValue.state.isWhitelistRequired.put).toEqual(false);

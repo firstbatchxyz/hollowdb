@@ -1,22 +1,23 @@
 import {JWKInterface, Warp} from 'warp-contracts';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
+import {BaseSDK} from './sdk';
 import type {ContractState} from '../contracts/common/types/contract';
-import {SDK} from './sdk';
+import type {
+  UpdateOwnerInput,
+  UpdateRequirementInput,
+  UpdateVerificationKeyInput,
+  UpdateWhitelistInput,
+} from '../contracts/common/types/inputs';
 
-/**
- * HollowDB admin that can set owner and set verification key.
- * For both operations, the admin wallet address must match the
- * owner in the contract state.
- */
-export class Admin<V = unknown> extends SDK<V> {
+export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK<State, V> {
   /**
    * Sets the owner as the given wallet address.
    * @param newOwner address of the new owner, make sure that this is correct!
    */
-  async changeOwner(newOwner: ContractState['owner']) {
-    await this.writeInteraction({
+  async updateOwner(newOwner: State['owner']) {
+    await this.writeInteraction<UpdateOwnerInput>({
       function: 'updateOwner',
-      data: {
+      value: {
         newOwner,
       },
     });
@@ -28,15 +29,15 @@ export class Admin<V = unknown> extends SDK<V> {
    * @param name name of the list to be updated
    * @param op whether to `add` the users to whitelist or `remove` them
    */
-  async updateWhitelist(users: string[], name: string, op: 'add' | 'remove') {
+  async updateWhitelist(users: string[], name: keyof State['whitelists'], op: 'add' | 'remove') {
     const add = op === 'add' ? users : [];
     const remove = op === 'remove' ? users : [];
-    await this.writeInteraction({
+    await this.writeInteraction<UpdateWhitelistInput>({
       function: 'updateWhitelist',
-      data: {
+      value: {
         add,
         remove,
-        name,
+        name: name as string,
       },
     });
   }
@@ -46,28 +47,34 @@ export class Admin<V = unknown> extends SDK<V> {
    * @param name name of the circuit that the verification key belongs to
    * @param verificationKey verification key
    */
-  async updateVerificationKey(name: string, verificationKey: any) {
-    await this.writeInteraction({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async updateVerificationKey(name: keyof State['verificationKeys'], verificationKey: any) {
+    await this.writeInteraction<UpdateVerificationKeyInput>({
       function: 'updateVerificationKey',
-      data: {
-        name,
+      value: {
         verificationKey,
+        name: name as string,
       },
     });
   }
 
-  /**
-   * Updates the requirement of whitelist or proof, essentially changing the mode of operation.
-   * @param type type of requirement, either `whitelist` or `proof`
-   * @param name name of the whitelist / circuit
-   * @param value `true` to enable, `false` to disable the requirement
-   */
-  async updateRequirement(type: 'whitelist' | 'proof', name: string, value: boolean) {
-    await this.writeInteraction({
+  async updateWhitelistRequirement(name: keyof State['whitelists'], value: boolean) {
+    await this.writeInteraction<UpdateRequirementInput>({
       function: 'updateRequirement',
-      data: {
-        name,
-        type,
+      value: {
+        type: 'whitelist',
+        name: name as string,
+        value,
+      },
+    });
+  }
+
+  async updateProofRequirement(name: keyof State['verificationKeys'], value: boolean) {
+    await this.writeInteraction<UpdateRequirementInput>({
+      function: 'updateRequirement',
+      value: {
+        type: 'proof',
+        name: name as string,
         value,
       },
     });
@@ -90,15 +97,11 @@ export class Admin<V = unknown> extends SDK<V> {
   ): Promise<{contractTxId: string; srcTxId: string | undefined}> {
     const ownerAddress = await warp.arweave.wallets.jwkToAddress(owner);
 
-    // deployer is the owner by default
     initialState.owner = ownerAddress;
-
-    // owner is also whitelisted on everything, whether or not whitelisting is enabled
     for (const list in initialState.whitelists) {
       initialState.whitelists[list as keyof typeof initialState.whitelists][ownerAddress] = true;
     }
 
-    // deploy
     const {contractTxId, srcTxId} = await warp.deploy(
       {
         wallet: disableBundling ? owner : new ArweaveSigner(owner),
@@ -118,7 +121,7 @@ export class Admin<V = unknown> extends SDK<V> {
   }
 
   /**
-   * Utility function to evolve the HollowDB contract.
+   * Utility function to evolve the contract.
    * @param owner wallet to deploy the new contract
    * @param contractSource source code of the new contract, as a string
    * @param contractTxId contract transaction id of the old contract
