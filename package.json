@@ -18,7 +18,13 @@
     "types": "./lib/index.d.ts",
     "import": "./lib/index.mjs",
     "require": "./lib/index.cjs",
-    "default": "./lib/index.mjs"
+    "default": "./lib/index.mjs",
+    "contract/errors": {
+      "import": "./lib/contracts/common/errors/index.mjs",
+      "types": "./lib/contracts/common/errors/index.d.ts",
+      "require": "./lib/contracts/common/errors/index.cjs",
+      "default": "./lib/contracts/common/errors/index.mjs"
+    }
   },
   "targets": {
     "cjs": {

@@ -4,7 +4,7 @@
     "rootDir": ".",
     "outDir": "./build",
     "strict": true,
-    "typeRoots": ["./node_modules/@types/"],
+    "typeRoots": ["./node_modules/@types/", "./src/contracts/types/"],
     "moduleResolution": "node",
     "target": "ES2020",
     "esModuleInterop": true,

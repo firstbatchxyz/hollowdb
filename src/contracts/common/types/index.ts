@@ -1,2 +1,2 @@
-export type * from './contract';
-export type * from './inputs';
+export * from './contract';
+export * from './inputs';
