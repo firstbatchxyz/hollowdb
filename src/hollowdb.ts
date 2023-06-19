@@ -1,4 +1,4 @@
-import {BaseSDK, BaseAdmin} from './common';
+import {BaseSDK, BaseAdmin} from './base';
 import {HollowState} from './contracts/hollowdb';
 
 export class SDK<V = unknown> extends BaseSDK<HollowState, V> {}

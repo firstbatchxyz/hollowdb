@@ -15,24 +15,10 @@
   "cjs": "lib/index.cjs",
   "mjs": "lib/index.mjs",
   "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "import": "./lib/index.mjs",
-      "require": "./lib/index.cjs",
-      "default": "./lib/index.mjs"
-    },
-    "./common": {
-      "types": "./lib/common/index.d.ts",
-      "import": "./lib/common/index.mjs",
-      "require": "./lib/common/index.cjs",
-      "default": "./lib/common/index.mjs"
-    },
-    "./contracts": {
-      "types": "./lib/contracts/index.d.ts",
-      "import": "./lib/contracts/index.mjs",
-      "require": "./lib/contracts/index.cjs",
-      "default": "./lib/contracts/index.mjs"
-    }
+    "types": "./lib/index.d.ts",
+    "import": "./lib/index.mjs",
+    "require": "./lib/index.cjs",
+    "default": "./lib/index.mjs"
   },
   "targets": {
     "cjs": {
@@ -55,10 +41,8 @@
     "README.md"
   ],
   "scripts": {
-    "prebuild": "yarn clean",
-    "build": "parcel build && yarn step 1 && parcel build && yarn step 2 && parcel build && yarn step 3",
-    "postbuild": "yarn check",
-    "step": "node buildstep.cjs",
+    "prebuild": "yarn clean && yarn check",
+    "build": "parcel build",
     "clean": "rimraf ./lib",
     "check": "tsc --noEmit",
     "compile": "tsc",
