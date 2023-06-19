@@ -10,9 +10,11 @@ import {
   updateWhitelist,
   updateVerificationKey,
   updateRequirement,
-} from './common/functions/index.js';
-import {InvalidFunctionError} from './common/errors/index.js';
+} from './functions';
+import {InvalidFunctionError} from './errors';
 import type {
+  ContractState,
+  ContractHandle,
   EvolveInput,
   GetInput,
   GetKVMapInput,
@@ -24,8 +26,7 @@ import type {
   UpdateRequirementInput,
   UpdateVerificationKeyInput,
   UpdateWhitelistInput,
-} from './common/types/inputs.js';
-import type {ContractState, ContractHandle} from './common/index.js';
+} from './types';
 
 export type HollowState = ContractState<{circuits: ['auth']; whitelists: ['put', 'update']}>;
 export type HollowInput =

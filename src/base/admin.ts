@@ -1,13 +1,13 @@
 import {JWKInterface, Warp} from 'warp-contracts';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 import {BaseSDK} from './sdk';
-import type {ContractState} from '../contracts/common/types/contract';
 import type {
+  ContractState,
   UpdateOwnerInput,
   UpdateRequirementInput,
   UpdateVerificationKeyInput,
   UpdateWhitelistInput,
-} from '../contracts/common/types/inputs';
+} from '../contracts/types';
 
 export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK<State, V> {
   /**

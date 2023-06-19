@@ -1,7 +1,7 @@
 import {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
-import type {ContractInput, ContractState} from '../contracts/common/types/contract';
+import type {ContractInput, ContractState} from '../contracts/types/contract';
 
 export class Base<State extends ContractState> {
   protected readonly contract: Contract<State>;

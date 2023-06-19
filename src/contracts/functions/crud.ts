@@ -1,6 +1,5 @@
+import type {ContractState, GetInput, PutInput, RemoveInput, UpdateInput} from '../types';
 import {KeyExistsError} from '../errors';
-import type {ContractState} from '../types/contract';
-import type {GetInput, PutInput, RemoveInput, UpdateInput} from '../types/inputs';
 import {assertWhitelist, safeGet, verifyAuthProof} from '../utils';
 
 export async function get<State extends ContractState>(_: State, {key}: GetInput['value']) {

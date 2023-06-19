@@ -1,7 +1,7 @@
 import {CantEvolveError} from '../errors';
 import {assertOwner} from '../utils';
-import type {ContractState} from '../types/contract';
 import type {
+  ContractState,
   EvolveInput,
   GetKVMapInput,
   GetKeysInput,
@@ -9,7 +9,7 @@ import type {
   UpdateRequirementInput,
   UpdateVerificationKeyInput,
   UpdateWhitelistInput,
-} from '../types/inputs';
+} from '../types';
 
 export async function evolve<State extends ContractState>(state: State, srcTxId: EvolveInput['value'], caller: string) {
   assertOwner(state, caller);

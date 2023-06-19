@@ -1,14 +1,14 @@
 import {Base} from './base';
-import type {ContractState} from '../contracts/common/types/contract';
 import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
 import type {
+  ContractState,
   GetInput,
   GetKVMapInput,
   GetKeysInput,
   PutInput,
   RemoveInput,
   UpdateInput,
-} from '../contracts/common/types/inputs';
+} from '../contracts/types';
 
 export class BaseSDK<State extends ContractState, V = unknown> extends Base<State> {
   /**
