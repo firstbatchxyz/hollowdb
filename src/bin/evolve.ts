@@ -3,7 +3,7 @@ import {Admin} from '../hollowdb';
 import fs from 'fs';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
-async function evolve() {
+async function main() {
   if (process.argv.length !== 4) {
     throw new Error('Usage: yarn contract:evolve <wallet-name> <contract-tx-id>');
   }
@@ -19,4 +19,4 @@ async function evolve() {
   console.log('Evolved.', result);
 }
 
-evolve();
+main();

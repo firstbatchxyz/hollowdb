@@ -46,5 +46,5 @@ jobs:
       - name: Linting
         run: yarn lint
 
-      - name: Compiling
-        run: yarn compile
+      - name: Build
+        run: yarn build

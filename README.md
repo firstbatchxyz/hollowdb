@@ -24,8 +24,8 @@
     <a href="./.github/workflows/test.yml" target="_blank">
         <img alt="Workflow: Tests" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master">
     </a>
-    <a href="./.github/workflows/styles.yml" target="_blank">
-        <img alt="Workflow: Styles" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/style.yml/badge.svg?branch=master">
+    <a href="./.github/workflows/build.yml" target="_blank">
+        <img alt="Workflow: Styles" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/build.yml/badge.svg?branch=master">
     </a>
     <a href="https://discord.gg/2wuU9ym6fq" target="_blank">
         <img alt="Discord" src="https://dcbadge.vercel.app/api/server/2wuU9ym6fq?style=flat">

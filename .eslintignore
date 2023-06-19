@@ -10,14 +10,11 @@ lib
 # contract bundlers in JS
 build.cjs
 
-# circuit files
-circuits
-
-# wallet stuff
-config 
+# ignore configs
+config
 
 # declarations
 *.d.ts
 
 # ignore js
-examples/**/*.js
+examples
