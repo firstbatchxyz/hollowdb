@@ -1,5 +1,8 @@
-import {get, put, update, remove} from './common/functions/index.js';
 import {
+  get,
+  put,
+  update,
+  remove,
   evolve,
   getKeys,
   getKVMap,
@@ -9,7 +12,6 @@ import {
   updateRequirement,
 } from './common/functions/index.js';
 import {InvalidFunctionError} from './common/errors/index.js';
-import type {ContractHandle, ContractState} from './common/types/index.js';
 import type {
   EvolveInput,
   GetInput,
@@ -22,7 +24,8 @@ import type {
   UpdateRequirementInput,
   UpdateVerificationKeyInput,
   UpdateWhitelistInput,
-} from './common/types/index.js';
+} from './common/types/inputs.js';
+import type {ContractState, ContractHandle} from './common/index.js';
 
 export type HollowState = ContractState<{circuits: ['auth']; whitelists: ['put', 'update']}>;
 export type HollowInput =

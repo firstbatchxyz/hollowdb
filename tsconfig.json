@@ -4,7 +4,6 @@
     "rootDir": ".",
     "outDir": "./build",
     "strict": true,
-    "typeRoots": ["./node_modules/@types/", "./src/contracts/types/"],
     "moduleResolution": "node",
     "target": "ES2020",
     "esModuleInterop": true,
@@ -12,7 +11,7 @@
     "downlevelIteration": true,
     "skipLibCheck": true,
     "module": "ESNext",
-    "types": ["jest"],
+    "types": ["jest", "./src/globals.d.ts"],
     "isolatedModules": true
   },
   "include": ["src/**/*.ts", "contracts/**/*.ts"],

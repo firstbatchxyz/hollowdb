@@ -31,7 +31,7 @@ export const valueToBigInt = (value: unknown): bigint => {
   if (value) {
     return BigInt(SmartWeave.extensions.ethers.utils.ripemd160(Buffer.from(JSON.stringify(value))));
   } else {
-    return 0n;
+    return BigInt(0);
   }
 };
 

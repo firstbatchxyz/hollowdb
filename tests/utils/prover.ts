@@ -21,7 +21,7 @@ export class Prover {
   }
 
   /**
-   * Generate a proof for HollowDB.
+   * Generate a proof.
    * If a value is given as null, it will be put as 0 in the proof.
    * @param preimage preimage of the key to be written at
    * @param curValue value currently stored
