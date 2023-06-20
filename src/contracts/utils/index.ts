@@ -45,12 +45,12 @@ export const digestToBytes = (digest: string): number[] => {
 };
 
 /** Gets a value at some key, throws an error if the value is null. */
-export const safeGet = async (key: string): Promise<unknown> => {
+export const safeGet = async <V = unknown>(key: string): Promise<V> => {
   const val = await SmartWeave.kv.get(key);
   if (val === null) {
     throw KeyNotExistsError;
   }
-  return val;
+  return val as V;
 };
 
 /** Throws an error if caller is not the contract owner. */
@@ -85,6 +85,26 @@ export async function verifyAuthProof<State extends ContractState>(
   const verificationSuccess = await verifyProof(
     proof,
     [valueToBigInt(oldValue), valueToBigInt(newValue), BigInt(key)],
+    state.verificationKeys.auth
+  );
+
+  if (!verificationSuccess) {
+    throw InvalidProofError;
+  }
+}
+
+export async function verifyAuthProofImmediate<State extends ContractState>(
+  state: State,
+  proof: object,
+  oldValueHash: bigint,
+  newValueHash: bigint,
+  key: string
+): Promise<void> {
+  if (!state.isProofRequired.auth) return;
+
+  const verificationSuccess = await verifyProof(
+    proof,
+    [oldValueHash, newValueHash, BigInt(key)],
     state.verificationKeys.auth
   );
 

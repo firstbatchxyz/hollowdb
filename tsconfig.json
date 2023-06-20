@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "./build",
@@ -14,7 +14,7 @@
     "types": ["jest", "./src/globals.d.ts"],
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "contracts/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["./node_modules", "./lib", "./build", "./cache"],
   "ts-node": {
     "esm": true,
