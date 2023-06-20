@@ -13,6 +13,7 @@ logs
 cache/
 lib/
 build/
+dist/
 dump.rdb
 
 # Temporary stuff not-to-be pushed

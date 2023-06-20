@@ -28,6 +28,7 @@ async function main() {
   console.log('Deploying contract...');
   const result = await Admin.deploy(wallet, initialHollowState, contractSource, warp);
   console.log('Deployed.', result);
+  console.log(`https://sonar.warp.cc/#/app/contract/${result.contractTxId}`);
 }
 
 main();

@@ -1,7 +1,7 @@
 const {SDK} = require('hollowdb');
 const {WarpFactory} = require('warp-contracts');
 const {poseidon1} = require('poseidon-lite');
-const {jwk} = require('./config/wallet');
+const {jwk} = require('./config/wallets');
 const Bundlr = require('@bundlr-network/client');
 
 function computeKey(preimage) {
@@ -32,7 +32,7 @@ async function upload(jwk, payload) {
 }
 
 async function main() {
-  /* either put your jwk in config/wallet folder (see line 4)
+  /* either put your jwk in config/wallets folder (see line 4)
     or write it inside a variable in this file below */
   // const jwk = {};
 
@@ -40,7 +40,7 @@ async function main() {
   const warp = WarpFactory.forMainnet();
 
   /* To deploy a hollowDB contract run yarn contract:deploy in the root directory. 
-     but don't forget to put your wallet inside the config/wallet folder */
+     but don't forget to put your wallet inside the config/wallets folder */
 
   // paste contract tx id here
   const contractTxId = '';
