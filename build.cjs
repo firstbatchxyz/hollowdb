@@ -1,25 +1,27 @@
 const {build} = require('esbuild');
 const replace = require('replace-in-file');
 
-const contracts = ['hollowDB/contract.ts'];
+const contracts = ['hollowdb.ts'];
+const outBase = './src/contracts';
+const outDir = './build';
 
 build({
   entryPoints: contracts.map(source => {
-    return `./contracts/${source}`;
+    return `${outBase}/${source}`;
   }),
-  outdir: './build',
-  outbase: './contracts',
+  outdir: outDir,
+  outbase: outBase,
   minify: false,
   bundle: true,
   format: 'iife',
 })
   .catch(() => {
-    console.log('Build failed');
+    console.error('Build failed');
     process.exit(1);
   })
   .finally(() => {
     const files = contracts.map(source => {
-      return `./build/${source}`.replace('.ts', '.js');
+      return `${outDir}/${source}`.replace('.ts', '.js');
     });
 
     // turn IIFE into normal file
@@ -34,7 +36,7 @@ build({
     // remove use strict, it breaks Warp source code reader
     replace.sync({
       files,
-      from: '"use strict";',
+      from: '"use strict";\n',
       to: '',
       countMatches: true,
     });

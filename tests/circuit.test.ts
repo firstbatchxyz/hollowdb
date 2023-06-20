@@ -1,12 +1,9 @@
 import {readFileSync} from 'fs';
-import {Prover, ProofSystem} from './utils/prover';
+import {Prover} from './utils/prover';
 import {computeKey} from './utils/computeKey';
 import constants from './constants';
 import {decimalToHex} from './utils';
 const snarkjs = require('snarkjs');
-
-// arbitrarily long timeout
-jest.setTimeout(constants.JEST_TIMEOUT_MS);
 
 const preimage = BigInt(1122334455);
 const curValue = {
@@ -20,7 +17,7 @@ const newValue = {
   bar: false,
 };
 
-describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits (%s)', proofSystem => {
+describe.each(['groth16', 'plonk'] as const)('hollowdb circuits (%s)', proofSystem => {
   let prover: Prover;
   let verificationKey: object;
   let proof: object;
@@ -31,11 +28,19 @@ describe.each<ProofSystem>(['groth16', 'plonk'])('hollowdb circuits (%s)', proof
   beforeAll(async () => {
     // prepare prover and verification key
     if (proofSystem === 'groth16') {
-      prover = new Prover(constants.GROTH16_WASM_PATH, constants.GROTH16_PROVERKEY_PATH, proofSystem);
-      verificationKey = JSON.parse(readFileSync(constants.GROTH16_VERIFICATIONKEY_PATH).toString());
+      prover = new Prover(
+        constants.PROVERS.groth16.HOLLOWDB.WASM_PATH,
+        constants.PROVERS.groth16.HOLLOWDB.PROVERKEY_PATH,
+        proofSystem
+      );
+      verificationKey = JSON.parse(readFileSync(constants.PROVERS.groth16.HOLLOWDB.VERIFICATIONKEY_PATH, 'utf-8'));
     } else {
-      prover = new Prover(constants.PLONK_WASM_PATH, constants.PLONK_PROVERKEY_PATH, proofSystem);
-      verificationKey = JSON.parse(readFileSync(constants.PLONK_VERIFICATIONKEY_PATH).toString());
+      prover = new Prover(
+        constants.PROVERS.plonk.HOLLOWDB.WASM_PATH,
+        constants.PROVERS.plonk.HOLLOWDB.PROVERKEY_PATH,
+        proofSystem
+      );
+      verificationKey = JSON.parse(readFileSync(constants.PROVERS.plonk.HOLLOWDB.VERIFICATIONKEY_PATH, 'utf-8'));
     }
 
     // generate a proof

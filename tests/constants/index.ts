@@ -1,5 +1,4 @@
 export default {
-  // limit options for cache
   DEFAULT_LIMIT_OPTS: {
     lmdb: {
       minEntriesPerContract: 10,
@@ -14,15 +13,21 @@ export default {
       maxEntriesPerContract: 100,
     },
   },
-  // port to run
   ARWEAVE_PORT: 3169,
-  // arbitrarily long timeout for the test
-  JEST_TIMEOUT_MS: 60000,
-  // to generate proofs & verify
-  GROTH16_WASM_PATH: './circuits/hollow-authz-groth16/hollow-authz.wasm',
-  GROTH16_PROVERKEY_PATH: './circuits/hollow-authz-groth16/prover_key.zkey',
-  GROTH16_VERIFICATIONKEY_PATH: './circuits/hollow-authz-groth16/verification_key.json',
-  PLONK_WASM_PATH: './circuits/hollow-authz-plonk/hollow-authz.wasm',
-  PLONK_PROVERKEY_PATH: './circuits/hollow-authz-plonk/prover_key.zkey',
-  PLONK_VERIFICATIONKEY_PATH: './circuits/hollow-authz-plonk/verification_key.json',
+  PROVERS: {
+    groth16: {
+      HOLLOWDB: {
+        WASM_PATH: './config/circuits/hollow-authz-groth16/hollow-authz.wasm',
+        PROVERKEY_PATH: './config/circuits/hollow-authz-groth16/prover_key.zkey',
+        VERIFICATIONKEY_PATH: './config/circuits/hollow-authz-groth16/verification_key.json',
+      },
+    },
+    plonk: {
+      HOLLOWDB: {
+        WASM_PATH: './config/circuits/hollow-authz-plonk/hollow-authz.wasm',
+        PROVERKEY_PATH: './config/circuits/hollow-authz-plonk/prover_key.zkey',
+        VERIFICATIONKEY_PATH: './config/circuits/hollow-authz-plonk/verification_key.json',
+      },
+    },
+  },
 } as const;

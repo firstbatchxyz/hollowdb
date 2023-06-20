@@ -1,4 +1,4 @@
-import {ripemd160} from '@ethersproject/sha2';
+import {createHash} from 'crypto';
 const snarkjs = require('snarkjs');
 
 export type ProofSystem = 'groth16' | 'plonk';
@@ -21,7 +21,7 @@ export class Prover {
   }
 
   /**
-   * Generate a proof for HollowDB.
+   * Generate a proof.
    * If a value is given as null, it will be put as 0 in the proof.
    * @param preimage preimage of the key to be written at
    * @param curValue value currently stored
@@ -37,8 +37,8 @@ export class Prover {
       // field names of this JSON object must match the input signal names of the circuit
       {
         preimage: preimage,
-        curValueHash: curValue ? this.valueToBigInt(curValue) : 0n,
-        nextValueHash: nextValue ? this.valueToBigInt(nextValue) : 0n,
+        curValueHash: this.valueToBigInt(curValue),
+        nextValueHash: this.valueToBigInt(nextValue),
       },
       this.wasmPath,
       this.proverKey
@@ -47,13 +47,18 @@ export class Prover {
   }
 
   /**
-   * Convert a value into bigint using `ripemd160`.
-   * - `ripemd160` outputs a hex string, which can be converted into a `bigint`.
+   * Converts a value into bigint using ripemd160.
+   * - Ripemd160 outputs a hex string, which can be converted into a bigint.
    * - Since the result is 160 bits, it is for sure within the finite field of BN128.
-   * @see https://docs.circom.io/background/background/#signals-of-a-circuit
-   * @param value any kind of value
+   *
+   * If the value is `null`, it returns `0` instead.
    */
   valueToBigInt = (value: unknown): bigint => {
-    return BigInt(ripemd160(Buffer.from(JSON.stringify(value))));
+    const digest = createHash('ripemd160').update(JSON.stringify(value), 'utf-8').digest('hex');
+    if (value) {
+      return BigInt('0x' + digest);
+    } else {
+      return 0n;
+    }
   };
 }

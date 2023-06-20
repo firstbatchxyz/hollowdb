@@ -1,10 +1,9 @@
 {
-  "extends": "./node_modules/gts/tsconfig-google.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "./build",
+    "rootDirs": ["./src", "./tests"],
+    "outDir": "./dist",
     "strict": true,
-    "typeRoots": ["./types", "./node_modules/@types/"],
     "moduleResolution": "node",
     "target": "ES2020",
     "esModuleInterop": true,
@@ -12,10 +11,10 @@
     "downlevelIteration": true,
     "skipLibCheck": true,
     "module": "ESNext",
-    "types": ["jest"],
+    "types": ["jest", "./src/globals.d.ts"],
     "isolatedModules": true
   },
-  "include": ["src/**/*.ts", "common/**/*.ts", "contracts/**/*.ts", "tools/**/*.ts", "types/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["./node_modules", "./lib", "./build", "./cache"],
   "ts-node": {
     "esm": true,

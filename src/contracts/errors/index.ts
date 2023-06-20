@@ -1,0 +1,9 @@
+export const KeyExistsError = new ContractError('Key already exists.');
+export const KeyNotExistsError = new ContractError('Key does not exist.');
+export const CantEvolveError = new ContractError('Evolving is disabled.');
+export const NoVerificationKeyError = new ContractError('No verification key.');
+export const UnknownProofSystemError = new ContractError('Unknown proof system.');
+export const NotWhitelistedError = new ContractError('Not whitelisted.');
+export const InvalidProofError = new ContractError('Invalid proof.');
+export const NotOwnerError = new ContractError('Not contract owner.');
+export const InvalidFunctionError = new ContractError('Invalid function.');

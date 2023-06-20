@@ -1,1 +1,13 @@
+# js output
+build
+dist
+lib
+
+# modules
 node_modules
+
+# ignore configs
+config
+
+# declarations
+*.d.ts
