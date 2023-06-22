@@ -2,12 +2,19 @@ import type {ContractState, GetInput, PutInput, RemoveInput, UpdateInput} from '
 import {KeyExistsError} from '../errors';
 import {assertWhitelist, safeGet, verifyAuthProof} from '../utils';
 
+/** Gets a value at the specified key. */
 export async function get<State extends ContractState>(_: State, {key}: GetInput['value']) {
   return {
     result: await SmartWeave.kv.get(key),
   };
 }
 
+/**
+ * Puts a value at the specified key.
+ *
+ * If required:
+ * - `caller` must be whitelisted for `put`
+ */
 export async function put<State extends ContractState<{whitelists: ['put']; circuits: []}>>(
   state: State,
   {key, value}: PutInput['value'],
@@ -23,6 +30,14 @@ export async function put<State extends ContractState<{whitelists: ['put']; circ
   return {state};
 }
 
+/**
+ * Removes a value at the specified key.
+ *
+ * If required:
+ * - `caller` must be whitelisted for `update`
+ * - `caller` must present a ZKP that they know the preimage of the key, where the proof is bound
+ * to hash of current value in database, and `0` for the next value.
+ */
 export async function remove<State extends ContractState<{whitelists: ['update']; circuits: ['auth']}>>(
   state: State,
   {key, proof}: RemoveInput['value'],
@@ -37,6 +52,14 @@ export async function remove<State extends ContractState<{whitelists: ['update']
   return {state};
 }
 
+/**
+ * Updates a value at the specified key.
+ *
+ * If required:
+ * - `caller` must be whitelisted for `update`
+ * - `caller` must present a ZKP that they know the preimage of the key, where the proof is bound
+ * to hash of current value as it appears in db, and hash of next value.
+ */
 export async function update<State extends ContractState<{whitelists: ['update']; circuits: ['auth']}>>(
   state: State,
   {key, value, proof}: UpdateInput['value'],
