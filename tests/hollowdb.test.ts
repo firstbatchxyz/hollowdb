@@ -6,48 +6,45 @@ import constants from './constants';
 import {decimalToHex} from './utils';
 import {disableProofs, enableProofs} from './utils/proofs';
 import {addToWhitelist, disableWhitelisting, enableWhitelisting, removeFromWhitelist} from './utils/whitelisting';
-import {setupArlocal, setupWarpAndHollowdb} from './common';
+import {setupArlocal, setupHollowTestState} from './common';
 import {Admin, SDK} from '../src/hollowdb';
 
+const proofSystem = 'groth16';
+
 describe('hollowdb', () => {
-  let prover: Prover;
+  const PORT = setupArlocal(0);
+  const prover = new Prover(
+    constants.PROVERS[proofSystem].HOLLOWDB.WASM_PATH,
+    constants.PROVERS[proofSystem].HOLLOWDB.PROVERKEY_PATH,
+    proofSystem
+  );
   type ValueType = {
     val: string;
   };
-  const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-  const KEY = computeKey(KEY_PREIMAGE);
-  const VALUE: ValueType = {
-    val: randomBytes(10).toString('hex'),
-  };
-  const NEXT_VALUE: ValueType = {
-    val: randomBytes(10).toString('hex'),
-  };
 
-  const PORT = setupArlocal(0);
-
-  beforeAll(async () => {
-    const proofSystem = 'groth16';
-    prover = new Prover(
-      constants.PROVERS[proofSystem].HOLLOWDB.WASM_PATH,
-      constants.PROVERS[proofSystem].HOLLOWDB.PROVERKEY_PATH,
-      proofSystem
-    );
-  });
-
-  const tests = ['redis' /* , 'lmdb', 'default'*/] as const;
+  const tests = ['redis', 'lmdb', 'default'] as const;
   describe.each(tests)('using %s cache, proofs enabled', cacheType => {
-    const getHollowUsers = setupWarpAndHollowdb<ValueType>(PORT, cacheType);
+    const getHollowTestState = setupHollowTestState<ValueType>(PORT, cacheType);
     let ownerAdmin: Admin<ValueType>;
     let aliceSDK: SDK<ValueType>;
     let ownerAddress: string;
     let aliceAddress: string;
 
+    const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
+    const KEY = computeKey(KEY_PREIMAGE);
+    const VALUE: ValueType = {
+      val: randomBytes(10).toString('hex'),
+    };
+    const NEXT_VALUE: ValueType = {
+      val: randomBytes(10).toString('hex'),
+    };
+
     beforeAll(() => {
-      const hollowUsers = getHollowUsers();
-      ownerAdmin = hollowUsers.ownerAdmin;
-      ownerAddress = hollowUsers.ownerAddress;
-      aliceSDK = hollowUsers.aliceSDK;
-      aliceAddress = hollowUsers.aliceAddress;
+      const testState = getHollowTestState();
+      ownerAdmin = testState.ownerAdmin;
+      ownerAddress = testState.ownerAddress;
+      aliceSDK = testState.aliceSDK;
+      aliceAddress = testState.aliceAddress;
     });
 
     it('should succesfully deploy with correct state', async () => {

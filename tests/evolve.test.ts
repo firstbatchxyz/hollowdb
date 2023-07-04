@@ -1,46 +1,25 @@
-import {JWKInterface, LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
+import {JWKInterface, Warp} from 'warp-contracts';
 import dummyContractSource from './res/dummyContract';
-import initialState from '../src/contracts/states/hollowdb';
-import fs from 'fs';
 import {Admin, SDK} from '../src/hollowdb';
-import {setupArlocal} from './common';
+import {setupArlocal, setupHollowTestState} from './common';
 
 describe('evolve', () => {
-  const port = setupArlocal(1);
+  const PORT = setupArlocal(1);
+  const getHollowTestState = setupHollowTestState(PORT, 'default');
 
   let warp: Warp;
   let contractTxId: string;
   let ownerJWK: JWKInterface;
 
   beforeAll(async () => {
-    LoggerFactory.INST.logLevel('none');
-
-    const contractSource = fs.readFileSync('./build/hollowdb.js', 'utf8');
-    warp = WarpFactory.forLocal(port).use(new DeployPlugin());
-
-    // get accounts
-    const ownerWallet = await warp.generateWallet();
-    ownerJWK = ownerWallet.jwk;
-
-    // deploy contract
-    contractTxId = (
-      await Admin.deploy(
-        ownerJWK,
-        initialState,
-        contractSource,
-        warp,
-        true // bundling is disabled during testing
-      )
-    ).contractTxId;
-
-    const contractTx = await warp.arweave.transactions.get(contractTxId);
-    expect(contractTx).not.toBeNull();
+    const testState = getHollowTestState();
+    warp = testState.warp;
+    contractTxId = testState.contractTxId;
+    ownerJWK = testState.ownerAdmin.signer as JWKInterface;
   });
 
   it('should evolve contract', async () => {
     const newContractSource = dummyContractSource;
-
     const {contractTxId: newContractTxId, srcTxId: newSrcTxId} = await Admin.evolve(
       ownerJWK,
       newContractSource,
@@ -59,8 +38,4 @@ describe('evolve', () => {
     // calling a non-existent function in the new contract should give error
     await expect(ownerSDK.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
   });
-
-  // afterAll(async () => {
-  //   await arlocal.stop();
-  // });
 });

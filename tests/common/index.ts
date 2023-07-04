@@ -30,32 +30,30 @@ export function setupArlocal(instanceId: number): number {
   return port;
 }
 
-export function setupWarpAndHollowdb<ValueType>(port: number, cacheType: 'redis' | 'lmdb' | 'default') {
+export function setupHollowTestState<ValueType = unknown>(port: number, cacheType: 'redis' | 'lmdb' | 'default') {
   let ownerAdmin: Admin<ValueType>;
   let aliceSDK: SDK<ValueType>;
   let ownerAddress: string;
   let aliceAddress: string;
-
+  let contractTxId: string;
   let warp: Warp;
+
   let redisClient: Redis;
 
   beforeAll(async () => {
-    // warp instance
     warp = WarpFactory.forLocal(port).use(new DeployPlugin());
-
-    // accounts
     const ownerWallet = await warp.generateWallet();
     const aliceWallet = await warp.generateWallet();
 
     // deploy contract
     const contractSource = readFileSync('./build/hollowdb.js', 'utf8');
-    const {contractTxId} = await Admin.deploy(
+    contractTxId = await Admin.deploy(
       ownerWallet.jwk,
       initialHollowState,
       contractSource,
       warp,
       true // bundling is disabled during testing
-    );
+    ).then(result => result.contractTxId);
     console.log('Contract deployed at:', contractTxId);
 
     // setup cache
@@ -89,5 +87,7 @@ export function setupWarpAndHollowdb<ValueType>(port: number, cacheType: 'redis'
     aliceAddress,
     ownerAdmin,
     aliceSDK,
+    contractTxId,
+    warp,
   });
 }
