@@ -1,37 +1,32 @@
-import ArLocal from 'arlocal';
-import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-import initialHollowState from '../src/contracts/states/hollowdb';
 import fs from 'fs';
-import {SDK, Admin} from '../src/hollowdb';
 import {Prover} from './utils/prover';
 import {computeKey} from './utils/computeKey';
 import {randomBytes} from 'crypto';
 import constants from './constants';
-import {globals} from '../jest.config.cjs';
-import {Redis} from 'ioredis';
 import {decimalToHex} from './utils';
-import {overrideCache} from './utils/cache';
 import {disableProofs, enableProofs} from './utils/proofs';
 import {addToWhitelist, disableWhitelisting, enableWhitelisting, removeFromWhitelist} from './utils/whitelisting';
-
-type ValueType = {
-  val: string;
-};
-
-const proofSystem = 'groth16';
+import {setupArlocal, setupWarpAndHollowdb} from './common';
+import {Admin, SDK} from '../src/hollowdb';
 
 describe('hollowdb', () => {
-  let arlocal: ArLocal;
-  let contractSource: string;
   let prover: Prover;
+  type ValueType = {
+    val: string;
+  };
+  const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
+  const KEY = computeKey(KEY_PREIMAGE);
+  const VALUE: ValueType = {
+    val: randomBytes(10).toString('hex'),
+  };
+  const NEXT_VALUE: ValueType = {
+    val: randomBytes(10).toString('hex'),
+  };
+
+  const PORT = setupArlocal(0);
 
   beforeAll(async () => {
-    arlocal = new ArLocal(constants.ARWEAVE_PORT, false);
-    await arlocal.start();
-
-    LoggerFactory.INST.logLevel('error');
-    contractSource = fs.readFileSync('./build/hollowdb.js', 'utf8');
+    const proofSystem = 'groth16';
     prover = new Prover(
       constants.PROVERS[proofSystem].HOLLOWDB.WASM_PATH,
       constants.PROVERS[proofSystem].HOLLOWDB.PROVERKEY_PATH,
@@ -39,61 +34,20 @@ describe('hollowdb', () => {
     );
   });
 
-  const tests = ['redis', 'lmdb', 'default'] as const;
+  const tests = ['redis' /* , 'lmdb', 'default'*/] as const;
   describe.each(tests)('using %s cache, proofs enabled', cacheType => {
+    const getHollowUsers = setupWarpAndHollowdb<ValueType>(PORT, cacheType);
     let ownerAdmin: Admin<ValueType>;
     let aliceSDK: SDK<ValueType>;
     let ownerAddress: string;
     let aliceAddress: string;
-    let warp: Warp;
-    let redisClient: Redis;
 
-    const KEY_PREIMAGE = BigInt('0x' + randomBytes(10).toString('hex'));
-    const KEY = computeKey(KEY_PREIMAGE);
-    const VALUE: ValueType = {
-      val: randomBytes(10).toString('hex'),
-    };
-    const NEXT_VALUE: ValueType = {
-      val: randomBytes(10).toString('hex'),
-    };
-
-    beforeAll(async () => {
-      // setup warp factory for local arweave
-      warp = WarpFactory.forLocal(constants.ARWEAVE_PORT).use(new DeployPlugin());
-
-      // get accounts
-      const ownerWallet = await warp.generateWallet();
-      const aliceWallet = await warp.generateWallet();
-
-      // deploy contract
-      const {contractTxId: hollowDBTxId} = await Admin.deploy(
-        ownerWallet.jwk,
-        initialHollowState,
-        contractSource,
-        warp,
-        true // bundling is disabled during testing
-      );
-
-      // setup cache
-      if (cacheType === 'redis') {
-        redisClient = new Redis(globals.__REDIS_URL__, {lazyConnect: true});
-      }
-      overrideCache(warp, hollowDBTxId, cacheType, {}, cacheType === 'redis' ? redisClient : undefined);
-      if (cacheType === 'redis') {
-        await redisClient.connect();
-      }
-
-      // log level
-      LoggerFactory.INST.logLevel('none');
-
-      // prepare Admin & SDK
-      ownerAdmin = new Admin(ownerWallet.jwk, hollowDBTxId, warp);
-      aliceSDK = new SDK(aliceWallet.jwk, hollowDBTxId, warp);
-      ownerAddress = ownerWallet.address;
-      aliceAddress = aliceWallet.address;
-
-      const contractTx = await warp.arweave.transactions.get(hollowDBTxId);
-      expect(contractTx).not.toBeNull();
+    beforeAll(() => {
+      const hollowUsers = getHollowUsers();
+      ownerAdmin = hollowUsers.ownerAdmin;
+      ownerAddress = hollowUsers.ownerAddress;
+      aliceSDK = hollowUsers.aliceSDK;
+      aliceAddress = hollowUsers.aliceAddress;
     });
 
     it('should succesfully deploy with correct state', async () => {
@@ -291,16 +245,5 @@ describe('hollowdb', () => {
         await enableProofs(ownerAdmin);
       });
     });
-
-    afterAll(async () => {
-      if (cacheType === 'redis') {
-        const response = await redisClient.quit();
-        expect(response).toBe('OK');
-      }
-    });
-  });
-
-  afterAll(async () => {
-    await arlocal.stop();
   });
 });

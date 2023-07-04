@@ -1,8 +1,8 @@
 module.exports = {
   clearMocks: true,
+  testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'js'],
   testPathIgnorePatterns: ['/.yalc/', '/data/', '/_helpers'],
-  testEnvironment: 'node',
   transformIgnorePatterns: ['<rootDir>/node_modules/(?!@assemblyscript/.*)'],
   transform: {
     '^.+\\.(ts|js)$': 'ts-jest',
@@ -11,4 +11,5 @@ module.exports = {
     __REDIS_URL__: 'redis://default:redispw@localhost:6379',
   },
   testTimeout: 60000,
+  maxConcurrency: 1,
 };

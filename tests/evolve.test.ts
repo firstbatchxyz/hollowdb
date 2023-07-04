@@ -1,28 +1,23 @@
-import ArLocal from 'arlocal';
 import {JWKInterface, LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import dummyContractSource from './res/dummyContract';
 import initialState from '../src/contracts/states/hollowdb';
 import fs from 'fs';
 import {Admin, SDK} from '../src/hollowdb';
-import constants from './constants';
+import {setupArlocal} from './common';
 
 describe('evolve', () => {
-  let arlocal: ArLocal;
+  const port = setupArlocal(1);
+
   let warp: Warp;
   let contractTxId: string;
   let ownerJWK: JWKInterface;
 
   beforeAll(async () => {
-    arlocal = new ArLocal(constants.ARWEAVE_PORT + 1, false);
-    await arlocal.start();
-
     LoggerFactory.INST.logLevel('none');
 
     const contractSource = fs.readFileSync('./build/hollowdb.js', 'utf8');
-
-    // setup warp factory for local arweave
-    warp = WarpFactory.forLocal(constants.ARWEAVE_PORT + 1).use(new DeployPlugin());
+    warp = WarpFactory.forLocal(port).use(new DeployPlugin());
 
     // get accounts
     const ownerWallet = await warp.generateWallet();
@@ -65,7 +60,7 @@ describe('evolve', () => {
     await expect(ownerSDK.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
   });
 
-  afterAll(async () => {
-    await arlocal.stop();
-  });
+  // afterAll(async () => {
+  //   await arlocal.stop();
+  // });
 });

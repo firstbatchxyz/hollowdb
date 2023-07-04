@@ -30,11 +30,6 @@ export function overrideCache(
           url: globals.__REDIS_URL__,
         };
 
-    // do manual overrides for `isManaged`
-    if (client) {
-      RedisCache.defineLuaScripts(client);
-    }
-
     if (useCache.state)
       warp = warp.useStateCache(
         new RedisCache(

@@ -4958,7 +4958,7 @@ domhandler@^4.2.0, domhandler@^4.2.2, domhandler@^4.3.1:
   dependencies:
     domelementtype "^2.2.0"
 
-domhandler@^5.0.1, domhandler@^5.0.2:
+domhandler@^5.0.2, domhandler@^5.0.3:
   version "5.0.3"
   resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-5.0.3.tgz#cc385f7f751f1d1fc650c21374804254538c7d31"
   integrity sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==
@@ -4975,13 +4975,13 @@ domutils@^2.8.0:
     domhandler "^4.2.0"
 
 domutils@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/domutils/-/domutils-3.0.1.tgz#696b3875238338cb186b6c0612bd4901c89a4f1c"
-  integrity sha512-z08c1l761iKhDFtfXO04C7kTdPBLi41zwOZl00WS8b5eiaebNpY00HKbztwBq+e3vyqWNwWF3mP9YLUeqIrF+Q==
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/domutils/-/domutils-3.1.0.tgz#c47f551278d3dc4b0b1ab8cbb42d751a6f0d824e"
+  integrity sha512-H78uMmQtI2AhgDJjWeQmHwJJ2bLPD3GMmO7Zja/ZZh84wkm+4ut+IUnUdRa8uCGX88DiVx1j6FRe1XfxEgjEZA==
   dependencies:
     dom-serializer "^2.0.0"
     domelementtype "^2.3.0"
-    domhandler "^5.0.1"
+    domhandler "^5.0.3"
 
 dotenv-expand@^5.1.0:
   version "5.1.0"
@@ -9741,10 +9741,10 @@ warp-contracts-plugin-snarkjs@^0.1.6:
   dependencies:
     snarkjs "^0.6.10"
 
-warp-contracts-redis@^0.3.0:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/warp-contracts-redis/-/warp-contracts-redis-0.3.3.tgz#320bd1b0b0f6054207704ff72ad8b141d844a1d2"
-  integrity sha512-Y6VRlUC31CHHgMs3Q9WhaAKxTvnuwmnhmDkP3aUzPZgyh4LKeZfHc9KnHZiHk49F7y0nx7nT3c7672Mg+ESoNQ==
+warp-contracts-redis@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/warp-contracts-redis/-/warp-contracts-redis-0.3.4.tgz#1e9e5a4294d7dc7c71e6c10558462d4e5a885c4a"
+  integrity sha512-f2OtV72rzd8flxjX3jztAvNxwWl1IzUqQ417nILF5Wl98NfmeW69hPabmZbv7ETc79q2GISgfd+naewvg/JVig==
   dependencies:
     ioredis "^5.3.2"
     safe-stable-stringify "^2.4.3"
