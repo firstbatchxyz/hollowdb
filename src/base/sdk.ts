@@ -35,7 +35,7 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * @returns an array of all the keys in the database
    */
   async getAllKeys(): Promise<string[]> {
-    return this.getKeys();
+    return await this.getKeys();
   }
 
   /**
@@ -43,16 +43,15 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * this function is equivalent to {@link getAllKeys}.
    */
   async getKeys(options?: SortKeyCacheRangeOptions): Promise<string[]> {
-    const response = await this.viewState<GetKeysInput, string[]>({
-      function: 'getKeys',
-      value: {
-        options,
+    return await this.safeReadInteraction<GetKeysInput, string[]>(
+      {
+        function: 'getKeys',
+        value: {
+          options,
+        },
       },
-    });
-    if (response.type !== 'ok') {
-      throw new Error('Contract Error [getKeys]: ' + response.errorMessage);
-    }
-    return response.result;
+      'Contract Error [getKeys]: '
+    );
   }
 
   /**
@@ -60,16 +59,15 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * all values are returned.
    */
   async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V>> {
-    const response = await this.viewState<GetKVMapInput, Map<string, V>>({
-      function: 'getKVMap',
-      value: {
-        options,
+    return await this.safeReadInteraction<GetKVMapInput, Map<string, V>>(
+      {
+        function: 'getKVMap',
+        value: {
+          options,
+        },
       },
-    });
-    if (response.type !== 'ok') {
-      throw new Error('Contract Error [getKVMap]: ' + response.errorMessage);
-    }
-    return response.result;
+      'Contract Error [getKVMap]: '
+    );
   }
 
   /**
@@ -78,16 +76,15 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * @returns the value of the given key
    */
   async get(key: string): Promise<V> {
-    const response = await this.viewState<GetInput, V>({
-      function: 'get',
-      value: {
-        key,
+    return await this.safeReadInteraction<GetInput, V>(
+      {
+        function: 'get',
+        value: {
+          key,
+        },
       },
-    });
-    if (response.type !== 'ok') {
-      throw new Error('Contract Error [get]: ' + response.errorMessage);
-    }
-    return response.result;
+      'Contract Error [get]: '
+    );
   }
 
   /**

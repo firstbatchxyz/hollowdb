@@ -45,7 +45,7 @@ export class Base<State extends ContractState> {
    * A typed wrapper around `dryWrite`, which evaluates a given input
    * on the local state, without creating a transaction. This may provide
    * better UX for some use-cases.
-   * @param input input in the form of `{function, data}`
+   * @param input input in the form of `{function, value}`
    * @returns interaction result
    */
   async dryWrite<Input extends ContractInput>(input: Input) {
@@ -56,7 +56,7 @@ export class Base<State extends ContractState> {
    * A typed wrapper around `writeInteraction`, which creates a
    * transaction. You are likely to use this after `dryWrite`, or you
    * may directly call this function.
-   * @param input input in the form of `{function, data}`
+   * @param input input in the form of `{function, value}`
    * @returns interaction response
    */
   async writeInteraction<Input extends ContractInput>(input: Input) {
@@ -67,8 +67,8 @@ export class Base<State extends ContractState> {
    * A typed wrapper around `dryWrite` followed by `writeInteraction`. This
    * function first executes the interaction locally via `dryWrite`, and if
    * there is an error, throws an error with an optional prefix in the message.
-   * @param input
-   * @param errorPrefix
+   * @param input input in the form of `{function, value}`
+   * @param errorPrefix optional prefix for the error message
    */
   async dryWriteInteraction<Input extends ContractInput>(input: Input, errorPrefix = '') {
     const result = await this.dryWrite(input);
@@ -79,10 +79,10 @@ export class Base<State extends ContractState> {
   }
 
   /**
-   * TODO
-   * @template V
-   * @param input
-   * @param errorPrefix
+   * A typed wrapper around `viewState` followed with a repsonse type check. If
+   * response type is not `ok`, it will throw an error with an optional prefix.
+   * @param input input in the form of `{function, value}`
+   * @param errorPrefix optional prefix for the error message
    * @returns
    */
   async safeReadInteraction<Input extends ContractInput, V>(input: Input, errorPrefix = '') {
@@ -99,6 +99,6 @@ export class Base<State extends ContractState> {
    * @returns interaction result
    */
   async viewState<Input extends ContractInput, R>(input: Input) {
-    return this.contract.viewState<typeof input, R>(input);
+    return await this.contract.viewState<typeof input, R>(input);
   }
 }

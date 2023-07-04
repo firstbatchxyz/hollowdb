@@ -72,6 +72,8 @@ export function assertWhitelist<State extends ContractState>(state: State, calle
  * preimage knowledge proof that is also bound to two values, the value currently in
  * database and the new value to be written. This binding happens via including
  * constraints related to the hashes of these values.
+ *
+ * If either `oldValue` or `newValue` is `null`, it will be mapped to number `0` for the circuit.
  */
 export async function verifyAuthProof<State extends ContractState>(
   state: State,
@@ -93,6 +95,7 @@ export async function verifyAuthProof<State extends ContractState>(
   }
 }
 
+/** Just like {@link verifyAuthProof} but the arguments are passed immediately. */
 export async function verifyAuthProofImmediate<State extends ContractState>(
   state: State,
   proof: object,

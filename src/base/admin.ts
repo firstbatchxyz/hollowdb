@@ -58,6 +58,11 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
     });
   }
 
+  /**
+   * Disable or enable whitelist checks for a specific whitelist.
+   * @param name name of the list
+   * @param value a boolean
+   */
   async updateWhitelistRequirement(name: keyof State['whitelists'], value: boolean) {
     await this.writeInteraction<UpdateRequirementInput>({
       function: 'updateRequirement',
@@ -69,6 +74,11 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
     });
   }
 
+  /**
+   * Disable or enable proof checks for a specific circuit.
+   * @param name name of the circuit
+   * @param value a boolean
+   */
   async updateProofRequirement(name: keyof State['verificationKeys'], value: boolean) {
     await this.writeInteraction<UpdateRequirementInput>({
       function: 'updateRequirement',
@@ -81,12 +91,12 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
   }
 
   /**
-   * Utility function to deploy a contract.
+   * Deploy a new contract.
    * @param owner wallet to deploy the contract
    * @param initialState the initial state
    * @param contractSource source code of the contract, as a string
    * @param warp warp instance
-   * @returns transaction ids
+   * @returns contract and source transaction ids
    */
   static async deploy(
     owner: JWKInterface,
@@ -121,7 +131,7 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
   }
 
   /**
-   * Utility function to evolve the contract.
+   * Evolve an existing contract with a new source code.
    * @param owner wallet to deploy the new contract
    * @param contractSource source code of the new contract, as a string
    * @param contractTxId contract transaction id of the old contract
