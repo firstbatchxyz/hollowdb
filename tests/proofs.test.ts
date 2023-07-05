@@ -2,14 +2,14 @@ import fs from 'fs';
 import {Prover} from './utils/prover';
 import constants from './constants';
 import {createValues, deployContract} from './utils';
-import {setupArlocal, setupWarp} from './fixture';
+import {setupArlocal, setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
 
 const PROTOCOL = 'groth16';
 
 describe('proofs', () => {
   const PORT = setupArlocal(3);
-  const warpFixture = setupWarp(PORT);
+  const warpHook = setupWarp(PORT);
   const prover = new Prover(
     constants.PROVERS[PROTOCOL].HOLLOWDB.WASM_PATH,
     constants.PROVERS[PROTOCOL].HOLLOWDB.PROVERKEY_PATH,
@@ -25,12 +25,12 @@ describe('proofs', () => {
   const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues<ValueType>();
 
   beforeAll(async () => {
-    const fixture = warpFixture();
-    const [ownerWallet, aliceWallet] = fixture.wallets;
-    const contractTxId = await deployContract(fixture.warp, ownerWallet.jwk);
+    const hook = warpHook();
+    const [ownerWallet, aliceWallet] = hook.wallets;
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk);
 
-    owner = new Admin(ownerWallet.jwk, contractTxId, fixture.warp);
-    alice = new SDK(aliceWallet.jwk, contractTxId, fixture.warp);
+    owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
+    alice = new SDK(aliceWallet.jwk, contractTxId, hook.warp);
   });
 
   it('should deploy with correct state', async () => {

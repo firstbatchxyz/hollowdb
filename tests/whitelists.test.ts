@@ -1,11 +1,11 @@
 import {createValues, deployContract} from './utils';
-import {setupArlocal, setupWarp} from './fixture';
+import {setupArlocal, setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
 describe('whitelists', () => {
   const PORT = setupArlocal(4);
-  const warpFixture = setupWarp(PORT);
+  const warpHook = setupWarp(PORT);
   type ValueType = {
     val: string;
   };
@@ -18,9 +18,9 @@ describe('whitelists', () => {
   const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
 
   beforeAll(async () => {
-    const fixture = warpFixture();
-    const [ownerWallet, aliceWallet, bobWallet] = fixture.wallets;
-    const contractTxId = await deployContract(fixture.warp, ownerWallet.jwk, {
+    const hook = warpHook();
+    const [ownerWallet, aliceWallet, bobWallet] = hook.wallets;
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, {
       ...initialHollowState,
       isProofRequired: {
         auth: false,
@@ -33,9 +33,9 @@ describe('whitelists', () => {
 
     aliceAddress = aliceWallet.address;
 
-    owner = new Admin(ownerWallet.jwk, contractTxId, fixture.warp);
-    alice = new SDK(aliceWallet.jwk, contractTxId, fixture.warp);
-    bob = new SDK(bobWallet.jwk, contractTxId, fixture.warp);
+    owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
+    alice = new SDK(aliceWallet.jwk, contractTxId, hook.warp);
+    bob = new SDK(bobWallet.jwk, contractTxId, hook.warp);
   });
 
   it('should deploy with correct state', async () => {

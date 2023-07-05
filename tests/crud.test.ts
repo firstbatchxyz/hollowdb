@@ -1,6 +1,6 @@
 import {randomBytes} from 'crypto';
 import {createValues, deployContract} from './utils';
-import {setupArlocal, setupWarp} from './fixture';
+import {setupArlocal, setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
@@ -11,15 +11,15 @@ describe('CRUD', () => {
   };
 
   describe.each(['redis', 'lmdb', 'default'] as const)('cache type: %s', cacheType => {
-    const warpFixture = setupWarp(PORT, cacheType);
+    const warpHook = setupWarp(PORT, cacheType);
     let user: SDK<ValueType>;
 
     const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
 
     beforeAll(async () => {
-      const fixture = warpFixture();
-      const userWallet = fixture.wallets[0];
-      const contractTxId = await deployContract(fixture.warp, userWallet.jwk, {
+      const hook = warpHook();
+      const userWallet = hook.wallets[0];
+      const contractTxId = await deployContract(hook.warp, userWallet.jwk, {
         ...initialHollowState,
         isProofRequired: {
           auth: false,
@@ -29,7 +29,7 @@ describe('CRUD', () => {
           update: false,
         },
       });
-      user = new SDK(userWallet.jwk, contractTxId, fixture.warp);
+      user = new SDK(userWallet.jwk, contractTxId, hook.warp);
     });
 
     it('should deploy with correct state', async () => {

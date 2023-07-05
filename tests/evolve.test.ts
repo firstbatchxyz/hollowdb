@@ -1,21 +1,21 @@
 import {JWKInterface, Warp} from 'warp-contracts';
 import {Admin, SDK} from '../src/hollowdb';
-import {setupArlocal, setupWarp} from './fixture';
+import {setupArlocal, setupWarp} from './hooks';
 import {deployContract} from './utils';
 
 describe('evolve', () => {
   const PORT = setupArlocal(2);
-  const warpFixture = setupWarp(PORT, 'default');
+  const warpHook = setupWarp(PORT, 'default');
 
   let warp: Warp;
   let contractTxId: string;
   let owner: JWKInterface;
 
   beforeAll(async () => {
-    const fixture = warpFixture();
-    owner = fixture.wallets[0].jwk;
-    warp = fixture.warp;
-    contractTxId = await deployContract(fixture.warp, owner);
+    const hook = warpHook();
+    owner = hook.wallets[0].jwk;
+    warp = hook.warp;
+    contractTxId = await deployContract(hook.warp, owner);
   });
 
   it('should evolve contract', async () => {

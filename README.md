@@ -59,11 +59,12 @@ Note that you need to have a Redis server running for Redis tests to pass, the U
 
 The tests are as follows:
 
-- `circuit` tests proof validation for the Hollow circuit.
+- `circuit` tests zero-knowledge proof generation & validation.
 - `evolve` tests for evolve functionality.
 - `whitelists` tests for Whitelist functionality, both enabled and disabled.
 - `proofs` tests for Proofs functionality, both enabled and disabled.
 - `crud` tests for basic CRUD functionality, such as checking for existing keys, not removing an already removed key and such.
+- `multi` tests using a single Warp instance with multiple contracts, and multiple HollowDB instances.
 
 ## Styling
 
