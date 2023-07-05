@@ -3,7 +3,7 @@ import {Admin, SDK} from '../src/hollowdb';
 import {setupArlocal, setupWarp} from './hooks';
 import {deployContract} from './utils';
 
-describe('evolve', () => {
+describe('evolve contract', () => {
   const PORT = setupArlocal(2);
   const warpHook = setupWarp(PORT, 'default');
 
@@ -19,10 +19,9 @@ describe('evolve', () => {
   });
 
   it('should evolve contract', async () => {
-    const newContractSource = dummyContractSource;
     const {contractTxId: newContractTxId, srcTxId: newSrcTxId} = await Admin.evolve(
       owner,
-      newContractSource,
+      dummyContractSource,
       contractTxId,
       warp,
       true

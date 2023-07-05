@@ -4,7 +4,7 @@ import {setupArlocal, setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
-describe('CRUD', () => {
+describe('crud operations', () => {
   const PORT = setupArlocal(0);
   type ValueType = {
     val: string;
@@ -45,6 +45,18 @@ describe('CRUD', () => {
         expect(await user.get(KEY)).toEqual(null);
         await user.put(KEY, VALUE);
         expect(await user.get(KEY)).toEqual(VALUE);
+      });
+
+      it('should read the value with getKvMap', async () => {
+        const kvmap = await user.getKVMap();
+        expect(kvmap.get(KEY)).toEqual(VALUE);
+      });
+
+      it('should see the key with getKeys', async () => {
+        // equivalent to getAllKeys when no option is given
+        const keys = await user.getKeys();
+        expect(keys.length).toEqual(1);
+        expect(keys[0]).toEqual(KEY);
       });
 
       it('should NOT put a value to the same key', async () => {

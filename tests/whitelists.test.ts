@@ -3,7 +3,7 @@ import {setupArlocal, setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
-describe('whitelists', () => {
+describe('whitelists mode', () => {
   const PORT = setupArlocal(4);
   const warpHook = setupWarp(PORT);
   type ValueType = {
