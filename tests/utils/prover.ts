@@ -58,7 +58,7 @@ export class Prover {
     if (value) {
       return BigInt('0x' + digest);
     } else {
-      return 0n;
+      return BigInt(0);
     }
   };
 }

@@ -1,6 +1,6 @@
 import {readFileSync} from 'fs';
 import {Prover} from './utils/prover';
-import {computeKey} from './utils/computeKey';
+import {computeKey} from './utils';
 import constants from './constants';
 import {decimalToHex} from './utils';
 const snarkjs = require('snarkjs');
@@ -17,7 +17,7 @@ const newValue = {
   bar: false,
 };
 
-describe.each(['groth16', 'plonk'] as const)('hollowdb circuits (%s)', proofSystem => {
+describe.each(['groth16', 'plonk'] as const)('circuits (%s)', proofSystem => {
   let prover: Prover;
   let verificationKey: object;
   let proof: object;

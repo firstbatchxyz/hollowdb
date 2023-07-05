@@ -1,41 +1,61 @@
 import {JWKInterface, Warp} from 'warp-contracts';
-import dummyContractSource from './res/dummyContract';
 import {Admin, SDK} from '../src/hollowdb';
-import {setupArlocal, setupHollowTestState} from './common';
+import {setupArlocal, setupWarp} from './fixture';
+import {deployContract} from './utils';
 
 describe('evolve', () => {
-  const PORT = setupArlocal(1);
-  const getHollowTestState = setupHollowTestState(PORT, 'default');
+  const PORT = setupArlocal(2);
+  const warpFixture = setupWarp(PORT, 'default');
 
   let warp: Warp;
   let contractTxId: string;
-  let ownerJWK: JWKInterface;
+  let owner: JWKInterface;
 
   beforeAll(async () => {
-    const testState = getHollowTestState();
-    warp = testState.warp;
-    contractTxId = testState.contractTxId;
-    ownerJWK = testState.ownerAdmin.signer as JWKInterface;
+    const fixture = warpFixture();
+    owner = fixture.wallets[0].jwk;
+    warp = fixture.warp;
+    contractTxId = await deployContract(fixture.warp, owner);
   });
 
   it('should evolve contract', async () => {
     const newContractSource = dummyContractSource;
     const {contractTxId: newContractTxId, srcTxId: newSrcTxId} = await Admin.evolve(
-      ownerJWK,
+      owner,
       newContractSource,
       contractTxId,
       warp,
       true
     );
 
-    // create new SDK
-    const ownerSDK = new SDK(ownerJWK, newContractTxId, warp);
+    const sdk = new SDK(owner, newContractTxId, warp);
 
     // state should have the new source id within its "evolve" field
-    const {cachedValue} = await ownerSDK.readState();
+    const {cachedValue} = await sdk.readState();
     expect(cachedValue.state.evolve).toEqual(newSrcTxId);
 
     // calling a non-existent function in the new contract should give error
-    await expect(ownerSDK.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
+    await expect(sdk.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
   });
 });
+
+// a dummy contract with just a get function
+const dummyContractSource = `
+// contracts/hollowDB/actions/read/get.ts
+var get = async (state, action) => {
+  const {key} = action.input.data;
+  return {
+    result: await SmartWeave.kv.get(key),
+  };
+};
+
+// contracts/hollowDB/contract.ts
+var handle = (state, action) => {
+  switch (action.input.function) {
+    case 'get':
+      return get(state, action);
+    default:
+      throw new ContractError('Unknown function: ' + action.input.function);
+  }
+};
+` as string;

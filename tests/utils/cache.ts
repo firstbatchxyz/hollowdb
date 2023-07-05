@@ -8,7 +8,6 @@ import {Redis} from 'ioredis';
 
 export function overrideCache(
   warp: Warp,
-  contractTxId: string,
   cacheType: 'lmdb' | 'redis' | 'default',
   useCache: {state?: boolean; contract?: boolean},
   client?: Redis
@@ -35,7 +34,7 @@ export function overrideCache(
         new RedisCache(
           {
             ...redisCacheOptions,
-            dbLocation: `${contractTxId}.state`,
+            dbLocation: 'state',
           },
           redisSpecificOptions
         )
@@ -45,14 +44,14 @@ export function overrideCache(
         new RedisCache(
           {
             ...redisCacheOptions,
-            dbLocation: `${contractTxId}.contract`,
+            dbLocation: 'contract',
           },
           redisSpecificOptions
         ),
         new RedisCache(
           {
             ...redisCacheOptions,
-            dbLocation: `${contractTxId}.src`,
+            dbLocation: 'src',
           },
           redisSpecificOptions
         )
@@ -63,7 +62,7 @@ export function overrideCache(
         new RedisCache(
           {
             ...redisCacheOptions,
-            dbLocation: `${contractTxId}.src`,
+            dbLocation: `${contractTxId}.kv`,
           },
           redisSpecificOptions
         )
@@ -105,7 +104,7 @@ export function overrideCache(
       (contractTxId: string) =>
         new LmdbCache({
           ...defaultCacheOptions,
-          dbLocation: `./cache/warp/kv/lmdb_2/${contractTxId}`,
+          dbLocation: `./cache/warp/kv/${contractTxId}`,
         })
     );
   }
