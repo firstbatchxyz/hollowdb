@@ -3,7 +3,11 @@ import {Prover} from './utils/prover';
 import {computeKey} from './utils';
 import constants from './constants';
 import {decimalToHex} from './utils';
-const snarkjs = require('snarkjs');
+// const snarkjs = require('snarkjs');
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+import * as snarkjs from 'snarkjs';
 
 const preimage = BigInt(1122334455);
 const curValue = {
@@ -27,6 +31,7 @@ describe.each(['groth16', 'plonk'] as const)('circuits (%s)', proofSystem => {
 
   beforeAll(async () => {
     // prepare prover and verification key
+
     if (proofSystem === 'groth16') {
       prover = new Prover(
         constants.PROVERS.groth16.HOLLOWDB.WASM_PATH,
@@ -88,5 +93,11 @@ describe.each(['groth16', 'plonk'] as const)('circuits (%s)', proofSystem => {
       proof
     );
     expect(result).toEqual(false);
+  });
+
+  afterAll(async () => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    await globalThis.curve_bn128.terminate();
   });
 });
