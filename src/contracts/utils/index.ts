@@ -4,7 +4,7 @@ import {
   NoVerificationKeyError,
   NotOwnerError,
   NotWhitelistedError,
-  UnknownProofSystemError,
+  UnknownProtocolError,
 } from '../errors';
 import type {ContractState} from '../types/contract';
 
@@ -15,7 +15,7 @@ export const verifyProof = async (proof: object, psignals: bigint[], verificatio
     throw NoVerificationKeyError;
   }
   if (verificationKey.protocol !== 'groth16' && verificationKey.protocol !== 'plonk') {
-    throw UnknownProofSystemError;
+    throw UnknownProtocolError;
   }
   return await SmartWeave.extensions[verificationKey.protocol].verify(verificationKey, psignals, proof);
 };

@@ -1,16 +1,16 @@
 import {deployContract} from './utils';
-import {setupArlocal, setupWarp} from './hooks';
+import {setupWarp} from './hooks';
 import {Admin} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
 describe('multiple contracts', () => {
-  const PORT = setupArlocal(5);
   const REQ_COUNT = 100;
-  const warpHook = setupWarp(PORT, 'redis');
+  const warpHook = setupWarp('redis');
 
   let user1: Admin<number>;
   let user2: Admin<number>;
   let randomness: boolean[];
+  let keys: string[];
 
   beforeAll(async () => {
     const hook = warpHook();
@@ -32,13 +32,16 @@ describe('multiple contracts', () => {
     user2 = new Admin(userWallet.jwk, contractTxId2, hook.warp);
 
     randomness = Array<boolean>(REQ_COUNT).fill(Math.random() < 0.5);
+    keys = Array<string>(REQ_COUNT)
+      .fill('')
+      .map((_, i) => `key.${i}`);
   });
 
   it('should allow putting at once', async () => {
     const values = Array<number>(REQ_COUNT).fill(Math.random() * REQ_COUNT);
 
     for (let i = 0; i < REQ_COUNT; ++i) {
-      const k = `key.${i}`;
+      const k = keys[i];
       const v = values[i];
       if (randomness[i]) {
         await user1.put(k, v);
@@ -54,7 +57,7 @@ describe('multiple contracts', () => {
     const values = Array<number>(REQ_COUNT).fill(Math.random() * REQ_COUNT);
 
     for (let i = 0; i < REQ_COUNT; ++i) {
-      const k = `key.${i}`;
+      const k = keys[i];
       const v = values[i];
 
       if (randomness[i]) {

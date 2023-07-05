@@ -2,14 +2,12 @@ import fs from 'fs';
 import {Prover} from './utils/prover';
 import constants from './constants';
 import {createValues, deployContract} from './utils';
-import {setupArlocal, setupWarp} from './hooks';
+import {setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
 
 describe('proofs mode', () => {
-  const PORT = setupArlocal(3);
-
   describe.each(['groth16', 'plonk'] as const)('protocol: %s', protocol => {
-    const warpHook = setupWarp(PORT);
+    const warpHook = setupWarp();
     const prover = new Prover(
       constants.PROVERS[protocol].HOLLOWDB.WASM_PATH,
       constants.PROVERS[protocol].HOLLOWDB.PROVERKEY_PATH,

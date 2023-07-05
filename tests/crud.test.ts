@@ -1,17 +1,16 @@
 import {randomBytes} from 'crypto';
 import {createValues, deployContract} from './utils';
-import {setupArlocal, setupWarp} from './hooks';
+import {setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
 describe('crud operations', () => {
-  const PORT = setupArlocal(0);
   type ValueType = {
     val: string;
   };
 
   describe.each(['redis', 'lmdb', 'default'] as const)('cache type: %s', cacheType => {
-    const warpHook = setupWarp(PORT, cacheType);
+    const warpHook = setupWarp(cacheType);
     let user: SDK<ValueType>;
 
     const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
@@ -40,16 +39,24 @@ describe('crud operations', () => {
       expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
     });
 
-    describe('put', () => {
+    describe('put & get', () => {
+      let values: ValueType[];
+      let keys: string[];
+
+      beforeAll(() => {
+        const count = 100;
+        values = Array<ValueType>(count).fill({
+          val: randomBytes(10).toString('hex'),
+        });
+        keys = Array<string>(count)
+          .fill('')
+          .map((_, i) => KEY + i);
+      });
+
       it('should put a value to a key & read it', async () => {
         expect(await user.get(KEY)).toEqual(null);
         await user.put(KEY, VALUE);
         expect(await user.get(KEY)).toEqual(VALUE);
-      });
-
-      it('should read the value with getKvMap', async () => {
-        const kvmap = await user.getKVMap();
-        expect(kvmap.get(KEY)).toEqual(VALUE);
       });
 
       it('should see the key with getKeys', async () => {
@@ -63,18 +70,34 @@ describe('crud operations', () => {
         await expect(user.put(KEY, VALUE)).rejects.toThrow('Contract Error [put]: Key already exists.');
       });
 
-      it('should put many values', async () => {
-        const count = 10;
-        const values = Array<ValueType>(count).fill({
-          val: randomBytes(10).toString('hex'),
-        });
-
+      it('should put many values & get them', async () => {
         for (let i = 0; i < values.length; ++i) {
-          const k = KEY + i;
+          const k = keys[i];
           const v = values[i];
           expect(await user.get(k)).toEqual(null);
           await user.put(k, v);
           expect(await user.get(k)).toEqual(v);
+        }
+      });
+
+      it('should get keys with getAllKeys', async () => {
+        const keys = await user.getAllKeys();
+        for (let i = 0; i < values.length; ++i) {
+          expect(keys.includes(KEY + i)).toBe(true);
+        }
+      });
+
+      it('should get values with getKvMap', async () => {
+        const kvMap = await user.getKVMap();
+        for (let i = 0; i < values.length; ++i) {
+          expect(kvMap.get(keys[i])).toEqual(values[i]);
+        }
+      });
+
+      it('should get values with getStorageValues', async () => {
+        const {cachedValue: kvMap} = await user.getStorageValues(keys);
+        for (let i = 0; i < values.length; ++i) {
+          expect(kvMap.get(KEY + i)).toEqual(values[i]);
         }
       });
     });

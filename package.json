@@ -50,7 +50,7 @@
     "contract:evolve": "yarn contract:build && npx ts-node ./src/bin/evolve.ts",
     "contract:clean": "rimraf ./build",
     "compile": "rimraf ./dist && npx tsc",
-    "test": "jest --verbose",
+    "test": "jest",
     "pretest": "yarn contract:build",
     "lint": "gts lint",
     "format": "prettier --write './src/**/*.ts'",

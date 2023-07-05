@@ -1,23 +1,25 @@
 import {createHash} from 'crypto';
-const snarkjs = require('snarkjs');
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
+import * as snarkjs from 'snarkjs';
 
-export type ProofSystem = 'groth16' | 'plonk';
+export type Protocol = 'groth16' | 'plonk';
 
 export class Prover {
   private readonly wasmPath: string;
   private readonly proverKey: string;
-  public readonly proofSystem: ProofSystem;
+  public readonly protocol: Protocol;
 
   /**
    * Create a prover with the given WASM path and prover key path.
    * @param wasmPath path to the circuit's WASM file
    * @param proverKey path to the prover key
-   * @param proofSystem underlying proof system
+   * @param protocol underlying proof system
    */
-  constructor(wasmPath: string, proverKey: string, proofSystem: ProofSystem) {
+  constructor(wasmPath: string, proverKey: string, protocol: Protocol) {
     this.wasmPath = wasmPath;
     this.proverKey = proverKey;
-    this.proofSystem = proofSystem;
+    this.protocol = protocol;
   }
 
   /**
@@ -33,7 +35,7 @@ export class Prover {
     curValue: unknown | null,
     nextValue: unknown | null
   ): Promise<{proof: object; publicSignals: [curValueHashOut: string, nextValueHashOut: string, key: string]}> {
-    const fullProof = await snarkjs[this.proofSystem].fullProve(
+    const fullProof = await snarkjs[this.protocol].fullProve(
       // field names of this JSON object must match the input signal names of the circuit
       {
         preimage: preimage,

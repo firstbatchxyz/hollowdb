@@ -1,11 +1,10 @@
 import {JWKInterface, Warp} from 'warp-contracts';
 import {Admin, SDK} from '../src/hollowdb';
-import {setupArlocal, setupWarp} from './hooks';
+import {setupWarp} from './hooks';
 import {deployContract} from './utils';
 
 describe('evolve contract', () => {
-  const PORT = setupArlocal(2);
-  const warpHook = setupWarp(PORT, 'default');
+  const warpHook = setupWarp();
 
   let warp: Warp;
   let contractTxId: string;

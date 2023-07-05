@@ -3,7 +3,6 @@ import {LmdbCache} from 'warp-contracts-lmdb';
 import {LmdbOptions} from 'warp-contracts-lmdb/lib/types/LmdbOptions';
 import {RedisCache, RedisOptions} from 'warp-contracts-redis';
 import constants from '../constants';
-import {globals} from '../../jest.config.cjs';
 import {Redis} from 'ioredis';
 
 export function overrideCache(
@@ -26,7 +25,7 @@ export function overrideCache(
         }
       : {
           ...LIMIT_OPTS,
-          url: globals.__REDIS_URL__,
+          url: constants.REDIS_URL,
         };
 
     if (useCache.state)
