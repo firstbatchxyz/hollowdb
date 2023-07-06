@@ -5,11 +5,18 @@ import {RedisCache, RedisOptions} from 'warp-contracts-redis';
 import constants from '../constants';
 import {Redis} from 'ioredis';
 
+/**
+ * Override Warp cache by using LMDB or Redis. The `default` option simply does
+ * nothing so that default settings are kept.
+ *
+ * Due to these lines [here](https://github.com/warp-contracts/warp/blob/main/src/core/modules/impl/ContractDefinitionLoader.ts#L156)
+ * `stateCache` and `contractCache` are not used.
+ */
 export function overrideCache(
   warp: Warp,
   cacheType: 'lmdb' | 'redis' | 'default',
-  useCache: {state?: boolean; contract?: boolean},
   client?: Redis
+  // useCache: {state?: boolean; contract?: boolean},
 ): Warp {
   const LIMIT_OPTS = constants.DEFAULT_LIMIT_OPTS[cacheType];
   if (cacheType === 'redis') {
@@ -28,33 +35,33 @@ export function overrideCache(
           url: constants.REDIS_URL,
         };
 
-    if (useCache.state)
-      warp = warp.useStateCache(
-        new RedisCache(
-          {
-            ...redisCacheOptions,
-            dbLocation: 'state',
-          },
-          redisSpecificOptions
-        )
-      );
-    if (useCache.contract)
-      warp = warp.useContractCache(
-        new RedisCache(
-          {
-            ...redisCacheOptions,
-            dbLocation: 'contract',
-          },
-          redisSpecificOptions
-        ),
-        new RedisCache(
-          {
-            ...redisCacheOptions,
-            dbLocation: 'src',
-          },
-          redisSpecificOptions
-        )
-      );
+    // if (useCache.state)
+    //   warp = warp.useStateCache(
+    //     new RedisCache(
+    //       {
+    //         ...redisCacheOptions,
+    //         dbLocation: 'state',
+    //       },
+    //       redisSpecificOptions
+    //     )
+    //   );
+    // if (useCache.contract)
+    //   warp = warp.useContractCache(
+    //     new RedisCache(
+    //       {
+    //         ...redisCacheOptions,
+    //         dbLocation: 'contract',
+    //       },
+    //       redisSpecificOptions
+    //     ),
+    //     new RedisCache(
+    //       {
+    //         ...redisCacheOptions,
+    //         dbLocation: 'src',
+    //       },
+    //       redisSpecificOptions
+    //     )
+    //   );
 
     warp = warp.useKVStorageFactory(
       (contractTxId: string) =>
@@ -70,34 +77,34 @@ export function overrideCache(
     const lmdbCacheOptions: CacheOptions = defaultCacheOptions;
     const lmdbSpecificOptions: LmdbOptions = LIMIT_OPTS;
 
-    if (useCache.state)
-      warp = warp.useStateCache(
-        new LmdbCache(
-          {
-            ...lmdbCacheOptions,
-            dbLocation: './cache/warp/state',
-          },
-          lmdbSpecificOptions
-        )
-      );
+    // if (useCache.state)
+    //   warp = warp.useStateCache(
+    //     new LmdbCache(
+    //       {
+    //         ...lmdbCacheOptions,
+    //         dbLocation: './cache/warp/state',
+    //       },
+    //       lmdbSpecificOptions
+    //     )
+    //   );
 
-    if (useCache.contract)
-      warp = warp.useContractCache(
-        new LmdbCache(
-          {
-            ...lmdbCacheOptions,
-            dbLocation: './cache/warp/contract',
-          },
-          lmdbSpecificOptions
-        ),
-        new LmdbCache(
-          {
-            ...lmdbCacheOptions,
-            dbLocation: './cache/warp/src',
-          },
-          lmdbSpecificOptions
-        )
-      );
+    // if (useCache.contract)
+    //   warp = warp.useContractCache(
+    //     new LmdbCache(
+    //       {
+    //         ...lmdbCacheOptions,
+    //         dbLocation: './cache/warp/contract',
+    //       },
+    //       lmdbSpecificOptions
+    //     ),
+    //     new LmdbCache(
+    //       {
+    //         ...lmdbCacheOptions,
+    //         dbLocation: './cache/warp/src',
+    //       },
+    //       lmdbSpecificOptions
+    //     )
+    //   );
 
     warp = warp.useKVStorageFactory(
       (contractTxId: string) =>
