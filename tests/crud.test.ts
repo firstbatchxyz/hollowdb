@@ -118,7 +118,7 @@ describe('crud operations', () => {
 
       it('should NOT remove an already removed value', async () => {
         expect(await user.get(KEY)).toEqual(null);
-        await expect(user.remove(KEY)).rejects.toThrow('Key does not exist');
+        await expect(user.remove(KEY)).rejects.toThrow('Contract Error [remove]: Key does not exist');
       });
     });
   });

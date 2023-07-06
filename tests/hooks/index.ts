@@ -13,13 +13,7 @@ import {Wallet} from 'warp-contracts/lib/types/contract/testing/Testing';
  *
  * Cache type defaults to `default`.
  */
-export function setupWarp(
-  cacheType: 'redis' | 'lmdb' | 'default' = 'default'
-  // useCache: {
-  //   state?: boolean | undefined;
-  //   contract?: boolean | undefined;
-  // } = {}
-) {
+export function setupWarp(cacheType: 'redis' | 'lmdb' | 'default' = 'default') {
   let warp: Warp;
   let wallets: [Wallet, Wallet, Wallet];
   let redisClient: Redis;

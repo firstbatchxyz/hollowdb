@@ -10,7 +10,8 @@ import {Redis} from 'ioredis';
  * nothing so that default settings are kept.
  *
  * Due to these lines [here](https://github.com/warp-contracts/warp/blob/main/src/core/modules/impl/ContractDefinitionLoader.ts#L156)
- * `stateCache` and `contractCache` are not used.
+ * `stateCache` and `contractCache` are not used. This is probably because of using `ArLocal` and `WarpFactory.forLocal`.
+ * These cache options are available on mainnet alright.
  */
 export function overrideCache(
   warp: Warp,
@@ -18,6 +19,8 @@ export function overrideCache(
   client?: Redis
   // useCache: {state?: boolean; contract?: boolean},
 ): Warp {
+  if (cacheType === 'default') return warp;
+
   const LIMIT_OPTS = constants.DEFAULT_LIMIT_OPTS[cacheType];
   if (cacheType === 'redis') {
     const redisCacheOptions: CacheOptions = {
@@ -108,10 +111,13 @@ export function overrideCache(
 
     warp = warp.useKVStorageFactory(
       (contractTxId: string) =>
-        new LmdbCache({
-          ...defaultCacheOptions,
-          dbLocation: `./cache/warp/kv/${contractTxId}`,
-        })
+        new LmdbCache(
+          {
+            ...lmdbCacheOptions,
+            dbLocation: `./cache/warp/kv/${contractTxId}`,
+          },
+          lmdbSpecificOptions
+        )
     );
   }
 
