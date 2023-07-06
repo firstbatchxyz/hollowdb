@@ -111,7 +111,7 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * @param value new value
    * @param proof optional zero-knowledge proof
    */
-  async update(key: string, value: V, proof: object = {}): Promise<void> {
+  async update(key: string, value: V, proof?: object): Promise<void> {
     await this.dryWriteInteraction<UpdateInput>(
       {
         function: 'update',
@@ -131,7 +131,7 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * @param key key of the value to be removed
    * @param proof optional zero-knowledge proof
    */
-  async remove(key: string, proof: object = {}): Promise<void> {
+  async remove(key: string, proof?: object): Promise<void> {
     await this.dryWriteInteraction<RemoveInput>(
       {
         function: 'remove',

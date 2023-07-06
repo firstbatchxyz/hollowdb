@@ -19,7 +19,7 @@ export type RemoveInput = {
   function: 'remove';
   value: {
     key: string;
-    proof: object;
+    proof?: object;
   };
 };
 
@@ -29,7 +29,7 @@ export type UpdateInput = {
     key: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any;
-    proof: object;
+    proof?: object;
   };
 };
 

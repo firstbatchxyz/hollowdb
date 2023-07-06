@@ -5,5 +5,6 @@ export const NoVerificationKeyError = new ContractError('No verification key.');
 export const UnknownProtocolError = new ContractError('Unknown protocol.');
 export const NotWhitelistedError = new ContractError('Not whitelisted.');
 export const InvalidProofError = new ContractError('Invalid proof.');
+export const ExpectedProofError = new ContractError('Expected a proof.');
 export const NotOwnerError = new ContractError('Not contract owner.');
 export const InvalidFunctionError = new ContractError('Invalid function.');

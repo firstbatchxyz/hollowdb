@@ -65,7 +65,7 @@ export async function deployContract(warp: Warp, signer: JWKInterface, initialSt
     warp,
     true // bundling is disabled during testing
   ).then(result => result.contractTxId);
-  console.log('Contract deployed at:', contractTxId);
+  // console.log('Contract deployed at:', contractTxId);
 
   const contractTx = await warp.arweave.transactions.get(contractTxId);
   expect(contractTx).not.toBeNull();

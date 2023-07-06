@@ -1,4 +1,5 @@
 import {
+  ExpectedProofError,
   InvalidProofError,
   KeyNotExistsError,
   NoVerificationKeyError,
@@ -77,12 +78,15 @@ export function assertWhitelist<State extends ContractState>(state: State, calle
  */
 export async function verifyAuthProof<State extends ContractState>(
   state: State,
-  proof: object,
+  proof: object | undefined,
   oldValue: unknown,
   newValue: unknown,
   key: string
 ): Promise<void> {
   if (!state.isProofRequired.auth) return;
+  if (!proof) {
+    throw ExpectedProofError;
+  }
 
   const verificationSuccess = await verifyProof(
     proof,
@@ -98,12 +102,15 @@ export async function verifyAuthProof<State extends ContractState>(
 /** Just like {@link verifyAuthProof} but the arguments are passed immediately. */
 export async function verifyAuthProofImmediate<State extends ContractState>(
   state: State,
-  proof: object,
+  proof: object | undefined,
   oldValueHash: bigint,
   newValueHash: bigint,
   key: string
 ): Promise<void> {
   if (!state.isProofRequired.auth) return;
+  if (!proof) {
+    throw ExpectedProofError;
+  }
 
   const verificationSuccess = await verifyProof(
     proof,

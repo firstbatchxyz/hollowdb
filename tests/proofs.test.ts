@@ -77,7 +77,7 @@ describe('proofs mode', () => {
       });
 
       it('should NOT update an existing value without a proof', async () => {
-        await expect(alice.update(KEY, NEXT_VALUE)).rejects.toThrow();
+        await expect(alice.update(KEY, NEXT_VALUE)).rejects.toThrow('Contract Error [update]: Expected a proof.');
       });
 
       it('should update an existing value with proof', async () => {
@@ -89,7 +89,7 @@ describe('proofs mode', () => {
 
     describe('remove operations', () => {
       it('should NOT remove an existing value without proof', async () => {
-        await expect(alice.remove(KEY)).rejects.toThrow();
+        await expect(alice.remove(KEY)).rejects.toThrow('Contract Error [remove]: Expected a proof.');
       });
 
       it('should remove an existing value with proof', async () => {
