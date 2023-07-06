@@ -1,6 +1,6 @@
 {
   "name": "hollowdb",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A decentralized privacy-preserving key-value database",
   "license": "MIT",
   "homepage": "https://github.com/firstbatchxyz/hollowdb#readme",
