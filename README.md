@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./img/logo.svg" alt="logo" width="140">
+  <img src="./logo.svg" alt="logo" width="142">
 </p>
 
 <p align="center">
@@ -47,13 +47,24 @@ You can read the full documentation at <https://docs.hollowdb.xyz>.
 
 ## Testing
 
-There are Jest test suites for HollowDB operations that operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). To run:
+You can run all tests via:
 
 ```sh
 yarn test
 ```
 
-The tests will run for all cache types (LMDB, Redis, LevelDB). For Redis tests to pass, you need to have a Redis server running, with the URL that you specify within the [Jest config](./jest.config.cjs).
+Tests operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB).
+
+Note that you need to have a Redis server running for Redis tests to pass, the URL shall be specified within [jest.config.cjs](./jest.config.cjs).
+
+The tests are as follows:
+
+- `circuit` tests zero-knowledge proof generation & validation.
+- `evolve` tests for evolve functionality.
+- `whitelists` tests for Whitelist functionality, both enabled and disabled.
+- `proofs` tests for Proofs functionality, both enabled and disabled.
+- `crud` tests for basic CRUD functionality, such as checking for existing keys, not removing an already removed key and such.
+- `multi` tests using a single Warp instance with multiple contracts, and multiple HollowDB instances.
 
 ## Styling
 

@@ -1,71 +1,59 @@
-import ArLocal from 'arlocal';
-import {JWKInterface, LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-import dummyContractSource from './res/dummyContract';
-import initialState from '../src/contracts/states/hollowdb';
-import fs from 'fs';
+import {JWKInterface, Warp} from 'warp-contracts';
 import {Admin, SDK} from '../src/hollowdb';
-import constants from './constants';
+import {setupWarp} from './hooks';
+import {deployContract} from './utils';
 
-describe('evolve', () => {
-  let arlocal: ArLocal;
+describe('evolve contract', () => {
+  const warpHook = setupWarp();
+
   let warp: Warp;
   let contractTxId: string;
-  let ownerJWK: JWKInterface;
+  let owner: JWKInterface;
 
   beforeAll(async () => {
-    arlocal = new ArLocal(constants.ARWEAVE_PORT + 1, false);
-    await arlocal.start();
-
-    LoggerFactory.INST.logLevel('none');
-
-    const contractSource = fs.readFileSync('./build/hollowdb.js', 'utf8');
-
-    // setup warp factory for local arweave
-    warp = WarpFactory.forLocal(constants.ARWEAVE_PORT + 1).use(new DeployPlugin());
-
-    // get accounts
-    const ownerWallet = await warp.generateWallet();
-    ownerJWK = ownerWallet.jwk;
-
-    // deploy contract
-    contractTxId = (
-      await Admin.deploy(
-        ownerJWK,
-        initialState,
-        contractSource,
-        warp,
-        true // bundling is disabled during testing
-      )
-    ).contractTxId;
-
-    const contractTx = await warp.arweave.transactions.get(contractTxId);
-    expect(contractTx).not.toBeNull();
+    const hook = warpHook();
+    owner = hook.wallets[0].jwk;
+    warp = hook.warp;
+    contractTxId = await deployContract(hook.warp, owner);
   });
 
   it('should evolve contract', async () => {
-    const newContractSource = dummyContractSource;
-
     const {contractTxId: newContractTxId, srcTxId: newSrcTxId} = await Admin.evolve(
-      ownerJWK,
-      newContractSource,
+      owner,
+      dummyContractSource,
       contractTxId,
       warp,
       true
     );
 
-    // create new SDK
-    const ownerSDK = new SDK(ownerJWK, newContractTxId, warp);
+    const sdk = new SDK(owner, newContractTxId, warp);
 
     // state should have the new source id within its "evolve" field
-    const {cachedValue} = await ownerSDK.readState();
+    const {cachedValue} = await sdk.readState();
     expect(cachedValue.state.evolve).toEqual(newSrcTxId);
 
     // calling a non-existent function in the new contract should give error
-    await expect(ownerSDK.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
-  });
-
-  afterAll(async () => {
-    await arlocal.stop();
+    await expect(sdk.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
   });
 });
+
+// a dummy contract with just a get function
+const dummyContractSource = `
+// contracts/hollowDB/actions/read/get.ts
+var get = async (state, action) => {
+  const {key} = action.input.data;
+  return {
+    result: await SmartWeave.kv.get(key),
+  };
+};
+
+// contracts/hollowDB/contract.ts
+var handle = (state, action) => {
+  switch (action.input.function) {
+    case 'get':
+      return get(state, action);
+    default:
+      throw new ContractError('Unknown function: ' + action.input.function);
+  }
+};
+` as string;

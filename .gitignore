@@ -19,3 +19,6 @@ dump.rdb
 # Temporary stuff not-to-be pushed
 *.tmp.ts
 tmp.ts
+
+# Test stuff
+coverage

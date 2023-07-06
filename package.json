@@ -50,7 +50,7 @@
     "contract:evolve": "yarn contract:build && npx ts-node ./src/bin/evolve.ts",
     "contract:clean": "rimraf ./build",
     "compile": "rimraf ./dist && npx tsc",
-    "test": "jest --forceExit",
+    "test": "jest",
     "pretest": "yarn contract:build",
     "lint": "gts lint",
     "format": "prettier --write './src/**/*.ts'",
@@ -71,7 +71,7 @@
     "poseidon-lite": "^0.1.0",
     "snarkjs": "^0.6.1",
     "warp-contracts-lmdb": "^1.1.10",
-    "warp-contracts-redis": "^0.3.0"
+    "warp-contracts-redis": "^0.3.4"
   },
   "devDependencies": {
     "@parcel/packager-ts": "^2.9.2",

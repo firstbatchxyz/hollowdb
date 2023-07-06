@@ -8,12 +8,9 @@ export default {
       minEntriesPerContract: 10,
       maxEntriesPerContract: 100,
     },
-    default: {
-      minEntriesPerContract: 10,
-      maxEntriesPerContract: 100,
-    },
   },
   ARWEAVE_PORT: 3169,
+  REDIS_URL: 'redis://default:redispw@localhost:6379',
   PROVERS: {
     groth16: {
       HOLLOWDB: {
