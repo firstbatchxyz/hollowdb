@@ -1,8 +1,5 @@
 import {
   get,
-  put,
-  update,
-  remove,
   evolve,
   getKeys,
   getKVMap,
@@ -25,6 +22,7 @@ import type {
   UpdateWhitelistInput,
 } from './types';
 import {PutHTXInput, RemoveHTXInput, UpdateHTXInput} from './types/htx';
+import {putHTX, removeHTX, updateHTX} from './functions/htx';
 
 export type HollowState = ContractState<{circuits: ['auth']; whitelists: ['put', 'update']}>;
 export type HollowInput =
@@ -50,11 +48,11 @@ export const handle: ContractHandle<HollowState, HollowInput> = (state, action) 
     case 'getKVMap':
       return getKVMap(state, input.value);
     case 'put':
-      return put(state, input.value, caller);
+      return putHTX(state, input.value, caller);
     case 'update':
-      return update(state, input.value, caller);
+      return updateHTX(state, input.value, caller);
     case 'remove':
-      return remove(state, input.value, caller);
+      return removeHTX(state, input.value, caller);
     case 'updateOwner':
       return updateOwner(state, input.value, caller);
     case 'updateRequirement':

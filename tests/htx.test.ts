@@ -5,17 +5,19 @@ import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin} from '../src/hollowdb';
 import {MockBundlr} from './mock/bundlr';
+import initialHollowState from '../src/contracts/states/hollowdb';
 
 type ValueType = {val: string};
 type HTXValueType = `${string}.${string}`;
+const PROTOCOL = 'groth16';
 
 describe('hash.txid value tests', () => {
   const mockBundlr = new MockBundlr<ValueType>();
   const warpHook = setupWarp();
   const prover = new Prover(
-    constants.PROVERS.plonk.HOLLOWDB.WASM_PATH,
-    constants.PROVERS.plonk.HOLLOWDB.PROVERKEY_PATH,
-    'plonk'
+    constants.PROVERS[PROTOCOL].HOLLOWDB.WASM_PATH,
+    constants.PROVERS[PROTOCOL].HOLLOWDB.PROVERKEY_PATH,
+    PROTOCOL
   );
 
   let owner: Admin<HTXValueType>;
@@ -25,13 +27,15 @@ describe('hash.txid value tests', () => {
   beforeAll(async () => {
     const hook = warpHook();
     const [ownerWallet] = hook.wallets;
-    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk);
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialHollowState, 'hollowdb-htx');
 
     owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
   });
 
   it('should set verification key', async () => {
-    const verificationKey = JSON.parse(fs.readFileSync(constants.PROVERS.plonk.HOLLOWDB.VERIFICATIONKEY_PATH, 'utf8'));
+    const verificationKey = JSON.parse(
+      fs.readFileSync(constants.PROVERS[PROTOCOL].HOLLOWDB.VERIFICATIONKEY_PATH, 'utf8')
+    );
     await owner.updateVerificationKey('auth', verificationKey);
     const {cachedValue} = await owner.readState();
     expect(cachedValue.state.verificationKeys.auth).toEqual(verificationKey);
@@ -57,12 +61,11 @@ describe('hash.txid value tests', () => {
 
     // get old hash from db
     const curHTX = await owner.get(KEY);
-    const [curValueHash] = '0x' + curHTX.split('.');
+    const [curValueHash] = curHTX.split('.');
 
-    // construct hash.txid
-    const val: HTXValueType = `${valueHash}.${txId}`;
-
+    // update
     const {proof} = await prover.generateProofImmediate(KEY_PREIMAGE, BigInt(curValueHash), BigInt(valueHash));
+    const val: HTXValueType = `${valueHash}.${txId}`;
     await owner.update(KEY, val, proof);
     expect(await owner.get(KEY)).toEqual(val);
   });
@@ -70,7 +73,7 @@ describe('hash.txid value tests', () => {
   it('should remove an existing value with proof', async () => {
     // get old hash from db
     const curHTX = await owner.get(KEY);
-    const [curValueHash] = '0x' + curHTX.split('.');
+    const [curValueHash] = curHTX.split('.');
 
     const {proof} = await prover.generateProofImmediate(KEY_PREIMAGE, BigInt(curValueHash), BigInt(0));
     await owner.remove(KEY, proof);
