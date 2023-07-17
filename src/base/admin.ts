@@ -131,6 +131,43 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
   }
 
   /**
+   * Deploy a new contract from an existing contract's source code.
+   * @param owner wallet to deploy the contract
+   * @param initialState the initial state
+   * @param srcTxId source transaction id of the contract source code
+   * @param warp warp instance
+   * @returns contract and source transaction ids
+   */
+  static async deployFromSrc(
+    owner: JWKInterface,
+    initialState: ContractState,
+    srcTxId: string,
+    warp: Warp,
+    disableBundling = false
+  ): Promise<{contractTxId: string; srcTxId: string | undefined}> {
+    const ownerAddress = await warp.arweave.wallets.jwkToAddress(owner);
+
+    initialState.owner = ownerAddress;
+    for (const list in initialState.whitelists) {
+      initialState.whitelists[list as keyof typeof initialState.whitelists][ownerAddress] = true;
+    }
+
+    const {contractTxId} = await warp.deployFromSourceTx({
+      wallet: disableBundling ? owner : new ArweaveSigner(owner),
+      initState: JSON.stringify(initialState),
+      srcTxId: srcTxId,
+      evaluationManifest: {
+        evaluationOptions: {
+          allowBigInt: true,
+          useKVStorage: true,
+        },
+      },
+    });
+
+    return {contractTxId, srcTxId};
+  }
+
+  /**
    * Evolve an existing contract with a new source code.
    * @param owner wallet to deploy the new contract
    * @param contractSource source code of the new contract, as a string
@@ -145,21 +182,35 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
     warp: Warp,
     disableBundling = false
   ): Promise<{contractTxId: string; srcTxId: string}> {
-    // connect to the contract that we want to evolve
     const contract = warp.contract(contractTxId).connect(owner);
 
-    // create a new source
     const newSource = await warp.createSource(
       {src: contractSource},
       disableBundling ? owner : new ArweaveSigner(owner)
     );
 
-    // save contract source
     const newSrcTxId = await warp.saveSource(newSource);
-
-    // evolve contract
     await contract.evolve(newSrcTxId);
 
     return {contractTxId, srcTxId: newSrcTxId};
+  }
+
+  /**
+   * Evolve an existing contract with a source code of an existing contract.
+   * @param owner wallet to deploy the new contract
+   * @param srcTxId source transaction id of the contract source code
+   * @param contractTxId contract transaction id of the old contract
+   * @param warp warp instance
+   * @returns transaction ids
+   */
+  static async evolveFromSrc(
+    owner: JWKInterface,
+    srcTxId: string,
+    contractTxId: string,
+    warp: Warp
+  ): Promise<{contractTxId: string; srcTxId: string}> {
+    const contract = warp.contract(contractTxId).connect(owner);
+    await contract.evolve(srcTxId);
+    return {contractTxId, srcTxId};
   }
 }
