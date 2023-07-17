@@ -5,6 +5,7 @@ import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
 
+type ValueType = {val: string};
 describe('proofs mode', () => {
   describe.each(['groth16', 'plonk'] as const)('protocol: %s', protocol => {
     const warpHook = setupWarp();
@@ -13,9 +14,6 @@ describe('proofs mode', () => {
       constants.PROVERS[protocol].HOLLOWDB.PROVERKEY_PATH,
       protocol
     );
-    type ValueType = {
-      val: string;
-    };
 
     let owner: Admin<ValueType>;
     let alice: SDK<ValueType>;
