@@ -101,7 +101,8 @@ describe('proofs mode', () => {
     });
 
     describe('disabling proofs', () => {
-      const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
+      const {VALUE, NEXT_VALUE} = createValues<ValueType>();
+      const KEY = 'some-non-bigint-friendly-key';
 
       beforeAll(async () => {
         const {cachedValue} = await owner.readState();

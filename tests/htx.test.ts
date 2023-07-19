@@ -9,8 +9,8 @@ import initialHollowState from '../src/contracts/states/hollowdb';
 
 type ValueType = {val: string};
 type HTXValueType = `${string}.${string}`;
-const PROTOCOL = 'groth16';
 
+const PROTOCOL = 'groth16';
 describe('hash.txid value tests', () => {
   const mockBundlr = new MockBundlr<ValueType>();
   const warpHook = setupWarp();
@@ -42,28 +42,21 @@ describe('hash.txid value tests', () => {
   });
 
   it('should allow putting without a proof', async () => {
-    // upload to bundlr
     const txId = mockBundlr.upload(VALUE);
-    // obtain hash
     const valueHash = '0x' + prover.valueToBigInt(VALUE).toString(16);
 
-    // construct hash.txid
     const val: HTXValueType = `${valueHash}.${txId}`;
     await owner.put(KEY, val);
     expect(await owner.get(KEY)).toEqual(val);
   });
 
   it('should update an existing value with proof', async () => {
-    // upload to bundlr
     const txId = mockBundlr.upload(NEXT_VALUE);
-    // obtain hash
     const valueHash = '0x' + prover.valueToBigInt(NEXT_VALUE).toString(16);
 
-    // get old hash from db
     const curHTX = await owner.get(KEY);
     const [curValueHash] = curHTX.split('.');
 
-    // update
     const {proof} = await prover.generateProofImmediate(KEY_PREIMAGE, BigInt(curValueHash), BigInt(valueHash));
     const val: HTXValueType = `${valueHash}.${txId}`;
     await owner.update(KEY, val, proof);
@@ -71,12 +64,51 @@ describe('hash.txid value tests', () => {
   });
 
   it('should remove an existing value with proof', async () => {
-    // get old hash from db
     const curHTX = await owner.get(KEY);
     const [curValueHash] = curHTX.split('.');
 
     const {proof} = await prover.generateProofImmediate(KEY_PREIMAGE, BigInt(curValueHash), BigInt(0));
     await owner.remove(KEY, proof);
     expect(await owner.get(KEY)).toEqual(null);
+  });
+
+  describe('disabling proofs', () => {
+    const {VALUE, NEXT_VALUE} = createValues<ValueType>();
+    const KEY = 'some-non-bigint-friendly-key';
+
+    beforeAll(async () => {
+      const {cachedValue} = await owner.readState();
+      expect(cachedValue.state.isProofRequired.auth).toEqual(true);
+
+      await owner.updateProofRequirement('auth', false);
+
+      const {cachedValue: newCachedValue} = await owner.readState();
+      expect(newCachedValue.state.isProofRequired.auth).toEqual(false);
+    });
+
+    it('should put a value to a key & read it', async () => {
+      const txId = mockBundlr.upload(VALUE);
+      const valueHash = '0x' + prover.valueToBigInt(VALUE).toString(16);
+
+      const val: HTXValueType = `${valueHash}.${txId}`;
+      expect(await owner.get(KEY)).toEqual(null);
+      await owner.put(KEY, val);
+      expect(await owner.get(KEY)).toEqual(val);
+    });
+
+    it('should update an existing value without proof', async () => {
+      const txId = mockBundlr.upload(NEXT_VALUE);
+      const valueHash = '0x' + prover.valueToBigInt(NEXT_VALUE).toString(16);
+
+      const val: HTXValueType = `${valueHash}.${txId}`;
+      await owner.update(KEY, val);
+      expect(await owner.get(KEY)).toEqual(val);
+    });
+
+    it('should remove an existing value without proof', async () => {
+      expect(await owner.get(KEY)).not.toEqual(null);
+      await owner.remove(KEY);
+      expect(await owner.get(KEY)).toEqual(null);
+    });
   });
 });

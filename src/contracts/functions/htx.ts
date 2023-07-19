@@ -28,7 +28,7 @@ export async function removeHTX<State extends ContractState<{whitelists: ['updat
   const dbValue = await safeGet<HTXValueType>(key);
   const [oldHash] = dbValue.split('.');
 
-  await verifyAuthProofImmediate(state, proof, BigInt(oldHash), BigInt(0), BigInt(key));
+  await verifyAuthProofImmediate(state, proof, oldHash, '0', key);
   await SmartWeave.kv.del(key);
 
   return {state};
@@ -45,7 +45,7 @@ export async function updateHTX<State extends ContractState<{whitelists: ['updat
   const [oldHash] = dbValue.split('.');
   const [newHash] = value.split('.');
 
-  await verifyAuthProofImmediate(state, proof, BigInt(oldHash), BigInt(newHash), BigInt(key));
+  await verifyAuthProofImmediate(state, proof, oldHash, newHash, key);
   await SmartWeave.kv.put(key, value);
 
   return {state};

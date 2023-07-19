@@ -103,16 +103,20 @@ export async function verifyAuthProof<State extends ContractState>(
 export async function verifyAuthProofImmediate<State extends ContractState>(
   state: State,
   proof: object | undefined,
-  oldValueHash: bigint,
-  newValueHash: bigint,
-  key: bigint
+  oldValueHash: string,
+  newValueHash: string,
+  key: string
 ): Promise<void> {
   if (!state.isProofRequired.auth) return;
   if (!proof) {
     throw ExpectedProofError;
   }
 
-  const verificationSuccess = await verifyProof(proof, [oldValueHash, newValueHash, key], state.verificationKeys.auth);
+  const verificationSuccess = await verifyProof(
+    proof,
+    [BigInt(oldValueHash), BigInt(newValueHash), BigInt(key)],
+    state.verificationKeys.auth
+  );
 
   if (!verificationSuccess) {
     throw InvalidProofError;

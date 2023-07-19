@@ -39,6 +39,7 @@ To install HollowDB:
 ```bash
 yarn add hollowdb     # yarn
 npm install hollowdb  # npm
+pnpm add hollowdb     # pnpm
 ```
 
 ## Documentation
