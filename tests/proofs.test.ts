@@ -5,6 +5,7 @@ import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
 
+type ValueType = {val: string};
 describe('proofs mode', () => {
   describe.each(['groth16', 'plonk'] as const)('protocol: %s', protocol => {
     const warpHook = setupWarp();
@@ -13,9 +14,6 @@ describe('proofs mode', () => {
       constants.PROVERS[protocol].HOLLOWDB.PROVERKEY_PATH,
       protocol
     );
-    type ValueType = {
-      val: string;
-    };
 
     let owner: Admin<ValueType>;
     let alice: SDK<ValueType>;
@@ -103,7 +101,8 @@ describe('proofs mode', () => {
     });
 
     describe('disabling proofs', () => {
-      const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
+      const {VALUE, NEXT_VALUE} = createValues<ValueType>();
+      const KEY = 'some-non-bigint-friendly-key';
 
       beforeAll(async () => {
         const {cachedValue} = await owner.readState();
@@ -132,11 +131,5 @@ describe('proofs mode', () => {
         expect(await alice.get(KEY)).toEqual(null);
       });
     });
-  });
-
-  afterAll(async () => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    await globalThis.curve_bn128.terminate();
   });
 });

@@ -39,6 +39,7 @@ To install HollowDB:
 ```bash
 yarn add hollowdb     # yarn
 npm install hollowdb  # npm
+pnpm add hollowdb     # pnpm
 ```
 
 ## Documentation
@@ -71,8 +72,6 @@ The tests are as follows:
 We are using the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html).
 
 ```sh
-# formatting with prettier
-yarn format
-# linting with eslint
-yarn lint
+yarn format # prettier
+yarn lint   # eslint
 ```

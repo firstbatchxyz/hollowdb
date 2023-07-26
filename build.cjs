@@ -1,7 +1,7 @@
 const {build} = require('esbuild');
 const replace = require('replace-in-file');
 
-const contracts = ['hollowdb.ts'];
+const contracts = ['hollowdb.ts', 'hollowdb-htx.ts'];
 const outBase = './src/contracts';
 const outDir = './build';
 

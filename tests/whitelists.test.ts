@@ -3,12 +3,9 @@ import {setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
+type ValueType = {val: string};
 describe('whitelists mode', () => {
   const warpHook = setupWarp();
-  type ValueType = {
-    val: string;
-  };
-
   let owner: Admin<ValueType>;
   let alice: SDK<ValueType>;
   let bob: SDK<ValueType>;

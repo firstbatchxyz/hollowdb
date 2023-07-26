@@ -5,6 +5,7 @@ import initialHollowState from '../../src/contracts/states/hollowdb';
 import {readFileSync} from 'fs';
 import {Admin} from '../../src/hollowdb';
 import {HollowState} from '../../src/contracts/hollowdb';
+import {MockBundlr} from '../mock/bundlr';
 
 /** Add funds to any wallet. */
 export async function addFunds(warp: Warp, wallet: JWKInterface) {
@@ -56,8 +57,13 @@ export function createValues<ValueType = unknown>(numBytes = 10) {
  * Deploys a contract with the optionally provided initial state.
  * Returns the `contractTxId`.
  */
-export async function deployContract(warp: Warp, signer: JWKInterface, initialState: HollowState = initialHollowState) {
-  const contractSource = readFileSync('./build/hollowdb.js', 'utf8');
+export async function deployContract(
+  warp: Warp,
+  signer: JWKInterface,
+  initialState: HollowState = initialHollowState,
+  contractName: 'hollowdb' | 'hollowdb-htx' = 'hollowdb'
+) {
+  const contractSource = readFileSync(`./build/${contractName}.js`, 'utf8');
   const contractTxId = await Admin.deploy(
     signer,
     initialState,

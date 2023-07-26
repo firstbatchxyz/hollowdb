@@ -4,11 +4,8 @@ import {setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
 import initialHollowState from '../src/contracts/states/hollowdb';
 
+type ValueType = {val: string};
 describe('crud operations', () => {
-  type ValueType = {
-    val: string;
-  };
-
   describe.each(['redis', 'lmdb', 'default'] as const)('cache type: %s', cacheType => {
     const warpHook = setupWarp(cacheType);
     let user: SDK<ValueType>;

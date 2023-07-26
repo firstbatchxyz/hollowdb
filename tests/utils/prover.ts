@@ -35,17 +35,22 @@ export class Prover {
     curValue: unknown | null,
     nextValue: unknown | null
   ): Promise<{proof: object; publicSignals: [curValueHashOut: string, nextValueHashOut: string, key: string]}> {
-    const fullProof = await snarkjs[this.protocol].fullProve(
-      // field names of this JSON object must match the input signal names of the circuit
-      {
-        preimage: preimage,
-        curValueHash: this.valueToBigInt(curValue),
-        nextValueHash: this.valueToBigInt(nextValue),
-      },
+    return this.generateProofImmediate(preimage, this.valueToBigInt(curValue), this.valueToBigInt(nextValue));
+  }
+
+  /** Generate proof with the given inputs.
+   * Inputs are not altered.
+   */
+  async generateProofImmediate(
+    preimage: bigint,
+    curValueHash: bigint,
+    nextValueHash: bigint
+  ): Promise<{proof: object; publicSignals: [curValueHashOut: string, nextValueHashOut: string, key: string]}> {
+    return await snarkjs[this.protocol].fullProve(
+      {preimage, curValueHash, nextValueHash},
       this.wasmPath,
       this.proverKey
     );
-    return fullProof;
   }
 
   /**
