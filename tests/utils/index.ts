@@ -5,7 +5,6 @@ import initialHollowState from '../../src/contracts/states/hollowdb';
 import {readFileSync} from 'fs';
 import {Admin} from '../../src/hollowdb';
 import {HollowState} from '../../src/contracts/hollowdb';
-import {MockBundlr} from '../mock/bundlr';
 
 /** Add funds to any wallet. */
 export async function addFunds(warp: Warp, wallet: JWKInterface) {

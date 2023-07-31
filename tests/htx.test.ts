@@ -1,5 +1,5 @@
 import fs from 'fs';
-import {Prover} from './utils/prover';
+import {Prover, hashToGroup} from 'hollowdb-prover';
 import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
@@ -43,7 +43,7 @@ describe('hash.txid value tests', () => {
 
   it('should allow putting without a proof', async () => {
     const txId = mockBundlr.upload(VALUE);
-    const valueHash = '0x' + prover.valueToBigInt(VALUE).toString(16);
+    const valueHash = '0x' + hashToGroup(JSON.stringify(VALUE)).toString(16);
 
     const val: HTXValueType = `${valueHash}.${txId}`;
     await owner.put(KEY, val);
@@ -52,12 +52,12 @@ describe('hash.txid value tests', () => {
 
   it('should update an existing value with proof', async () => {
     const txId = mockBundlr.upload(NEXT_VALUE);
-    const valueHash = '0x' + prover.valueToBigInt(NEXT_VALUE).toString(16);
+    const valueHash = '0x' + hashToGroup(JSON.stringify(NEXT_VALUE)).toString(16);
 
     const curHTX = await owner.get(KEY);
     const [curValueHash] = curHTX.split('.');
 
-    const {proof} = await prover.generateProofImmediate(KEY_PREIMAGE, BigInt(curValueHash), BigInt(valueHash));
+    const {proof} = await prover.proveHashed(KEY_PREIMAGE, BigInt(curValueHash), BigInt(valueHash));
     const val: HTXValueType = `${valueHash}.${txId}`;
     await owner.update(KEY, val, proof);
     expect(await owner.get(KEY)).toEqual(val);
@@ -67,7 +67,7 @@ describe('hash.txid value tests', () => {
     const curHTX = await owner.get(KEY);
     const [curValueHash] = curHTX.split('.');
 
-    const {proof} = await prover.generateProofImmediate(KEY_PREIMAGE, BigInt(curValueHash), BigInt(0));
+    const {proof} = await prover.proveHashed(KEY_PREIMAGE, BigInt(curValueHash), BigInt(0));
     await owner.remove(KEY, proof);
     expect(await owner.get(KEY)).toEqual(null);
   });
@@ -88,7 +88,7 @@ describe('hash.txid value tests', () => {
 
     it('should put a value to a key & read it', async () => {
       const txId = mockBundlr.upload(VALUE);
-      const valueHash = '0x' + prover.valueToBigInt(VALUE).toString(16);
+      const valueHash = '0x' + hashToGroup(JSON.stringify(VALUE)).toString(16);
 
       const val: HTXValueType = `${valueHash}.${txId}`;
       expect(await owner.get(KEY)).toEqual(null);
@@ -98,7 +98,7 @@ describe('hash.txid value tests', () => {
 
     it('should update an existing value without proof', async () => {
       const txId = mockBundlr.upload(NEXT_VALUE);
-      const valueHash = '0x' + prover.valueToBigInt(NEXT_VALUE).toString(16);
+      const valueHash = '0x' + hashToGroup(JSON.stringify(NEXT_VALUE)).toString(16);
 
       const val: HTXValueType = `${valueHash}.${txId}`;
       await owner.update(KEY, val);
