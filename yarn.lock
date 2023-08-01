@@ -8957,22 +8957,6 @@ smartweave@^0.4.46:
     sentencer "^0.2.1"
     yargs "^17.5.1"
 
-snarkjs@^0.6.10:
-  version "0.6.10"
-  resolved "https://registry.yarnpkg.com/snarkjs/-/snarkjs-0.6.10.tgz#d751645a45d2390abcb007c409b31d813bedd108"
-  integrity sha512-Ls9XPTIuW2Ivk2sACM0Pn/FnKZP8UYYqRbzDl3SnglY5Gw28BIp1sfArOxdJJ2QrlbK7e6FFjMHQPvTp0Ttn0w==
-  dependencies:
-    "@iden3/binfileutils" "0.0.11"
-    bfj "^7.0.2"
-    blake2b-wasm "^2.4.0"
-    circom_runtime "0.1.22"
-    ejs "^3.1.6"
-    fastfile "0.0.20"
-    ffjavascript "0.2.57"
-    js-sha3 "^0.8.0"
-    logplease "^1.2.15"
-    r1csfile "0.0.45"
-
 snarkjs@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/snarkjs/-/snarkjs-0.7.0.tgz#9b4d193a0535c1903e45f1508aa7ad74cd130844"
@@ -9772,12 +9756,12 @@ warp-contracts-plugin-ethers@^1.0.7:
     ethers "^5.7.2"
     node-nlp "^4.24.0"
 
-warp-contracts-plugin-snarkjs@^0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/warp-contracts-plugin-snarkjs/-/warp-contracts-plugin-snarkjs-0.1.6.tgz#9200fd8e53cf430975380e111859550df03843ec"
-  integrity sha512-omfvY1CrOfY/tKvAGVck0k5y/XrQTKOZ4Txnjjo7uWYF53HYSyhoKyPnOXJjxpNvGq3CgYr2Lsnn5D/PXAzKmA==
+warp-contracts-plugin-snarkjs@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/warp-contracts-plugin-snarkjs/-/warp-contracts-plugin-snarkjs-0.2.1.tgz#f929f6ad1d507e8d43ca8dfa84460a5f5b2e4a93"
+  integrity sha512-5Gh5fTSvMz6SdmkaOoOC6k6BTzcnjPqd7h2bBU7ipifiRwEhx9WoITSOG3Qy0X2jt6KwdjhqdYcPn4aj2NXRDQ==
   dependencies:
-    snarkjs "^0.6.10"
+    snarkjs "^0.7.0"
 
 warp-contracts-redis@^0.3.4:
   version "0.3.4"

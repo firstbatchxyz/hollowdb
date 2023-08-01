@@ -7,7 +7,7 @@ import {Admin, SDK} from '../src/hollowdb';
 
 type ValueType = {val: string};
 describe('proofs mode', () => {
-  describe.each(['plonk'] as const)('protocol: %s', protocol => {
+  describe.each(['groth16', 'plonk'] as const)('protocol: %s', protocol => {
     const warpHook = setupWarp();
     let prover: Prover;
     let owner: Admin<ValueType>;
@@ -56,7 +56,6 @@ describe('proofs mode', () => {
     describe('update operations', () => {
       it('should NOT update with a proof using wrong current value', async () => {
         const fullProof = await prover.prove(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
-        console.log(fullProof);
         await expect(alice.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow(
           'Contract Error [update]: Invalid proof.'
         );

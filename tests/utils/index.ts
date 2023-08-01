@@ -1,10 +1,10 @@
-import {poseidon1} from 'poseidon-lite';
 import {randomBytes} from 'crypto';
 import {Warp, JWKInterface} from 'warp-contracts';
 import initialHollowState from '../../src/contracts/states/hollowdb';
 import {readFileSync} from 'fs';
 import {Admin} from '../../src/hollowdb';
 import {HollowState} from '../../src/contracts/hollowdb';
+import {computeKey} from 'hollowdb-prover';
 
 /** Add funds to any wallet. */
 export async function addFunds(warp: Warp, wallet: JWKInterface) {
@@ -20,15 +20,6 @@ export async function mineBlock(warp: Warp) {
 /** Convert a decimal string to hexadecimal, both belonging to a bigint. */
 export function decimalToHex(bigIntString: string): string {
   return '0x' + BigInt(bigIntString).toString(16);
-}
-
-/**
- * Compute the key that only you can know the preimage of.
- * @param preimage your secret, the preimage of the key
- * @returns key, that is the Poseidon hash of your secret as a hexadecimal string
- */
-export function computeKey(preimage: bigint): string {
-  return '0x' + poseidon1([preimage]).toString(16);
 }
 
 /**

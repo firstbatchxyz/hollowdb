@@ -1,11 +1,7 @@
 const {SDK} = require('hollowdb');
 const {WarpFactory} = require('warp-contracts');
-const {poseidon1} = require('poseidon-lite');
+const {computeKey} = require('hollowdb-prover');
 const {jwk} = require('./config/wallets');
-
-function computeKey(preimage) {
-  return poseidon1([preimage]).toString();
-}
 
 async function main() {
   /* either put your jwk in config/wallets folder (see line 4)

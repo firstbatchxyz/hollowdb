@@ -1,12 +1,8 @@
 const {SDK} = require('hollowdb');
 const {WarpFactory} = require('warp-contracts');
-const {poseidon1} = require('poseidon-lite');
+const {computeKey} = require('hollowdb-prover');
 const {jwk} = require('./config/wallets');
 const Bundlr = require('@bundlr-network/client');
-
-function computeKey(preimage) {
-  return poseidon1([preimage]).toString();
-}
 
 // for more information on bundlr, visit https://bundlr.network
 async function upload(jwk, payload) {
