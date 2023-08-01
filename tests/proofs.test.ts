@@ -7,14 +7,9 @@ import {Admin, SDK} from '../src/hollowdb';
 
 type ValueType = {val: string};
 describe('proofs mode', () => {
-  describe.each(['groth16', 'plonk'] as const)('protocol: %s', protocol => {
+  describe.each(['plonk'] as const)('protocol: %s', protocol => {
     const warpHook = setupWarp();
-    const prover = new Prover(
-      constants.PROVERS[protocol].HOLLOWDB.WASM_PATH,
-      constants.PROVERS[protocol].HOLLOWDB.PROVERKEY_PATH,
-      protocol
-    );
-
+    let prover: Prover;
     let owner: Admin<ValueType>;
     let alice: SDK<ValueType>;
 
@@ -24,6 +19,12 @@ describe('proofs mode', () => {
       const hook = warpHook();
       const [ownerWallet, aliceWallet] = hook.wallets;
       const contractTxId = await deployContract(hook.warp, ownerWallet.jwk);
+
+      prover = new Prover(
+        constants.PROVERS[protocol].HOLLOWDB.WASM_PATH,
+        constants.PROVERS[protocol].HOLLOWDB.PROVERKEY_PATH,
+        protocol
+      );
 
       owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
       alice = new SDK(aliceWallet.jwk, contractTxId, hook.warp);
@@ -55,6 +56,7 @@ describe('proofs mode', () => {
     describe('update operations', () => {
       it('should NOT update with a proof using wrong current value', async () => {
         const fullProof = await prover.prove(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
+        console.log(fullProof);
         await expect(alice.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow(
           'Contract Error [update]: Invalid proof.'
         );

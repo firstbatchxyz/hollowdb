@@ -6052,10 +6052,10 @@ hmac-drbg@^1.0.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
-hollowdb-prover@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/hollowdb-prover/-/hollowdb-prover-0.1.3.tgz#e2c9b21c076d6b9ddaa2e4c54cc88190cbef9007"
-  integrity sha512-OFq1rH45uCR9gzZGfQuATVSsJ9d9Io1oCVd72e+DrAiQy9w0I7xoWpCNXKp14NTvAGPJAVhxN7fvNw8maXcXcA==
+hollowdb-prover@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/hollowdb-prover/-/hollowdb-prover-0.1.4.tgz#a4d95a339a4dbebe30421f79814f384ed58ca79b"
+  integrity sha512-reMPuOfVMpZpkFkVN3/OdHb6p7obETecrqZSrZnGQuuRa7Z0fZr8gQarhf3ehtRy65kmNRu6kNAbPuQn5cH47w==
   dependencies:
     poseidon-lite "^0.2.0"
     snarkjs "^0.7.0"
@@ -8957,7 +8957,7 @@ smartweave@^0.4.46:
     sentencer "^0.2.1"
     yargs "^17.5.1"
 
-snarkjs@^0.6.1, snarkjs@^0.6.10:
+snarkjs@^0.6.10:
   version "0.6.10"
   resolved "https://registry.yarnpkg.com/snarkjs/-/snarkjs-0.6.10.tgz#d751645a45d2390abcb007c409b31d813bedd108"
   integrity sha512-Ls9XPTIuW2Ivk2sACM0Pn/FnKZP8UYYqRbzDl3SnglY5Gw28BIp1sfArOxdJJ2QrlbK7e6FFjMHQPvTp0Ttn0w==
