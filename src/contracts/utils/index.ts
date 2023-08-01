@@ -28,7 +28,7 @@ export const verifyProof = async (proof: object, psignals: bigint[], verificatio
  *
  * If the value is `null`, it returns `0` instead.
  */
-export const valueToBigInt = (value: unknown): bigint => {
+export const hashToGroup = (value: unknown): bigint => {
   if (value) {
     return BigInt(SmartWeave.extensions.ethers.utils.ripemd160(Buffer.from(JSON.stringify(value))));
   } else {
@@ -90,7 +90,7 @@ export async function verifyAuthProof<State extends ContractState>(
 
   const verificationSuccess = await verifyProof(
     proof,
-    [valueToBigInt(oldValue), valueToBigInt(newValue), BigInt(key)],
+    [hashToGroup(oldValue), hashToGroup(newValue), BigInt(key)],
     state.verificationKeys.auth
   );
 

@@ -66,12 +66,11 @@
     "warp-contracts": "^1.4.2",
     "warp-contracts-plugin-deploy": "^1.0.7",
     "warp-contracts-plugin-ethers": "^1.0.7",
-    "warp-contracts-plugin-snarkjs": "^0.1.6"
+    "warp-contracts-plugin-snarkjs": "^0.2.1"
   },
   "optionalDependencies": {
     "ioredis": "^5.3.2",
-    "poseidon-lite": "^0.1.0",
-    "snarkjs": "^0.6.1",
+    "hollowdb-prover": "^0.1.4",
     "warp-contracts-lmdb": "^1.1.10",
     "warp-contracts-redis": "^0.3.4"
   },

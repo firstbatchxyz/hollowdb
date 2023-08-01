@@ -1,5 +1,5 @@
 import fs from 'fs';
-import {Prover} from './utils/prover';
+import {Prover} from 'hollowdb-prover';
 import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
@@ -9,12 +9,7 @@ type ValueType = {val: string};
 describe('proofs mode', () => {
   describe.each(['groth16', 'plonk'] as const)('protocol: %s', protocol => {
     const warpHook = setupWarp();
-    const prover = new Prover(
-      constants.PROVERS[protocol].HOLLOWDB.WASM_PATH,
-      constants.PROVERS[protocol].HOLLOWDB.PROVERKEY_PATH,
-      protocol
-    );
-
+    let prover: Prover;
     let owner: Admin<ValueType>;
     let alice: SDK<ValueType>;
 
@@ -24,6 +19,12 @@ describe('proofs mode', () => {
       const hook = warpHook();
       const [ownerWallet, aliceWallet] = hook.wallets;
       const contractTxId = await deployContract(hook.warp, ownerWallet.jwk);
+
+      prover = new Prover(
+        constants.PROVERS[protocol].HOLLOWDB.WASM_PATH,
+        constants.PROVERS[protocol].HOLLOWDB.PROVERKEY_PATH,
+        protocol
+      );
 
       owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
       alice = new SDK(aliceWallet.jwk, contractTxId, hook.warp);
@@ -54,21 +55,21 @@ describe('proofs mode', () => {
 
     describe('update operations', () => {
       it('should NOT update with a proof using wrong current value', async () => {
-        const fullProof = await prover.generateProof(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
+        const fullProof = await prover.prove(KEY_PREIMAGE, 'abcdefg', NEXT_VALUE);
         await expect(alice.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow(
           'Contract Error [update]: Invalid proof.'
         );
       });
 
       it('should NOT update with a proof using wrong next value', async () => {
-        const fullProof = await prover.generateProof(KEY_PREIMAGE, VALUE, 'abcdefg');
+        const fullProof = await prover.prove(KEY_PREIMAGE, VALUE, 'abcdefg');
         await expect(alice.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow(
           'Contract Error [update]: Invalid proof.'
         );
       });
 
       it('should NOT update with a proof using wrong preimage', async () => {
-        const fullProof = await prover.generateProof(1234567n, VALUE, NEXT_VALUE);
+        const fullProof = await prover.prove(1234567n, VALUE, NEXT_VALUE);
         await expect(alice.update(KEY, NEXT_VALUE, fullProof.proof)).rejects.toThrow(
           'Contract Error [update]: Invalid proof.'
         );
@@ -79,7 +80,7 @@ describe('proofs mode', () => {
       });
 
       it('should update an existing value with proof', async () => {
-        const {proof} = await prover.generateProof(KEY_PREIMAGE, VALUE, NEXT_VALUE);
+        const {proof} = await prover.prove(KEY_PREIMAGE, VALUE, NEXT_VALUE);
         await alice.update(KEY, NEXT_VALUE, proof);
         expect(await alice.get(KEY)).toEqual(NEXT_VALUE);
       });
@@ -92,7 +93,7 @@ describe('proofs mode', () => {
 
       it('should remove an existing value with proof', async () => {
         // MEXT_VALUE is the "current" value at this point in the test
-        const {proof} = await prover.generateProof(KEY_PREIMAGE, NEXT_VALUE, null);
+        const {proof} = await prover.prove(KEY_PREIMAGE, NEXT_VALUE, null);
 
         expect(await alice.get(KEY)).toEqual(NEXT_VALUE);
         await alice.remove(KEY, proof);

@@ -60,11 +60,11 @@ Note that you need to have a Redis server running for Redis tests to pass, the U
 
 The tests are as follows:
 
-- `circuit` tests zero-knowledge proof generation & validation.
 - `evolve` tests for evolve functionality.
 - `whitelists` tests for Whitelist functionality, both enabled and disabled.
 - `proofs` tests for Proofs functionality, both enabled and disabled.
 - `crud` tests for basic CRUD functionality, such as checking for existing keys, not removing an already removed key and such.
+- `htx` tests use a custom contract where assume Bundlr usage and instead of values themselves, we store `valueHash.txid` as values.
 - `multi` tests using a single Warp instance with multiple contracts, and multiple HollowDB instances.
 
 ## Styling

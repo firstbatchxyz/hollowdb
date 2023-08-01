@@ -11,29 +11,22 @@ import type {
 } from '../contracts/types';
 
 export class BaseSDK<State extends ContractState, V = unknown> extends Base<State> {
-  /**
-   * Gets the values of the given keys.
-   * @param keys an array of keys
-   * @returns the values of the given keys
-   */
+  /** Gets the values at the given keys as an array. */
   async getMany(keys: string[]): Promise<V[]> {
     return await Promise.all(keys.map(key => this.get(key)));
   }
 
   /**
    * Alternative method of getting key values.
-   * Uses the underlying `getStorageValues` function.
-   * @param keys the keys of the values to be returned
-   * @returns the values of the given keys
+   *
+   * Uses the underlying `getStorageValues` function, returns a Map instead of
+   * an array.
    */
   async getStorageValues(keys: string[]) {
     return await this.contract.getStorageValues(keys);
   }
 
-  /**
-   * Returns all the keys in the database
-   * @returns an array of all the keys in the database
-   */
+  /** Returns all the keys in the database. */
   async getAllKeys(): Promise<string[]> {
     return await this.getKeys();
   }
