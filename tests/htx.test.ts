@@ -41,10 +41,13 @@ describe('hash.txid value tests', () => {
     expect(cachedValue.state.verificationKeys.auth).toEqual(verificationKey);
   });
 
+  it('should NOT put a key that is not hexadecimal', async () => {});
+
   it('should allow putting without a proof', async () => {
     const txId = mockBundlr.upload(VALUE);
     const valueHash = '0x' + hashToGroup(JSON.stringify(VALUE)).toString(16);
 
+    console.log(KEY);
     const val: HTXValueType = `${valueHash}.${txId}`;
     await owner.put(KEY, val);
     expect(await owner.get(KEY)).toEqual(val);
@@ -73,8 +76,7 @@ describe('hash.txid value tests', () => {
   });
 
   describe('disabling proofs', () => {
-    const {VALUE, NEXT_VALUE} = createValues<ValueType>();
-    const KEY = 'some-non-bigint-friendly-key';
+    const {VALUE, NEXT_VALUE, KEY} = createValues<ValueType>();
 
     beforeAll(async () => {
       const {cachedValue} = await owner.readState();

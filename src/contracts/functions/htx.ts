@@ -1,5 +1,5 @@
 import type {ContractState} from '../types';
-import {KeyExistsError} from '../errors';
+import {KeyExistsError, KeyNotHexadecimalError} from '../errors';
 import {assertWhitelist, safeGet, verifyAuthProofImmediate} from '../utils';
 import {HTXValueType, PutHTXInput, RemoveHTXInput, UpdateHTXInput} from '../types/htx';
 
@@ -9,6 +9,11 @@ export async function putHTX<State extends ContractState<{whitelists: ['put']; c
   caller: string
 ) {
   assertWhitelist(state, caller, 'put');
+
+  // check hexadecimal
+  if (!/^0x[\da-f]+$/i.test(key)) {
+    throw KeyNotHexadecimalError;
+  }
 
   if ((await SmartWeave.kv.get(key)) !== null) {
     throw KeyExistsError;

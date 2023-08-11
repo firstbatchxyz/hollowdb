@@ -14,6 +14,7 @@ const config: Config = {
   verbose: true,
   // Warp & Arlocal takes some time to close, so make this 5 secs
   openHandlesTimeout: 5000,
+  forceExit: true,
 };
 
 export default config;

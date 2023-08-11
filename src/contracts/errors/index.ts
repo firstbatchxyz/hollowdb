@@ -1,5 +1,6 @@
 export const KeyExistsError = new ContractError('Key already exists.');
 export const KeyNotExistsError = new ContractError('Key does not exist.');
+export const KeyNotHexadecimalError = new ContractError('Key expected to be hexadecimal.');
 export const CantEvolveError = new ContractError('Evolving is disabled.');
 export const NoVerificationKeyError = new ContractError('No verification key.');
 export const UnknownProtocolError = new ContractError('Unknown protocol.');
