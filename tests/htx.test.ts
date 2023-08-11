@@ -27,7 +27,7 @@ describe('hash.txid value tests', () => {
   beforeAll(async () => {
     const hook = warpHook();
     const [ownerWallet] = hook.wallets;
-    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialHollowState, 'hollowdb-htx');
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialHollowState, 'hollowdb-htx-plug');
 
     owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
   });

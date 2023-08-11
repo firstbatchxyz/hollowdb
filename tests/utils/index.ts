@@ -51,7 +51,7 @@ export async function deployContract(
   warp: Warp,
   signer: JWKInterface,
   initialState: HollowState = initialHollowState,
-  contractName: 'hollowdb' | 'hollowdb-htx' = 'hollowdb'
+  contractName = 'hollowdb'
 ) {
   const contractSource = readFileSync(`./build/${contractName}.js`, 'utf8');
   const contractTxId = await Admin.deploy(

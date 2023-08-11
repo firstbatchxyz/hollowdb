@@ -28,14 +28,14 @@ export type HollowState = ContractState<{circuits: ['auth']; whitelists: ['put',
 export type HollowInput =
   | GetInput
   | PutHTXInput
+  | RemoveHTXInput
+  | UpdateHTXInput
   | GetKeysInput
   | GetKVMapInput
   | UpdateOwnerInput
   | UpdateWhitelistInput
   | UpdateVerificationKeyInput
   | EvolveInput
-  | RemoveHTXInput
-  | UpdateHTXInput
   | UpdateRequirementInput;
 
 export const handle: ContractHandle<HollowState, HollowInput> = (state, action) => {
