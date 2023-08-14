@@ -42,13 +42,10 @@ describe('hash.txid value tests', () => {
     expect(cachedValue.state.verificationKeys.auth).toEqual(verificationKey);
   });
 
-  it('should NOT put a key that is not hexadecimal', async () => {});
-
   it('should allow putting without a proof', async () => {
     const txId = mockBundlr.upload(VALUE);
     const valueHash = '0x' + hashToGroup(JSON.stringify(VALUE)).toString(16);
 
-    console.log(KEY);
     const val: HTXValueType = `${valueHash}.${txId}`;
     await owner.put(KEY, val);
     expect(await owner.get(KEY)).toEqual(val);
