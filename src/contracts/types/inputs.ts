@@ -7,11 +7,22 @@ export type GetInput = {
   };
 };
 
-export type PutInput = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type PutInput<V = any> = {
   function: 'put';
   value: {
     key: string;
-    value: unknown;
+    value: V;
+  };
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type UpdateInput<V = any> = {
+  function: 'update';
+  value: {
+    key: string;
+    value: V;
+    proof?: object;
   };
 };
 
@@ -19,16 +30,6 @@ export type RemoveInput = {
   function: 'remove';
   value: {
     key: string;
-    proof?: object;
-  };
-};
-
-export type UpdateInput = {
-  function: 'update';
-  value: {
-    key: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
     proof?: object;
   };
 };

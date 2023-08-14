@@ -4,12 +4,13 @@
  *
  * The naming convention is strict, as `evolve` function in particular will use `value` field.
  */
-export type ContractInput = {function: string; value: any};
+export type ContractGenericInput = {function: string; value: any};
 
 /** A contract action, that is a caller and input.
  * @template Input input type
  */
-export type ContractAction<Input extends ContractInput = ContractInput> = {
+
+export type ContractAction<Input extends ContractGenericInput = ContractGenericInput> = {
   input: Input;
   caller: string;
 };
@@ -43,7 +44,7 @@ export type ContractState<Mode extends {whitelists: string[]; circuits: string[]
  * @template State contract state
  * @template Input union of all input types
  */
-export type ContractHandle<State extends ContractState, Input extends ContractInput> = (
+export type ContractHandle<State extends ContractState, Input extends ContractGenericInput> = (
   state: State,
   action: ContractAction<Input>
 ) =>
