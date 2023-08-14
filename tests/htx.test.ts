@@ -73,8 +73,7 @@ describe('hash.txid value tests', () => {
   });
 
   describe('disabling proofs', () => {
-    const {VALUE, NEXT_VALUE} = createValues<ValueType>();
-    const KEY = 'some-non-bigint-friendly-key';
+    const {VALUE, NEXT_VALUE, KEY} = createValues<ValueType>();
 
     beforeAll(async () => {
       const {cachedValue} = await owner.readState();
