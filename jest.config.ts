@@ -12,8 +12,10 @@ const config: Config = {
   testTimeout: 60000,
   // print everything like Mocha
   verbose: true,
-  // Warp & Arlocal takes some time to close, so make this 5 secs
-  openHandlesTimeout: 5000,
+  // Warp & Arlocal takes some time to close, so make this 10 secs
+  openHandlesTimeout: 10000,
+  // Tests may hang randomly (not known why yet, it was fixed before)
+  // that will cause workflow to run all the way, so we might force exit
   forceExit: true,
 };
 

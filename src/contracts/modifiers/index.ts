@@ -2,11 +2,11 @@ import {ExpectedProofError, InvalidProofError, NotOwnerError, NotWhitelistedErro
 import {ContractState} from '../types';
 import {hashToGroup, verifyProof} from '../utils';
 
-export async function apply<T, S extends ContractState>(
+export async function apply<I, S extends ContractState>(
   caller: string,
-  input: T,
+  input: I,
   state: S,
-  ...modifiers: ((caller: string, input: T, state: S) => T | Promise<T>)[]
+  ...modifiers: ((caller: string, input: I, state: S) => I | Promise<I>)[]
 ): Promise<typeof input> {
   for (const modifier of modifiers) {
     input = await modifier(caller, input, state);
@@ -14,7 +14,7 @@ export async function apply<T, S extends ContractState>(
   return input;
 }
 
-export const onlyOwner = <T, S extends ContractState>(caller: string, input: T, state: S) => {
+export const onlyOwner = <I, S extends ContractState>(caller: string, input: I, state: S) => {
   if (caller !== state.owner) {
     throw NotOwnerError;
   }
@@ -22,11 +22,12 @@ export const onlyOwner = <T, S extends ContractState>(caller: string, input: T, 
 };
 
 export function onlyWhitelisted(list: string) {
-  return <T, S extends ContractState>(caller: string, input: T, state: S) => {
+  return <I, S extends ContractState>(caller: string, input: I, state: S) => {
     // must have whitelisting enabled for this list
     if (!state.isWhitelistRequired[list]) {
       return input;
     }
+
     // must be whitelisted
     if (!state.whitelists[list][caller]) {
       throw NotWhitelistedError;
@@ -36,15 +37,16 @@ export function onlyWhitelisted(list: string) {
 }
 
 export function onlyProofVerified(circuit: string) {
-  return async <T extends {key: string; value?: unknown; proof?: object}, S extends ContractState>(
+  return async <I extends {key: string; value?: unknown; proof?: object}, S extends ContractState>(
     _: string,
-    input: T,
+    input: I,
     state: S
   ) => {
     // must have proofs enabled for this circuit
     if (!state.isProofRequired[circuit]) {
       return input;
     }
+
     // must have a proof object
     if (!input.proof) {
       throw ExpectedProofError;

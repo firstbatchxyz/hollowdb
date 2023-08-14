@@ -1,10 +1,10 @@
 import {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
-import type {ContractInput, ContractState} from '../contracts/types/contract';
+import type {ContractInput, ContractMode, ContractState} from '../contracts/types/contract';
 
-export class Base<State extends ContractState> {
-  protected readonly contract: Contract<State>;
+export class Base<M extends ContractMode> {
+  protected readonly contract: Contract<ContractState<M>>;
   readonly warp: Warp;
   readonly contractTxId: string;
   readonly signer: ArWallet | CustomSignature;
@@ -25,7 +25,7 @@ export class Base<State extends ContractState> {
       .use(new EthersExtension());
 
     this.contract = this.warp
-      .contract<State>(this.contractTxId)
+      .contract<ContractState<M>>(this.contractTxId)
       .setEvaluationOptions({
         allowBigInt: true, // bigInt is required for circuits
         useKVStorage: true,
@@ -48,7 +48,7 @@ export class Base<State extends ContractState> {
    * @param input input in the form of `{function, value}`
    * @returns interaction result
    */
-  async dryWrite<Input extends ContractInput>(input: Input) {
+  async dryWrite<I extends ContractInput>(input: I) {
     return await this.contract.dryWrite(input);
   }
 
@@ -59,7 +59,7 @@ export class Base<State extends ContractState> {
    * @param input input in the form of `{function, value}`
    * @returns interaction response
    */
-  async writeInteraction<Input extends ContractInput>(input: Input) {
+  async writeInteraction<I extends ContractInput>(input: I) {
     return await this.contract.writeInteraction(input);
   }
 
@@ -70,7 +70,7 @@ export class Base<State extends ContractState> {
    * @param input input in the form of `{function, value}`
    * @param errorPrefix optional prefix for the error message
    */
-  async dryWriteInteraction<Input extends ContractInput>(input: Input, errorPrefix = '') {
+  async dryWriteInteraction<I extends ContractInput>(input: I, errorPrefix = '') {
     const result = await this.dryWrite(input);
     if (result.type !== 'ok') {
       throw new Error(errorPrefix + result.errorMessage);
@@ -85,8 +85,8 @@ export class Base<State extends ContractState> {
    * @param errorPrefix optional prefix for the error message
    * @returns
    */
-  async safeReadInteraction<Input extends ContractInput, V>(input: Input, errorPrefix = '') {
-    const response = await this.viewState<Input, V>(input);
+  async safeReadInteraction<I extends ContractInput, V>(input: I, errorPrefix = '') {
+    const response = await this.viewState<I, V>(input);
     if (response.type !== 'ok') {
       throw new Error(errorPrefix + response.errorMessage);
     }
@@ -98,7 +98,7 @@ export class Base<State extends ContractState> {
    * @param input input in the form of `{function, value}`
    * @returns interaction result
    */
-  async viewState<Input extends ContractInput, R>(input: Input) {
-    return await this.contract.viewState<typeof input, R>(input);
+  async viewState<I extends ContractInput, R>(input: I) {
+    return await this.contract.viewState<I, R>(input);
   }
 }

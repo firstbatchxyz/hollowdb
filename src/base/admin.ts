@@ -2,6 +2,7 @@ import {JWKInterface, Warp} from 'warp-contracts';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 import {BaseSDK} from './sdk';
 import type {
+  ContractMode,
   ContractState,
   UpdateOwnerInput,
   UpdateRequirementInput,
@@ -9,12 +10,12 @@ import type {
   UpdateWhitelistInput,
 } from '../contracts/types';
 
-export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK<State, V> {
+export class BaseAdmin<V = unknown, M extends ContractMode = {whitelists: []; circuits: []}> extends BaseSDK<V, M> {
   /**
    * Sets the owner as the given wallet address.
    * @param newOwner address of the new owner, make sure that this is correct!
    */
-  async updateOwner(newOwner: State['owner']) {
+  async updateOwner(newOwner: string) {
     await this.writeInteraction<UpdateOwnerInput>({
       function: 'updateOwner',
       value: {
@@ -29,15 +30,15 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
    * @param name name of the list to be updated
    * @param op whether to `add` the users to whitelist or `remove` them
    */
-  async updateWhitelist(users: string[], name: keyof State['whitelists'], op: 'add' | 'remove') {
+  async updateWhitelist(users: string[], name: string, op: 'add' | 'remove') {
     const add = op === 'add' ? users : [];
     const remove = op === 'remove' ? users : [];
-    await this.writeInteraction<UpdateWhitelistInput>({
+    await this.writeInteraction<UpdateWhitelistInput<M['whitelists']>>({
       function: 'updateWhitelist',
       value: {
         add,
         remove,
-        name: name as string,
+        name,
       },
     });
   }
@@ -48,8 +49,8 @@ export class BaseAdmin<State extends ContractState, V = unknown> extends BaseSDK
    * @param verificationKey verification key
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async updateVerificationKey(name: keyof State['verificationKeys'], verificationKey: any) {
-    await this.writeInteraction<UpdateVerificationKeyInput>({
+  async updateVerificationKey(name: keyof S['verificationKeys'], verificationKey: any) {
+    await this.writeInteraction<UpdateVerificationKeyInput<M['circuits']>>({
       function: 'updateVerificationKey',
       value: {
         verificationKey,

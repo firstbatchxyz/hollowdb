@@ -1,47 +1,17 @@
-import {CantEvolveError, InvalidFunctionError, KeyExistsError, KeyNotHexadecimalError} from './errors';
+import {CantEvolveError, InvalidFunctionError, KeyExistsError, NullValueError} from './errors';
 import {apply, onlyOwner, onlyWhitelisted} from './modifiers';
-import type {
-  ContractState,
-  EvolveInput,
-  GetInput,
-  GetKVMapInput,
-  GetKeysInput,
-  UpdateOwnerInput,
-  UpdateRequirementInput,
-  UpdateVerificationKeyInput,
-  UpdateWhitelistInput,
-  ContractAction,
-  RemoveInput,
-  UpdateInput,
-  PutInput,
-} from './types';
+import type {ContractHandle} from './types';
 import {onlyProofVerifiedHTX} from './modifiers/htx';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type HollowInput<V = any> =
-  | GetInput
-  | GetKeysInput
-  | PutInput<V>
-  | UpdateInput<V>
-  | RemoveInput
-  | GetKVMapInput
-  | UpdateOwnerInput
-  | UpdateWhitelistInput
-  | UpdateVerificationKeyInput
-  | EvolveInput
-  | UpdateRequirementInput;
+type Mode = {circuits: ['auth']; whitelists: ['put', 'update']};
+type Value = `${string}.${string}`;
 
-export async function handle(
-  state: ContractState<{circuits: ['auth']; whitelists: ['put', 'update']}>,
-  action: ContractAction<HollowInput<`${string}.${string}`>>
-) {
+export const handle: ContractHandle<Value, Mode> = async (state, action) => {
   const {caller, input} = action;
   switch (input.function) {
     case 'get': {
       const {key} = await apply(caller, input.value, state);
-      return {
-        result: await SmartWeave.kv.get(key),
-      };
+      return {result: (await SmartWeave.kv.get(key)) as Value | null};
     }
 
     case 'getKeys': {
@@ -55,14 +25,10 @@ export async function handle(
     }
 
     case 'put': {
-      const {key, value} = await apply(caller, input.value, state, onlyWhitelisted('put'), (_, input) => {
-        // check hexadecimal
-        if (!/^0x[\da-f]+$/i.test(input.key)) {
-          throw KeyNotHexadecimalError;
-        }
-
-        return input;
-      });
+      const {key, value} = await apply(caller, input.value, state, onlyWhitelisted('put'));
+      if (value === null) {
+        throw NullValueError;
+      }
       if ((await SmartWeave.kv.get(key)) !== null) {
         throw KeyExistsError;
       }
@@ -78,6 +44,9 @@ export async function handle(
         onlyWhitelisted('update'),
         onlyProofVerifiedHTX('auth')
       );
+      if (value === null) {
+        throw NullValueError;
+      }
       await SmartWeave.kv.put(key, value);
       return {state};
     }
@@ -133,4 +102,4 @@ export async function handle(
     default:
       throw InvalidFunctionError;
   }
-}
+};

@@ -1,7 +1,7 @@
 import {Base} from './base';
 import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
 import type {
-  ContractState,
+  ContractMode,
   GetInput,
   GetKVMapInput,
   GetKeysInput,
@@ -10,7 +10,7 @@ import type {
   UpdateInput,
 } from '../contracts/types';
 
-export class BaseSDK<State extends ContractState, V = unknown> extends Base<State> {
+export class BaseSDK<V = unknown, M extends ContractMode = {whitelists: []; circuits: []}> extends Base<M> {
   /** Gets the values at the given keys as an array. */
   async getMany(keys: string[]): Promise<V[]> {
     return await Promise.all(keys.map(key => this.get(key)));
@@ -86,7 +86,7 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * @param value the value to be inserted
    */
   async put(key: string, value: V): Promise<void> {
-    await this.dryWriteInteraction<PutInput>(
+    await this.dryWriteInteraction<PutInput<V>>(
       {
         function: 'put',
         value: {
@@ -105,7 +105,7 @@ export class BaseSDK<State extends ContractState, V = unknown> extends Base<Stat
    * @param proof optional zero-knowledge proof
    */
   async update(key: string, value: V, proof?: object): Promise<void> {
-    await this.dryWriteInteraction<UpdateInput>(
+    await this.dryWriteInteraction<UpdateInput<V>>(
       {
         function: 'update',
         value: {

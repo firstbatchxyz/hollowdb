@@ -7,8 +7,7 @@ export type GetInput = {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PutInput<V = any> = {
+export type PutInput<V> = {
   function: 'put';
   value: {
     key: string;
@@ -16,8 +15,7 @@ export type PutInput<V = any> = {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UpdateInput<V = any> = {
+export type UpdateInput<V> = {
   function: 'update';
   value: {
     key: string;
@@ -48,17 +46,17 @@ export type GetKVMapInput = {
   };
 };
 
-export type UpdateRequirementInput = {
+export type UpdateRequirementInput<N extends string[], M extends string[]> = {
   function: 'updateRequirement';
   value:
     | {
         type: 'whitelist';
-        name: string; // keyof whitelist
+        name: N extends [] ? string : N[number];
         value: boolean;
       }
     | {
         type: 'proof';
-        name: string; // keyof proof
+        name: M extends [] ? string : M[number];
         value: boolean;
       };
 };
@@ -70,20 +68,20 @@ export type UpdateOwnerInput = {
   };
 };
 
-export type UpdateVerificationKeyInput = {
+export type UpdateVerificationKeyInput<N extends string[]> = {
   function: 'updateVerificationKey';
   value: {
     verificationKey: object;
-    name: string;
+    name: N extends [] ? string : N[number];
   };
 };
 
-export type UpdateWhitelistInput = {
+export type UpdateWhitelistInput<N extends string[]> = {
   function: 'updateWhitelist';
   value: {
     add: string[];
     remove: string[];
-    name: string;
+    name: N extends [] ? string : N[number];
   };
 };
 

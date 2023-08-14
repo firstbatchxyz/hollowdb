@@ -3,9 +3,9 @@ import {ContractState} from '../types';
 import {verifyProof} from '../utils';
 
 export function onlyProofVerifiedHTX(circuit: string) {
-  return async <T extends {key: string; value?: `${string}.${string}`; proof?: object}, S extends ContractState>(
+  return async <I extends {key: string; value?: `${string}.${string}`; proof?: object}, S extends ContractState>(
     _: string,
-    input: T,
+    input: I,
     state: S
   ) => {
     // must have proofs enabled for this circuit

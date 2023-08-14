@@ -1,45 +1,16 @@
-import {CantEvolveError, InvalidFunctionError, KeyExistsError} from './errors';
+import {CantEvolveError, InvalidFunctionError, KeyExistsError, NullValueError} from './errors';
 import {apply, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
-import type {
-  ContractState,
-  EvolveInput,
-  GetInput,
-  GetKVMapInput,
-  GetKeysInput,
-  PutInput,
-  RemoveInput,
-  UpdateInput,
-  UpdateOwnerInput,
-  UpdateRequirementInput,
-  UpdateVerificationKeyInput,
-  UpdateWhitelistInput,
-  ContractAction,
-} from './types';
+import type {ContractHandle} from './types';
 
-export type HollowState = ContractState<{circuits: ['auth']; whitelists: ['put', 'update']}>;
+type Mode = {circuits: ['auth']; whitelists: ['put', 'update']};
+type Value = unknown;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type HollowInput<V = any> =
-  | GetInput
-  | GetKeysInput
-  | PutInput<V>
-  | UpdateInput<V>
-  | RemoveInput
-  | GetKVMapInput
-  | UpdateOwnerInput
-  | UpdateWhitelistInput
-  | UpdateVerificationKeyInput
-  | EvolveInput
-  | UpdateRequirementInput;
-
-export async function handle(state: ContractState, action: ContractAction<HollowInput>) {
+export const handle: ContractHandle<Value, Mode> = async (state, action) => {
   const {caller, input} = action;
   switch (input.function) {
     case 'get': {
       const {key} = await apply(caller, input.value, state);
-      return {
-        result: await SmartWeave.kv.get(key),
-      };
+      return {result: (await SmartWeave.kv.get(key)) as Value | null};
     }
 
     case 'getKeys': {
@@ -54,6 +25,9 @@ export async function handle(state: ContractState, action: ContractAction<Hollow
 
     case 'put': {
       const {key, value} = await apply(caller, input.value, state, onlyWhitelisted('put'));
+      if (value === null) {
+        throw NullValueError;
+      }
       if ((await SmartWeave.kv.get(key)) !== null) {
         throw KeyExistsError;
       }
@@ -69,6 +43,9 @@ export async function handle(state: ContractState, action: ContractAction<Hollow
         onlyWhitelisted('update'),
         onlyProofVerified('auth')
       );
+      if (value === null) {
+        throw NullValueError;
+      }
       await SmartWeave.kv.put(key, value);
       return {state};
     }
@@ -124,4 +101,4 @@ export async function handle(state: ContractState, action: ContractAction<Hollow
     default:
       throw InvalidFunctionError;
   }
-}
+};
