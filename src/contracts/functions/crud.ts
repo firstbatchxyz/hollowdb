@@ -1,5 +1,5 @@
 import type {ContractState, GetInput, PutInput, RemoveInput, UpdateInput} from '../types';
-import {KeyExistsError} from '../errors';
+import {KeyExistsError, NullValueError} from '../errors';
 import {assertWhitelist, safeGet, verifyAuthProof} from '../utils';
 
 /** Gets a value at the specified key. */
@@ -22,6 +22,9 @@ export async function put<State extends ContractState<{whitelists: ['put']; circ
 ) {
   assertWhitelist(state, caller, 'put');
 
+  if (value === null) {
+    throw NullValueError;
+  }
   if ((await SmartWeave.kv.get(key)) !== null) {
     throw KeyExistsError;
   }
@@ -67,6 +70,9 @@ export async function update<State extends ContractState<{whitelists: ['update']
 ) {
   assertWhitelist(state, caller, 'update');
 
+  if (value === null) {
+    throw NullValueError;
+  }
   const dbValue = await safeGet(key);
   await verifyAuthProof(state, proof, dbValue, value, key);
   await SmartWeave.kv.put(key, value);

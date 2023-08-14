@@ -18,6 +18,7 @@ export async function putHTX<State extends ContractState<{whitelists: ['put']; c
   if ((await SmartWeave.kv.get(key)) !== null) {
     throw KeyExistsError;
   }
+
   await SmartWeave.kv.put(key, value);
 
   return {state};
