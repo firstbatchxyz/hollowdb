@@ -1,2 +1,2 @@
-export {BaseSDK} from './sdk';
-export {BaseAdmin} from './admin';
+export {SDK} from './sdk';
+export {Admin} from './admin';
