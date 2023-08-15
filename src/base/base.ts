@@ -70,10 +70,10 @@ export class Base<M extends ContractMode> {
    * @param input input in the form of `{function, value}`
    * @param errorPrefix optional prefix for the error message
    */
-  async dryWriteInteraction<I extends ContractInput>(input: I, errorPrefix = '') {
+  async dryWriteInteraction<I extends ContractInput>(input: I) {
     const result = await this.dryWrite(input);
     if (result.type !== 'ok') {
-      throw new Error(errorPrefix + result.errorMessage);
+      throw new Error(`Contract Error [${input.function}]: ${result.errorMessage}`);
     }
     await this.writeInteraction(input);
   }
@@ -85,10 +85,10 @@ export class Base<M extends ContractMode> {
    * @param errorPrefix optional prefix for the error message
    * @returns
    */
-  async safeReadInteraction<I extends ContractInput, V>(input: I, errorPrefix = '') {
+  async safeReadInteraction<I extends ContractInput, V>(input: I) {
     const response = await this.viewState<I, V>(input);
     if (response.type !== 'ok') {
-      throw new Error(errorPrefix + response.errorMessage);
+      throw new Error(`Contract Error [${input.function}]: ${response.errorMessage}`);
     }
     return response.result;
   }

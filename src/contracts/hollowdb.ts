@@ -1,9 +1,30 @@
-import {CantEvolveError, InvalidFunctionError, KeyExistsError, NullValueError} from './errors';
-import {apply, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
-import type {ContractHandle} from './types';
+import {CantEvolveError, InvalidFunctionError, KeyExistsError} from './errors';
+import {apply, onlyNonNullValue, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
+import type {ContractHandle, ContractState} from './types';
+import {hashToGroup} from './utils';
 
-type Mode = {circuits: ['auth']; whitelists: ['put', 'update']};
+type Mode = {proofs: ['auth']; whitelists: ['put', 'update']};
 type Value = unknown;
+
+// TODO where to move this guy?
+export const initialState: ContractState<Mode> = {
+  owner: '',
+  verificationKeys: {
+    auth: null,
+  },
+  isProofRequired: {
+    auth: true,
+  },
+  canEvolve: true,
+  whitelists: {
+    put: {},
+    update: {},
+  },
+  isWhitelistRequired: {
+    put: false,
+    update: false,
+  },
+};
 
 export const handle: ContractHandle<Value, Mode> = async (state, action) => {
   const {caller, input} = action;
@@ -24,10 +45,7 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
     }
 
     case 'put': {
-      const {key, value} = await apply(caller, input.value, state, onlyWhitelisted('put'));
-      if (value === null) {
-        throw NullValueError;
-      }
+      const {key, value} = await apply(caller, input.value, state, onlyNonNullValue, onlyWhitelisted('put'));
       if ((await SmartWeave.kv.get(key)) !== null) {
         throw KeyExistsError;
       }
@@ -40,18 +58,28 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
         caller,
         input.value,
         state,
+        onlyNonNullValue,
         onlyWhitelisted('update'),
-        onlyProofVerified('auth')
+        onlyProofVerified('auth', async (_, input) => {
+          const oldValue = await SmartWeave.kv.get(input.key);
+          return [hashToGroup(oldValue), hashToGroup(input.value), BigInt(input.key)];
+        })
       );
-      if (value === null) {
-        throw NullValueError;
-      }
       await SmartWeave.kv.put(key, value);
       return {state};
     }
 
     case 'remove': {
-      const {key} = await apply(caller, input.value, state, onlyWhitelisted('update'), onlyProofVerified('auth'));
+      const {key} = await apply(
+        caller,
+        input.value,
+        state,
+        onlyWhitelisted('update'),
+        onlyProofVerified('auth', async (_, input) => {
+          const oldValue = await SmartWeave.kv.get(input.key);
+          return [hashToGroup(oldValue), BigInt(0), BigInt(input.key)];
+        })
+      );
       await SmartWeave.kv.del(key);
       return {state};
     }
@@ -62,19 +90,21 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
       return {state};
     }
 
-    case 'updateRequirement': {
-      const {name, type, value} = await apply(caller, input.value, state, onlyOwner);
-      if (type === 'proof') {
-        state.isProofRequired[name] = value;
-      } else if (type === 'whitelist') {
-        state.isWhitelistRequired[name] = value;
-      }
+    case 'updateProofRequirement': {
+      const {name, value} = await apply(caller, input.value, state, onlyOwner);
+      state.isProofRequired[name] = value;
       return {state};
     }
 
     case 'updateVerificationKey': {
       const {name, verificationKey} = await apply(caller, input.value, state, onlyOwner);
       state.verificationKeys[name] = verificationKey;
+      return {state};
+    }
+
+    case 'updateWhitelistRequirement': {
+      const {name, value} = await apply(caller, input.value, state, onlyOwner);
+      state.isWhitelistRequired[name] = value;
       return {state};
     }
 
@@ -99,6 +129,8 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
     }
 
     default:
+      // type-safe way to make sure all switch cases are handled
+      input satisfies never;
       throw InvalidFunctionError;
   }
 };

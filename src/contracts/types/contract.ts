@@ -7,8 +7,9 @@ import {
   RemoveInput,
   UpdateInput,
   UpdateOwnerInput,
-  UpdateRequirementInput,
+  UpdateProofRequirementInput,
   UpdateVerificationKeyInput,
+  UpdateWhitelistRequirementInput,
   UpdateWhitelistInput,
 } from './inputs';
 
@@ -22,7 +23,7 @@ import {
  * @template M contract mode
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ContractInput<V = any, M extends ContractMode = {whitelists: []; circuits: []}> =
+export type ContractInput<V = any, M extends ContractMode = ContractMode> =
   | GetKVMapInput
   | GetKeysInput
   | GetInput
@@ -31,28 +32,33 @@ export type ContractInput<V = any, M extends ContractMode = {whitelists: []; cir
   | RemoveInput
   | UpdateOwnerInput
   | UpdateWhitelistInput<M['whitelists']>
-  | UpdateVerificationKeyInput<M['circuits']>
-  | UpdateRequirementInput<M['whitelists'], M['circuits']>
+  | UpdateWhitelistRequirementInput<M['whitelists']>
+  | UpdateVerificationKeyInput<M['proofs']>
+  | UpdateProofRequirementInput<M['proofs']>
   | EvolveInput;
 
 /**
- * A type for whitelists and circuits used within a contract.
+ * A type to describe whitelists and proofs (circuits) used within a contract.
  */
-export type ContractMode = {whitelists: string[]; circuits: string[]};
+export type ContractMode = {whitelists: string[]; proofs: string[]};
+
+/**
+ * A generic contract input.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ContractInputGeneric = {function: string; value: any};
 
 /** A contract action, that is a caller and input.
  * @template I input type
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ContractAction<I extends {function: string; value: any}> = {
+
+export type ContractAction<I extends ContractInputGeneric> = {
   input: I;
   caller: string;
 };
 
 /**
- * A contract state.
- *
- * For example, HollowDB state is defined as:
+ * A contract state. For example, HollowDB state is defined as:
  *
  * ```ts
  * ContractState<{circuits: ['auth']; whitelists: ['put', 'update']}>
@@ -62,14 +68,14 @@ export type ContractAction<I extends {function: string; value: any}> = {
  *
  * @template M a type where whitelists and circuit names are specified. If none, pass in empty array `[]` to each.
  */
-export type ContractState<M extends ContractMode = {whitelists: []; circuits: []}> = {
+export type ContractState<M extends ContractMode = ContractMode> = {
   canEvolve: boolean;
   evolve?: string;
   owner: string;
   // proofs mode
-  isProofRequired: {[name in M['circuits'] extends [] ? string : M['circuits'][number]]: boolean};
+  isProofRequired: {[name in M['proofs'] extends [] ? string : M['proofs'][number]]: boolean};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  verificationKeys: {[name in M['circuits'] extends [] ? string : M['circuits'][number]]: any};
+  verificationKeys: {[name in M['proofs'] extends [] ? string : M['proofs'][number]]: any};
   // whitelists mode
   whitelists: {
     [name in M['whitelists'] extends [] ? string : M['whitelists'][number]]: {[address: string]: boolean};
@@ -82,7 +88,7 @@ export type ContractState<M extends ContractMode = {whitelists: []; circuits: []
  * @template M contract mode, that is whitelist names and circuit names (for verification keys)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ContractHandle<V = any, M extends ContractMode = {whitelists: []; circuits: []}> = (
+export type ContractHandle<V = any, M extends ContractMode = ContractMode> = (
   state: ContractState<M>,
   action: ContractAction<ContractInput<V, M>>
 ) => Promise<

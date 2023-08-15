@@ -1,16 +1,17 @@
 import {JWKInterface, Warp} from 'warp-contracts';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
-import {BaseSDK} from './sdk';
+import {SDK} from './sdk';
 import type {
   ContractMode,
   ContractState,
   UpdateOwnerInput,
-  UpdateRequirementInput,
+  UpdateProofRequirementInput,
+  UpdateWhitelistRequirementInput,
   UpdateVerificationKeyInput,
   UpdateWhitelistInput,
 } from '../contracts/types';
 
-export class BaseAdmin<V = unknown, M extends ContractMode = {whitelists: []; circuits: []}> extends BaseSDK<V, M> {
+export class Admin<V = unknown, M extends ContractMode = ContractMode> extends SDK<V, M> {
   /**
    * Sets the owner as the given wallet address.
    * @param newOwner address of the new owner, make sure that this is correct!
@@ -30,7 +31,11 @@ export class BaseAdmin<V = unknown, M extends ContractMode = {whitelists: []; ci
    * @param name name of the list to be updated
    * @param op whether to `add` the users to whitelist or `remove` them
    */
-  async updateWhitelist(users: string[], name: string, op: 'add' | 'remove') {
+  async updateWhitelist(
+    users: string[],
+    name: M['whitelists'] extends [] ? string : M['whitelists'][number],
+    op: 'add' | 'remove'
+  ) {
     const add = op === 'add' ? users : [];
     const remove = op === 'remove' ? users : [];
     await this.writeInteraction<UpdateWhitelistInput<M['whitelists']>>({
@@ -48,13 +53,16 @@ export class BaseAdmin<V = unknown, M extends ContractMode = {whitelists: []; ci
    * @param name name of the circuit that the verification key belongs to
    * @param verificationKey verification key
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async updateVerificationKey(name: keyof S['verificationKeys'], verificationKey: any) {
-    await this.writeInteraction<UpdateVerificationKeyInput<M['circuits']>>({
+  async updateVerificationKey(
+    name: M['proofs'] extends [] ? string : M['proofs'][number],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    verificationKey: any
+  ) {
+    await this.writeInteraction<UpdateVerificationKeyInput<M['proofs']>>({
       function: 'updateVerificationKey',
       value: {
         verificationKey,
-        name: name as string,
+        name,
       },
     });
   }
@@ -64,12 +72,14 @@ export class BaseAdmin<V = unknown, M extends ContractMode = {whitelists: []; ci
    * @param name name of the list
    * @param value a boolean
    */
-  async updateWhitelistRequirement(name: keyof State['whitelists'], value: boolean) {
-    await this.writeInteraction<UpdateRequirementInput>({
-      function: 'updateRequirement',
+  async updateWhitelistRequirement(
+    name: M['whitelists'] extends [] ? string : M['whitelists'][number],
+    value: boolean
+  ) {
+    await this.writeInteraction<UpdateWhitelistRequirementInput<M['whitelists']>>({
+      function: 'updateWhitelistRequirement',
       value: {
-        type: 'whitelist',
-        name: name as string,
+        name,
         value,
       },
     });
@@ -80,12 +90,11 @@ export class BaseAdmin<V = unknown, M extends ContractMode = {whitelists: []; ci
    * @param name name of the circuit
    * @param value a boolean
    */
-  async updateProofRequirement(name: keyof State['verificationKeys'], value: boolean) {
-    await this.writeInteraction<UpdateRequirementInput>({
-      function: 'updateRequirement',
+  async updateProofRequirement(name: M['proofs'] extends [] ? string : M['proofs'][number], value: boolean) {
+    await this.writeInteraction<UpdateProofRequirementInput<M['proofs']>>({
+      function: 'updateProofRequirement',
       value: {
-        type: 'proof',
-        name: name as string,
+        name,
         value,
       },
     });

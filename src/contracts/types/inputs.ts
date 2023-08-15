@@ -46,19 +46,20 @@ export type GetKVMapInput = {
   };
 };
 
-export type UpdateRequirementInput<N extends string[], M extends string[]> = {
-  function: 'updateRequirement';
-  value:
-    | {
-        type: 'whitelist';
-        name: N extends [] ? string : N[number];
-        value: boolean;
-      }
-    | {
-        type: 'proof';
-        name: M extends [] ? string : M[number];
-        value: boolean;
-      };
+export type UpdateWhitelistRequirementInput<N extends string[]> = {
+  function: 'updateWhitelistRequirement';
+  value: {
+    name: N extends [] ? string : N[number];
+    value: boolean;
+  };
+};
+
+export type UpdateProofRequirementInput<N extends string[]> = {
+  function: 'updateProofRequirement';
+  value: {
+    name: N extends [] ? string : N[number];
+    value: boolean;
+  };
 };
 
 export type UpdateOwnerInput = {

@@ -42,7 +42,7 @@ npm install hollowdb  # npm
 pnpm add hollowdb     # pnpm
 ```
 
-## Documentation
+## Usage
 
 You can read the full documentation at <https://docs.hollowdb.xyz>.
 
@@ -54,9 +54,7 @@ You can run all tests via:
 yarn test
 ```
 
-Tests operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB).
-
-Note that you need to have a Redis server running for Redis tests to pass, the URL shall be specified within [jest.config.cjs](./jest.config.cjs).
+Tests operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
 
 The tests are as follows:
 
