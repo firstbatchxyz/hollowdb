@@ -4,6 +4,7 @@ import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin} from '../src/hollowdb';
+import initialState from '../src/contracts/states/hollowdb';
 
 // adding `null` to type for testing purposes
 // it is not allowed normally
@@ -20,7 +21,7 @@ describe('null value tests with proofs', () => {
   beforeAll(async () => {
     const hook = warpHook();
     const [ownerWallet] = hook.wallets;
-    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk);
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialState);
 
     prover = new Prover(
       constants.PROVERS[protocol].HOLLOWDB.WASM_PATH,

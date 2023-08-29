@@ -1,7 +1,7 @@
 import {deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin} from '../src/hollowdb';
-import initialHollowState from '../src/contracts/states/hollowdb';
+import initialState from '../src/contracts/states/hollowdb';
 
 describe('multiple contracts', () => {
   const REQ_COUNT = 100;
@@ -15,8 +15,8 @@ describe('multiple contracts', () => {
   beforeAll(async () => {
     const hook = warpHook();
     const [userWallet] = hook.wallets;
-    const initialState = {
-      ...initialHollowState,
+    const state = {
+      ...initialState,
       isProofRequired: {
         auth: false,
       },
@@ -25,8 +25,8 @@ describe('multiple contracts', () => {
         update: false,
       },
     };
-    const contractTxId1 = await deployContract(hook.warp, userWallet.jwk, initialState);
-    const contractTxId2 = await deployContract(hook.warp, userWallet.jwk, initialState);
+    const contractTxId1 = await deployContract(hook.warp, userWallet.jwk, state);
+    const contractTxId2 = await deployContract(hook.warp, userWallet.jwk, state);
 
     user1 = new Admin(userWallet.jwk, contractTxId1, hook.warp);
     user2 = new Admin(userWallet.jwk, contractTxId2, hook.warp);

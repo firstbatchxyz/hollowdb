@@ -1,7 +1,7 @@
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
-import initialHollowState from '../src/contracts/states/hollowdb';
+import initialState from '../src/contracts/states/hollowdb';
 
 type ValueType = {val: string};
 describe('whitelists mode', () => {
@@ -17,7 +17,7 @@ describe('whitelists mode', () => {
     const hook = warpHook();
     const [ownerWallet, aliceWallet, bobWallet] = hook.wallets;
     const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, {
-      ...initialHollowState,
+      ...initialState,
       isProofRequired: {
         auth: false,
       },

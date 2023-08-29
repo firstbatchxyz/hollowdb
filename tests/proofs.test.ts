@@ -4,6 +4,7 @@ import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin, SDK} from '../src/hollowdb';
+import initialState from '../src/contracts/states/hollowdb';
 
 type ValueType = {val: string};
 describe('proofs mode', () => {
@@ -18,7 +19,7 @@ describe('proofs mode', () => {
     beforeAll(async () => {
       const hook = warpHook();
       const [ownerWallet, aliceWallet] = hook.wallets;
-      const contractTxId = await deployContract(hook.warp, ownerWallet.jwk);
+      const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialState);
 
       prover = new Prover(
         constants.PROVERS[protocol].HOLLOWDB.WASM_PATH,

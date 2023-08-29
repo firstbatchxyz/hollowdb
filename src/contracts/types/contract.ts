@@ -1,3 +1,4 @@
+import {OpitonalArray} from '.';
 import {
   EvolveInput,
   GetInput,
@@ -73,14 +74,14 @@ export type ContractState<M extends ContractMode = ContractMode> = {
   evolve?: string;
   owner: string;
   // proofs mode
-  isProofRequired: {[name in M['proofs'] extends [] ? string : M['proofs'][number]]: boolean};
+  isProofRequired: {[name in OpitonalArray<M['proofs'], string>]: boolean};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  verificationKeys: {[name in M['proofs'] extends [] ? string : M['proofs'][number]]: any};
+  verificationKeys: {[name in OpitonalArray<M['proofs'], string>]: any};
   // whitelists mode
   whitelists: {
-    [name in M['whitelists'] extends [] ? string : M['whitelists'][number]]: {[address: string]: boolean};
+    [name in OpitonalArray<M['whitelists'], string>]: {[address: string]: boolean};
   };
-  isWhitelistRequired: {[name in M['whitelists'] extends [] ? string : M['whitelists'][number]]: boolean};
+  isWhitelistRequired: {[name in OpitonalArray<M['whitelists'], string>]: boolean};
 };
 
 /** A contract handler, that is the entry point to a SmartWeave contract.

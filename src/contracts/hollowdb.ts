@@ -1,30 +1,10 @@
 import {CantEvolveError, InvalidFunctionError, KeyExistsError} from './errors';
 import {apply, onlyNonNullValue, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
-import type {ContractHandle, ContractState} from './types';
+import type {ContractHandle} from './types';
 import {hashToGroup} from './utils';
 
 type Mode = {proofs: ['auth']; whitelists: ['put', 'update']};
 type Value = unknown;
-
-// TODO where to move this guy?
-export const initialState: ContractState<Mode> = {
-  owner: '',
-  verificationKeys: {
-    auth: null,
-  },
-  isProofRequired: {
-    auth: true,
-  },
-  canEvolve: true,
-  whitelists: {
-    put: {},
-    update: {},
-  },
-  isWhitelistRequired: {
-    put: false,
-    update: false,
-  },
-};
 
 export const handle: ContractHandle<Value, Mode> = async (state, action) => {
   const {caller, input} = action;

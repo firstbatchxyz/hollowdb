@@ -1,7 +1,7 @@
 import {WarpFactory, JWKInterface} from 'warp-contracts';
 import {Admin} from '../hollowdb';
 import fs from 'fs';
-import initialHollowState from '../contracts/states/hollowdb';
+import {initialState} from '../contracts/hollowdb';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
 async function main() {
@@ -21,13 +21,13 @@ async function main() {
   const warp = WarpFactory.forMainnet().use(new DeployPlugin());
 
   if (protocol === 'groth16' || protocol === 'plonk') {
-    initialHollowState.verificationKeys.auth = JSON.parse(
+    initialState.verificationKeys.auth = JSON.parse(
       fs.readFileSync(`./config/circuits/hollow-authz-${protocol}/verification_key.json`, 'utf-8')
     );
   }
 
   console.log('Deploying contract...');
-  const result = await Admin.deployFromSrc(wallet, initialHollowState, sourceTxId, warp);
+  const result = await Admin.deployFromSrc(wallet, initialState, sourceTxId, warp);
   console.log('Deployed.', result);
   console.log(`https://sonar.warp.cc/#/app/contract/${result.contractTxId}`);
 }

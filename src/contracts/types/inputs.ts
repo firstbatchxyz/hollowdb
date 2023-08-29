@@ -1,4 +1,5 @@
 import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
+import {OpitonalArray} from '.';
 
 export type GetInput = {
   function: 'get';
@@ -49,7 +50,7 @@ export type GetKVMapInput = {
 export type UpdateWhitelistRequirementInput<N extends string[]> = {
   function: 'updateWhitelistRequirement';
   value: {
-    name: N extends [] ? string : N[number];
+    name: OpitonalArray<N, string>;
     value: boolean;
   };
 };
@@ -57,7 +58,7 @@ export type UpdateWhitelistRequirementInput<N extends string[]> = {
 export type UpdateProofRequirementInput<N extends string[]> = {
   function: 'updateProofRequirement';
   value: {
-    name: N extends [] ? string : N[number];
+    name: OpitonalArray<N, string>;
     value: boolean;
   };
 };
@@ -73,7 +74,7 @@ export type UpdateVerificationKeyInput<N extends string[]> = {
   function: 'updateVerificationKey';
   value: {
     verificationKey: object;
-    name: N extends [] ? string : N[number];
+    name: OpitonalArray<N, string>;
   };
 };
 
@@ -82,7 +83,7 @@ export type UpdateWhitelistInput<N extends string[]> = {
   value: {
     add: string[];
     remove: string[];
-    name: N extends [] ? string : N[number];
+    name: OpitonalArray<N, string>;
   };
 };
 

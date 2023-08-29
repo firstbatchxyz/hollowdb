@@ -5,14 +5,13 @@ import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {Admin} from '../src/hollowdb';
 import {MockBundlr} from './mock/bundlr';
-import initialHollowState from '../src/contracts/states/hollowdb';
+import initialState from '../src/contracts/states/hollowdb-htx';
 
 type ValueType = {val: string};
 type HTXValueType = `${string}.${string}`;
 
-const PROTOCOL = 'groth16';
-
 describe('hash.txid value tests', () => {
+  const PROTOCOL = 'groth16';
   const mockBundlr = new MockBundlr<ValueType>();
   const warpHook = setupWarp();
   const prover = new Prover(
@@ -28,7 +27,7 @@ describe('hash.txid value tests', () => {
   beforeAll(async () => {
     const hook = warpHook();
     const [ownerWallet] = hook.wallets;
-    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialHollowState, 'hollowdb-htx');
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialState, 'hollowdb-htx');
 
     owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
   });

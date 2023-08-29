@@ -2,6 +2,7 @@ import {JWKInterface, Warp} from 'warp-contracts';
 import {Admin, SDK} from '../src/hollowdb';
 import {setupWarp} from './hooks';
 import {deployContract} from './utils';
+import initialState from '../src/contracts/states/hollowdb';
 
 describe('evolve contract', () => {
   const warpHook = setupWarp();
@@ -14,7 +15,7 @@ describe('evolve contract', () => {
     const hook = warpHook();
     owner = hook.wallets[0].jwk;
     warp = hook.warp;
-    contractTxId = await deployContract(hook.warp, owner);
+    contractTxId = await deployContract(hook.warp, owner, initialState);
   });
 
   it('should evolve contract', async () => {

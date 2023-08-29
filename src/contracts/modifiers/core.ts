@@ -1,8 +1,8 @@
-import {ExpectedProofError, InvalidProofError, NotOwnerError, NotWhitelistedError} from '../errors';
+import {ExpectedProofError, InvalidProofError, NotOwnerError, NotWhitelistedError, NullValueError} from '../errors';
 import {ContractState} from '../types';
-import {hashToGroup, verifyProof} from '../utils';
+import {verifyProof} from '../utils';
 
-/**  */
+/** Ensures `caller` to be the contract owner. */
 export const onlyOwner = <I, S extends ContractState>(caller: string, input: I, state: S) => {
   if (caller !== state.owner) {
     throw NotOwnerError;
@@ -18,8 +18,8 @@ export const onlyOwner = <I, S extends ContractState>(caller: string, input: I, 
  * ambiguity regarding whether a key exists or not.
  */
 export const onlyNonNullValue = <I extends {value: unknown}>(_: string, input: I) => {
-  if (input.value !== null) {
-    throw NotOwnerError;
+  if (input.value === null) {
+    throw NullValueError;
   }
   return input;
 };
@@ -28,12 +28,12 @@ export const onlyNonNullValue = <I extends {value: unknown}>(_: string, input: I
 export const onlyWhitelisted = <I, S extends ContractState>(list: keyof S['whitelists']) => {
   return (caller: string, input: I, state: S) => {
     // must have whitelisting enabled for this list
-    if (!state.isWhitelistRequired[list]) {
+    if (!state.isWhitelistRequired[list as string]) {
       return input;
     }
 
     // must be whitelisted
-    if (!state.whitelists[list][caller]) {
+    if (!state.whitelists[list as string][caller]) {
       throw NotWhitelistedError;
     }
     return input;
@@ -47,7 +47,7 @@ export const onlyProofVerified = <I extends {key: string; value?: unknown; proof
 ) => {
   return async (caller: string, input: I, state: S) => {
     // must have proofs enabled for this circuit
-    if (!state.isProofRequired[proofName]) {
+    if (!state.isProofRequired[proofName as string]) {
       return input;
     }
 
@@ -60,7 +60,7 @@ export const onlyProofVerified = <I extends {key: string; value?: unknown; proof
     const ok = await verifyProof(
       input.proof,
       await prepareInputs(caller, input, state),
-      state.verificationKeys[proofName]
+      state.verificationKeys[proofName as string]
     );
     if (!ok) {
       throw InvalidProofError;
