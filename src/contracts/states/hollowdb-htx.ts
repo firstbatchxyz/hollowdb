@@ -1,4 +1,4 @@
-import type {handle} from '../hollowdb-htx';
+import type {handle} from '../hollowdb-htx.contract';
 
 const initialState: Parameters<typeof handle>[0] = {
   owner: '',

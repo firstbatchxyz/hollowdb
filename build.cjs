@@ -1,9 +1,12 @@
 const {build} = require('esbuild');
 const replace = require('replace-in-file');
+const {readdirSync} = require('fs');
 
-const contracts = ['hollowdb.ts', 'hollowdb-htx.ts'];
 const outBase = './src/contracts';
 const outDir = './build';
+
+// read contracts from the folder
+const contracts = readdirSync(outBase).filter(file => file.endsWith('.contract.ts'));
 
 build({
   entryPoints: contracts.map(source => {
