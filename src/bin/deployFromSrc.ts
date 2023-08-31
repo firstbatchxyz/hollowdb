@@ -1,7 +1,7 @@
 import {WarpFactory, JWKInterface} from 'warp-contracts';
 import {Admin} from '../hollowdb';
 import fs from 'fs';
-import {initialState} from '../contracts/hollowdb.contract';
+import initialState from '../contracts/states/hollowdb';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
 async function main() {

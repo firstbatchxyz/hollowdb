@@ -1,7 +1,6 @@
 import {WarpFactory, JWKInterface} from 'warp-contracts';
 import {Admin} from '../hollowdb';
 import fs from 'fs';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 
 async function main() {
   let walletName = '';

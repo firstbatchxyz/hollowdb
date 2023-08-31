@@ -82,4 +82,23 @@ Writing your own modifiers is a great way to change the functionality of existin
 
 ### Adding a Custom Function
 
-When you are adding a new function, you may notice that TypeScript will give errors to your newly added `case`. This is because ot
+When you are adding a new function, you may notice that TypeScript will give errors to your newly added `case`. This is because it is not yet registered as a contract input for the `handle` function yet.
+
+All the functions at the start are defined by default within the `ContractHandle` type; to define our own inputs we must pass them to the handle type.
+
+For example, let's say we have a function `foo` with a number input.
+
+```ts
+type FooInput = {
+  function: 'foo';
+  value: number;
+};
+```
+
+We can give this input as the third argument to our `ContractHandle` type:
+
+```ts
+export const handle: ContractHandle<Value, Mode, FooInput>; // ...
+```
+
+Now you can add the `case` without any type errors, and also type-inference for your `input.value` to be a `number` too!
