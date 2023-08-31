@@ -87,11 +87,12 @@ export type ContractState<M extends ContractMode = ContractMode> = {
 /** A contract handler, that is the entry point to a SmartWeave contract.
  * @template V type of values in the database
  * @template M contract mode, that is whitelist names and circuit names (for verification keys)
+ * @template I custom inputs, in the form `{function, value}`
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ContractHandle<V = any, M extends ContractMode = ContractMode> = (
+export type ContractHandle<V = any, M extends ContractMode = ContractMode, I extends ContractInputGeneric = never> = (
   state: ContractState<M>,
-  action: ContractAction<ContractInput<V, M>>
+  action: ContractAction<ContractInput<V, M> | I>
 ) => Promise<
   | {
       // read interaction returns a result
