@@ -1,7 +1,7 @@
 import {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
-import type {ContractInput, ContractMode, ContractState} from '../contracts/types/contract';
+import type {ContractInput, ContractInputGeneric, ContractMode, ContractState} from '../contracts/types/contract';
 
 export class Base<M extends ContractMode> {
   protected readonly contract: Contract<ContractState<M>>;
@@ -48,7 +48,7 @@ export class Base<M extends ContractMode> {
    * @param input input in the form of `{function, value}`
    * @returns interaction result
    */
-  async dryWrite<I extends ContractInput>(input: I) {
+  async dryWrite<I extends ContractInputGeneric>(input: I) {
     return await this.contract.dryWrite(input);
   }
 
@@ -59,7 +59,7 @@ export class Base<M extends ContractMode> {
    * @param input input in the form of `{function, value}`
    * @returns interaction response
    */
-  async writeInteraction<I extends ContractInput>(input: I) {
+  async writeInteraction<I extends ContractInputGeneric>(input: I) {
     return await this.contract.writeInteraction(input);
   }
 
@@ -70,7 +70,7 @@ export class Base<M extends ContractMode> {
    * @param input input in the form of `{function, value}`
    * @param errorPrefix optional prefix for the error message
    */
-  async dryWriteInteraction<I extends ContractInput>(input: I) {
+  async dryWriteInteraction<I extends ContractInputGeneric>(input: I) {
     const result = await this.dryWrite(input);
     if (result.type !== 'ok') {
       throw new Error(`Contract Error [${input.function}]: ${result.errorMessage}`);
@@ -85,7 +85,7 @@ export class Base<M extends ContractMode> {
    * @param errorPrefix optional prefix for the error message
    * @returns
    */
-  async safeReadInteraction<I extends ContractInput, V>(input: I) {
+  async safeReadInteraction<I extends ContractInputGeneric, V>(input: I) {
     const response = await this.viewState<I, V>(input);
     if (response.type !== 'ok') {
       throw new Error(`Contract Error [${input.function}]: ${response.errorMessage}`);
@@ -98,7 +98,7 @@ export class Base<M extends ContractMode> {
    * @param input input in the form of `{function, value}`
    * @returns interaction result
    */
-  async viewState<I extends ContractInput, R>(input: I) {
+  async viewState<I extends ContractInputGeneric, R>(input: I) {
     return await this.contract.viewState<I, R>(input);
   }
 }

@@ -86,7 +86,55 @@ When you are adding a new function, you may notice that TypeScript will give err
 
 All the functions at the start are defined by default within the `ContractHandle` type; to define our own inputs we must pass them to the handle type.
 
-For example, let's say we have a function `foo` with a number input.
+For example, let's say we have a function `foo` with a number input and `bar` with some other input:
+
+```ts
+type FooInput = {
+  function: 'foo';
+  value: number;
+};
+type BarInput = {
+  function: 'bar';
+  value: {
+    barbar: string;
+  };
+};
+```
+
+We can give these inputs as the third argument to our `ContractHandle` type:
+
+```ts
+export const handle: ContractHandle<Value, Mode, FooInput | BarInput> = async (state, input) => {
+  // ...
+};
+```
+
+Now you can add the respective `case`s without any type errors, and also type-inference will understand the type of your `input.value` based on which case you are handling!
+
+### Caveats
+
+When `esbuild` builds the contract, it will put all necessary files within the build file. If you are using an NPM package within your contract, the entire package will be written into the output! This will cause the contract to be unreadable with huge lines of code.
+
+To avoid this issue, simply try to be 0-dependency, or use [Warp Plugins](https://academy.warp.cc/docs/sdk/advanced/plugins/overview) if convenient.
+
+## Extending SDK
+
+If you've added new contract functions, and would like to be able to call them using the HollowDB SDK, you have to extend the SDK with your custom functions.
+
+HollowDB provides `BaseSDK` and `BaseAdmin` which implement all core functionalities without type-safety. To make them type-safe, we provide the template parameters. As an example, here is the actual HollowDB SDK and Admin classes:
+
+```ts
+import {SDK as BaseSDK, Admin as BaseAdmin} from './base';
+
+type Mode = {proofs: ['auth']; whitelists: ['put', 'update']};
+
+export class SDK<V = unknown> extends BaseSDK<V, Mode> {}
+export class Admin<V = unknown> extends BaseAdmin<V, Mode> {}
+```
+
+By providing the `Mode` type, we get type-safety for our whitelist names and circuit names; and, we provide the option to define a type for the values `V` to be stored in the database.
+
+Let's consider the `FooInput` example from above:
 
 ```ts
 type FooInput = {
@@ -95,10 +143,21 @@ type FooInput = {
 };
 ```
 
-We can give this input as the third argument to our `ContractHandle` type:
+We can handle this function as we extend the `BaseSDK`:
 
 ```ts
-export const handle: ContractHandle<Value, Mode, FooInput>; // ...
+import {SDK as BaseSDK, Admin as BaseAdmin} from './base';
+
+type Mode = /* your contract mode, if you have any */;
+
+export class FooSDK<V = unknown> extends BaseSDK<V, Mode> {
+  async foo(value: number) {
+    return this.dryWriteInteraction<FooInput>({
+      function: 'foo',
+      value,
+    });
+  }
+}
 ```
 
-Now you can add the `case` without any type errors, and also type-inference for your `input.value` to be a `number` too!
+TODO: how to handle SDK and Admin together?
