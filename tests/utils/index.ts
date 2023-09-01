@@ -1,7 +1,7 @@
 import {randomBytes} from 'crypto';
 import {Warp, JWKInterface} from 'warp-contracts';
 import {readFileSync} from 'fs';
-import {Admin} from '../../src/hollowdb';
+import {SDK} from '../../src/hollowdb';
 import {computeKey} from 'hollowdb-prover';
 import {ContractState} from '../../src/contracts/types';
 
@@ -53,14 +53,7 @@ export async function deployContract(
   contractName = 'hollowdb'
 ) {
   const contractSource = readFileSync(`./build/${contractName}.js`, 'utf8');
-  const contractTxId = await Admin.deploy(
-    signer,
-    initialState,
-    contractSource,
-    warp,
-    true // bundling is disabled during testing
-  ).then(result => result.contractTxId);
-  // console.log('Contract deployed at:', contractTxId);
+  const contractTxId = await SDK.deploy(signer, initialState, contractSource, warp).then(result => result.contractTxId);
 
   const contractTx = await warp.arweave.transactions.get(contractTxId);
   expect(contractTx).not.toBeNull();

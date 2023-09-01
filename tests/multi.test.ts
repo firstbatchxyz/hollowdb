@@ -1,14 +1,14 @@
 import {deployContract} from './utils';
 import {setupWarp} from './hooks';
-import {Admin} from '../src/hollowdb';
+import {SDK} from '../src/hollowdb';
 import initialState from '../src/contracts/states/hollowdb';
 
 describe('multiple contracts', () => {
   const REQ_COUNT = 100;
   const warpHook = setupWarp('redis');
 
-  let user1: Admin<number>;
-  let user2: Admin<number>;
+  let user1: SDK<number>;
+  let user2: SDK<number>;
   let randomness: boolean[];
   let keys: string[];
 
@@ -28,8 +28,8 @@ describe('multiple contracts', () => {
     const contractTxId1 = await deployContract(hook.warp, userWallet.jwk, state);
     const contractTxId2 = await deployContract(hook.warp, userWallet.jwk, state);
 
-    user1 = new Admin(userWallet.jwk, contractTxId1, hook.warp);
-    user2 = new Admin(userWallet.jwk, contractTxId2, hook.warp);
+    user1 = new SDK(userWallet.jwk, contractTxId1, hook.warp);
+    user2 = new SDK(userWallet.jwk, contractTxId2, hook.warp);
 
     randomness = Array<boolean>(REQ_COUNT).fill(Math.random() < 0.5);
     keys = Array<string>(REQ_COUNT)

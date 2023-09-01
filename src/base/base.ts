@@ -1,27 +1,21 @@
 import {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
-import type {ContractInput, ContractInputGeneric, ContractMode, ContractState} from '../contracts/types/contract';
+import type {ContractInputGeneric, ContractMode, ContractState} from '../contracts/types/contract';
 
 export class Base<M extends ContractMode> {
-  protected readonly contract: Contract<ContractState<M>>;
+  readonly contract: Contract<ContractState<M>>;
   readonly warp: Warp;
   readonly contractTxId: string;
   readonly signer: ArWallet | CustomSignature;
 
-  /**
-   * Connects to the given contract via the provided Warp instance using the provided signer.
-   * @param signer a Signer, such as Arweave wallet or Ethereum CustomSignature
-   * @param contractTxId contract txId to connect to
-   * @param warp a Warp instace, such as `WarpFactory.forMainnet()`
-   */
   constructor(signer: ArWallet | CustomSignature, contractTxId: string, warp: Warp) {
     this.signer = signer;
     this.contractTxId = contractTxId;
     this.warp = warp
-      // SnarkJS extension is required for proof verification
+      // required for proof verification
       .use(new SnarkjsExtension())
-      // Ethers utilities extension is required for hashing
+      // required for hashing
       .use(new EthersExtension());
 
     this.contract = this.warp
@@ -35,6 +29,11 @@ export class Base<M extends ContractMode> {
 
   /**
    * Return the latest contract state.
+   *
+   * This is a good way to trigger Warp to fetch the latest data from Arweave.
+   * Note that if the contract has many transactions, fetching up to the latest
+   * state may take some time.
+   *
    * @returns contract state
    */
   async readState() {

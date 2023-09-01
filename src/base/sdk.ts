@@ -1,7 +1,9 @@
 import {Base} from './base';
+import {Admin} from './admin';
 import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
 import type {
   ContractMode,
+  ContractState,
   GetInput,
   GetKVMapInput,
   GetKeysInput,
@@ -9,9 +11,47 @@ import type {
   RemoveInput,
   UpdateInput,
 } from '../contracts/types';
-import type {SortKeyCacheResult} from 'warp-contracts';
+import type {ArWallet, Contract, CustomSignature, SortKeyCacheResult, Warp} from 'warp-contracts';
 
-export class SDK<V = unknown, M extends ContractMode = ContractMode> extends Base<M> {
+export class SDK<V = unknown, M extends ContractMode = ContractMode> {
+  readonly base: Base<M>;
+  readonly admin: Admin<M>;
+
+  /**
+   * Connects to the given contract via the provided Warp instance using the provided signer.
+   * @param signer a Signer, such as Arweave wallet or Ethereum CustomSignature
+   * @param contractTxId contract txId to connect to
+   * @param warp a Warp instace, such as `WarpFactory.forMainnet()`
+   */
+  constructor(signer: ArWallet | CustomSignature, contractTxId: string, warp: Warp) {
+    this.base = new Base(signer, contractTxId, warp);
+    this.admin = new Admin(this.base);
+  }
+
+  /** The smart-contract that we are connected to. */
+  get contract(): Contract<ContractState<M>> {
+    return this.base.contract;
+  }
+
+  /** Warp instance. */
+  get warp(): Warp {
+    return this.base.warp;
+  }
+
+  /** Signer. */
+  get signer(): ArWallet | CustomSignature {
+    return this.base.signer;
+  }
+
+  /** Returns the latest contract state.
+   *
+   * For a more fine-grained state data, use `base.readState()`.
+   *
+   */
+  async getState(): Promise<ContractState<M>> {
+    return await this.base.readState().then(s => s.cachedValue.state);
+  }
+
   /** Gets the values at the given keys as an array. */
   async getMany(keys: string[]): Promise<(V | null)[]> {
     return await Promise.all(keys.map(key => this.get(key)));
@@ -31,7 +71,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> extends Bas
    * If no option is provided, it will get all keys.
    */
   async getKeys(options?: SortKeyCacheRangeOptions): Promise<string[]> {
-    return await this.safeReadInteraction<GetKeysInput, string[]>({
+    return await this.base.safeReadInteraction<GetKeysInput, string[]>({
       function: 'getKeys',
       value: {
         options,
@@ -40,11 +80,11 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> extends Bas
   }
 
   /**
-   * Returns a mapping of keys and values with respect to a range option. If no option is provided,
-   * all values are returned.
+   * Returns a mapping of keys and values with respect to a range option.
+   * If no option is provided, all values are returned.
    */
   async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V>> {
-    return await this.safeReadInteraction<GetKVMapInput, Map<string, V>>({
+    return await this.base.safeReadInteraction<GetKVMapInput, Map<string, V>>({
       function: 'getKVMap',
       value: {
         options,
@@ -58,7 +98,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> extends Bas
    * @returns the value of the given key
    */
   async get(key: string): Promise<V> {
-    return await this.safeReadInteraction<GetInput, V>({
+    return await this.base.safeReadInteraction<GetInput, V>({
       function: 'get',
       value: {
         key,
@@ -72,7 +112,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> extends Bas
    * @param value the value to be inserted
    */
   async put(key: string, value: V): Promise<void> {
-    await this.dryWriteInteraction<PutInput<V>>({
+    await this.base.dryWriteInteraction<PutInput<V>>({
       function: 'put',
       value: {
         key,
@@ -88,7 +128,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> extends Bas
    * @param proof optional zero-knowledge proof
    */
   async update(key: string, value: V, proof?: object): Promise<void> {
-    await this.dryWriteInteraction<UpdateInput<V>>({
+    await this.base.dryWriteInteraction<UpdateInput<V>>({
       function: 'update',
       value: {
         key,
@@ -105,7 +145,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> extends Bas
    * @param proof optional zero-knowledge proof
    */
   async remove(key: string, proof?: object): Promise<void> {
-    await this.dryWriteInteraction<RemoveInput>({
+    await this.base.dryWriteInteraction<RemoveInput>({
       function: 'remove',
       value: {
         key,

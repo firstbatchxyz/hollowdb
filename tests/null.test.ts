@@ -3,7 +3,7 @@ import {Prover} from 'hollowdb-prover';
 import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
-import {Admin} from '../src/hollowdb';
+import {SDK} from '../src/hollowdb';
 import initialState from '../src/contracts/states/hollowdb';
 
 // adding `null` to type for testing purposes
@@ -14,7 +14,7 @@ describe('null value tests with proofs', () => {
   const warpHook = setupWarp();
   const protocol = 'groth16';
   let prover: Prover;
-  let owner: Admin<ValueType>;
+  let owner: SDK<ValueType>;
 
   const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues<ValueType>();
 
@@ -29,16 +29,16 @@ describe('null value tests with proofs', () => {
       protocol
     );
 
-    owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
+    owner = new SDK(ownerWallet.jwk, contractTxId, hook.warp);
   });
 
   it('should set verification key', async () => {
     const verificationKey = JSON.parse(
       fs.readFileSync(constants.PROVERS[protocol].HOLLOWDB.VERIFICATIONKEY_PATH, 'utf8')
     );
-    await owner.updateVerificationKey('auth', verificationKey);
-    const {cachedValue} = await owner.readState();
-    expect(cachedValue.state.verificationKeys.auth).toEqual(verificationKey);
+    await owner.admin.updateVerificationKey('auth', verificationKey);
+    const state = await owner.getState();
+    expect(state.verificationKeys.auth).toEqual(verificationKey);
   });
 
   it('should NOT allow putting a null value', async () => {

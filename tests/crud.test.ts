@@ -30,11 +30,11 @@ describe('crud operations', () => {
     });
 
     it('should deploy with correct state', async () => {
-      const {cachedValue} = await user.readState();
-      expect(cachedValue.state.verificationKeys.auth).toEqual(null);
-      expect(cachedValue.state.isProofRequired.auth).toEqual(false);
-      expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
-      expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
+      const state = await user.getState();
+      expect(state.verificationKeys.auth).toEqual(null);
+      expect(state.isProofRequired.auth).toEqual(false);
+      expect(state.isWhitelistRequired.put).toEqual(false);
+      expect(state.isWhitelistRequired.update).toEqual(false);
     });
 
     describe('put & get', () => {

@@ -3,7 +3,7 @@ import {Prover} from 'hollowdb-prover';
 import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
-import {Admin, SDK} from '../src/hollowdb';
+import {SDK} from '../src/hollowdb';
 import initialState from '../src/contracts/states/hollowdb';
 
 type ValueType = {val: string};
@@ -11,7 +11,7 @@ describe('proofs mode', () => {
   describe.each(['groth16', 'plonk'] as const)('protocol: %s', protocol => {
     const warpHook = setupWarp();
     let prover: Prover;
-    let owner: Admin<ValueType>;
+    let owner: SDK<ValueType>;
     let alice: SDK<ValueType>;
 
     const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues<ValueType>();
@@ -27,25 +27,25 @@ describe('proofs mode', () => {
         protocol
       );
 
-      owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
+      owner = new SDK(ownerWallet.jwk, contractTxId, hook.warp);
       alice = new SDK(aliceWallet.jwk, contractTxId, hook.warp);
     });
 
     it('should deploy with correct state', async () => {
-      const {cachedValue} = await owner.readState();
-      expect(cachedValue.state.verificationKeys.auth).toEqual(null);
-      expect(cachedValue.state.isProofRequired.auth).toEqual(true);
-      expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
-      expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
+      const state = await owner.getState();
+      expect(state.verificationKeys.auth).toEqual(null);
+      expect(state.isProofRequired.auth).toEqual(true);
+      expect(state.isWhitelistRequired.put).toEqual(false);
+      expect(state.isWhitelistRequired.update).toEqual(false);
     });
 
     it('should set verification key', async () => {
       const verificationKey = JSON.parse(
         fs.readFileSync(constants.PROVERS[protocol].HOLLOWDB.VERIFICATIONKEY_PATH, 'utf8')
       );
-      await owner.updateVerificationKey('auth', verificationKey);
-      const {cachedValue} = await owner.readState();
-      expect(cachedValue.state.verificationKeys.auth).toEqual(verificationKey);
+      await owner.admin.updateVerificationKey('auth', verificationKey);
+      const state = await owner.getState();
+      expect(state.verificationKeys.auth).toEqual(verificationKey);
     });
 
     it('should allow putting without a proof', async () => {
@@ -107,13 +107,13 @@ describe('proofs mode', () => {
       const KEY = 'some-non-bigint-friendly-key';
 
       beforeAll(async () => {
-        const {cachedValue} = await owner.readState();
-        expect(cachedValue.state.isProofRequired.auth).toEqual(true);
+        const state = await owner.getState();
+        expect(state.isProofRequired.auth).toEqual(true);
 
-        await owner.updateProofRequirement('auth', false);
+        await owner.admin.updateProofRequirement('auth', false);
 
-        const {cachedValue: newCachedValue} = await owner.readState();
-        expect(newCachedValue.state.isProofRequired.auth).toEqual(false);
+        const newState = await owner.getState();
+        expect(newState.isProofRequired.auth).toEqual(false);
       });
 
       it('should put a value to a key & read it', async () => {
