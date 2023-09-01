@@ -76,13 +76,13 @@ describe('hash.txid value tests', () => {
     const {VALUE, NEXT_VALUE, KEY} = createValues<ValueType>();
 
     beforeAll(async () => {
-      const {cachedValue} = await owner.readState();
-      expect(cachedValue.state.isProofRequired.auth).toEqual(true);
+      const state = await owner.getState();
+      expect(state.isProofRequired.auth).toEqual(true);
 
-      await owner.updateProofRequirement('auth', false);
+      await owner.admin.updateProofRequirement('auth', false);
 
-      const {cachedValue: newCachedValue} = await owner.readState();
-      expect(newCachedValue.state.isProofRequired.auth).toEqual(false);
+      const newState = await owner.getState();
+      expect(newState.isProofRequired.auth).toEqual(false);
     });
 
     it('should put a value to a key & read it', async () => {

@@ -3,6 +3,7 @@ import {SDK} from '../src/hollowdb';
 import {setupWarp} from './hooks';
 import {deployContract} from './utils';
 import initialState from '../src/contracts/states/hollowdb';
+import {evolve} from '../src/tools';
 
 describe('evolve contract', () => {
   const warpHook = setupWarp();
@@ -19,12 +20,11 @@ describe('evolve contract', () => {
   });
 
   it('should evolve contract', async () => {
-    const {contractTxId: newContractTxId, srcTxId: newSrcTxId} = await SDK.admin.evolve(
+    const {contractTxId: newContractTxId, srcTxId: newSrcTxId} = await evolve(
       owner,
-      dummyContractSource,
-      contractTxId,
       warp,
-      true
+      contractTxId,
+      dummyContractSource
     );
 
     const sdk = new SDK(owner, newContractTxId, warp);

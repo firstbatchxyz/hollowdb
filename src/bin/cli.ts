@@ -8,6 +8,7 @@ import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import {ContractState} from '../contracts/types';
 
 yargs(hideBin(process.argv))
+  .scriptName('hollowdb-contracts')
   .option('walletPath', {
     alias: 'w',
     describe: 'Path to Arweave wallet',
@@ -27,6 +28,12 @@ yargs(hideBin(process.argv))
   })
   .string('codePath')
 
+  .option('initialStatePath', {
+    alias: 'init',
+    describe: 'Path to initial state',
+  })
+  .string('initialStatePath')
+
   .option('contractTxId', {
     alias: 'ctx',
     describe: 'Contract transaction id',
@@ -39,13 +46,6 @@ yargs(hideBin(process.argv))
   })
   .string('sourceTxId')
 
-  .option('initialStatePath', {
-    alias: 'init',
-    describe: 'Path to the contract initial state JSON',
-  })
-  .string('initialStatePath')
-
-  /////////// EVOLVE CONTTRACT ///////////
   .command(
     'evolve',
     'Evolve an existing contract',
@@ -73,7 +73,6 @@ yargs(hideBin(process.argv))
     }
   )
 
-  /////////// DEPLOY CONTTRACT ///////////
   .command(
     'deploy',
     'Deploy a new contract',

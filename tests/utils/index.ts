@@ -1,7 +1,7 @@
 import {randomBytes} from 'crypto';
 import {Warp, JWKInterface} from 'warp-contracts';
 import {readFileSync} from 'fs';
-import {SDK} from '../../src/hollowdb';
+import {deploy} from '../../src/tools';
 import {computeKey} from 'hollowdb-prover';
 import {ContractState} from '../../src/contracts/types';
 
@@ -51,9 +51,9 @@ export async function deployContract(
   signer: JWKInterface,
   initialState: ContractState,
   contractName = 'hollowdb'
-) {
-  const contractSource = readFileSync(`./build/${contractName}.js`, 'utf8');
-  const contractTxId = await SDK.deploy(signer, initialState, contractSource, warp).then(result => result.contractTxId);
+): Promise<string> {
+  const contractSource = readFileSync(`./build/${contractName}.contract.js`, 'utf8');
+  const contractTxId = await deploy(signer, warp, initialState, contractSource).then(result => result.contractTxId);
 
   const contractTx = await warp.arweave.transactions.get(contractTxId);
   expect(contractTx).not.toBeNull();
