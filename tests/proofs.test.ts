@@ -4,7 +4,7 @@ import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
-import initialState from '../src/contracts/states/hollowdb';
+import {hollowdb as initialState} from '../src/contracts/states/';
 
 type ValueType = {val: string};
 describe('proofs mode', () => {

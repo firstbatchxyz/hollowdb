@@ -1,7 +1,7 @@
 import {deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
-import initialState from '../src/contracts/states/hollowdb';
+import {hollowdb as initialState} from '../src/contracts/states/';
 
 describe('multiple contracts', () => {
   const REQ_COUNT = 100;

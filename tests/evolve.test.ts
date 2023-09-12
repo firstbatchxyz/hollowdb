@@ -2,7 +2,7 @@ import {JWKInterface, Warp} from 'warp-contracts';
 import {SDK} from '../src/hollowdb';
 import {setupWarp} from './hooks';
 import {deployContract} from './utils';
-import initialState from '../src/contracts/states/hollowdb';
+import {hollowdb as initialState} from '../src/contracts/states/';
 import {evolve} from '../src/tools';
 
 describe('evolve contract', () => {

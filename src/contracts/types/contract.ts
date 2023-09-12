@@ -70,6 +70,7 @@ export type ContractAction<I extends ContractInputGeneric> = {
  * @template M a type where whitelists and circuit names are specified. If none, pass in empty array `[]` to each.
  */
 export type ContractState<M extends ContractMode = ContractMode> = {
+  version: string;
   canEvolve: boolean;
   evolve?: string;
   owner: string;

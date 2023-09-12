@@ -34,7 +34,7 @@ export class Base<M extends ContractMode> {
    * Note that if the contract has many transactions, fetching up to the latest
    * state may take some time.
    *
-   * @returns contract state
+   * @returns contract state along with corresponding sort key
    */
   async readState() {
     return await this.contract.readState();

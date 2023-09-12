@@ -6,70 +6,72 @@ import {hideBin} from 'yargs/helpers';
 import {deploy, deployFromSrc, evolve, evolveFromSrc} from '../tools';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import {ContractState} from '../contracts/types';
+import {prepareState} from '../tools/deploy';
 
 yargs(hideBin(process.argv))
   .scriptName('hollowdb-contracts')
-  .option('walletPath', {
+  .option('wallet', {
     alias: 'w',
     describe: 'Path to Arweave wallet',
+    string: true,
+    demandOption: true,
   })
-  .string('walletPath')
-  .demandOption('walletPath')
   .check(yargs => {
-    if (!existsSync(yargs.walletPath)) {
+    if (!existsSync(yargs.wallet)) {
       throw new Error('A wallet does not exist at the given path.');
     }
     return true;
   })
 
-  .option('codePath', {
-    alias: 'code',
-    describe: 'Path to the JS contract code',
+  .option('name', {
+    alias: 'n',
+    describe: 'Name of the contract.',
+    string: true,
   })
-  .string('codePath')
-
-  .option('initialStatePath', {
-    alias: 'init',
-    describe: 'Path to initial state',
-  })
-  .string('initialStatePath')
-
-  .option('contractTxId', {
-    alias: 'ctx',
-    describe: 'Contract transaction id',
-  })
-  .string('contractTxId')
 
   .option('sourceTxId', {
-    alias: 'stx',
+    alias: 's',
     describe: 'Source transaction id',
+    string: true,
   })
-  .string('sourceTxId')
+  .option('target', {
+    alias: 't',
+    describe: 'Target network',
+    default: 'mainnet',
+    choices: ['mainnet', 'testnet', 'local'],
+  })
 
   .command(
     'evolve',
     'Evolve an existing contract',
     yargs => {
-      yargs.demandOption('contractTxId');
-      yargs.check(yargs => {
-        if (!yargs.sourceCode && !yargs.sourceTxId) {
-          throw new Error('Please specify a contract source code path or a source transaction id.');
-        } else if (yargs.sourceCode && !existsSync(yargs.codePath)) {
-          throw new Error('No source code found at the given path.');
-        }
-        return true;
+      yargs.option('contractTxId', {
+        alias: 'c',
+        describe: 'Contract transaction id',
+        string: true,
+        demandOption: true,
       });
     },
     async args => {
-      const warp = WarpFactory.forMainnet().use(new DeployPlugin());
-      const wallet = JSON.parse(readFileSync(args.walletPath, 'utf-8')) as JWKInterface;
+      // prepare warp
+      const warp =
+        args.target === 'mainnet'
+          ? WarpFactory.forMainnet().use(new DeployPlugin())
+          : WarpFactory.forTestnet().use(new DeployPlugin());
 
-      if (args.codePath) {
-        const code = readFileSync(args.codePath, 'utf-8');
-        evolve(wallet, warp, args.contractTxId, code);
+      // read wallet
+      const wallet = JSON.parse(readFileSync(args.wallet, 'utf-8')) as JWKInterface;
+
+      let result;
+      if (args.sourceTxId) {
+        result = await evolveFromSrc(wallet, warp, args.contractTxId as string, args.sourceTxId);
+        console.log(`Contract ${args.contractTxId} evolved from source ${args.sourceTxId}.`);
       } else {
-        evolveFromSrc(wallet, warp, args.contractTxId, args.sourceTxId);
+        const code = readFileSync('./src/contracts/build/' + args.name + '.contract.js', 'utf-8');
+        result = await evolve(wallet, warp, args.contractTxId as string, code);
+        console.log(`Contract ${args.contractTxId} evolved from local ${args.name} code.`);
       }
+      console.log(result);
     }
   )
 
@@ -77,33 +79,36 @@ yargs(hideBin(process.argv))
     'deploy',
     'Deploy a new contract',
     yargs => {
-      yargs.demandOption('initialStatePath');
-      yargs.check(yargs => {
-        if (!existsSync(yargs.initialStatePath)) {
-          throw new Error('An initial state does not exist at the given path.');
-        }
-        return true;
-      });
-      yargs.check(yargs => {
-        if (!yargs.sourceCode && !yargs.sourceTxId) {
-          throw new Error('Please specify a contract source code path or a source transaction id.');
-        } else if (yargs.sourceCode && !existsSync(yargs.codePath)) {
-          throw new Error('No source code found at the given path.');
-        }
-        return true;
-      });
+      yargs.demandOption('name');
+      yargs.demandOption('target');
     },
     async args => {
-      const warp = WarpFactory.forMainnet().use(new DeployPlugin());
-      const wallet = JSON.parse(readFileSync(args.walletPath, 'utf-8')) as JWKInterface;
-      const initialState = JSON.parse(readFileSync(args.initialStatePath, 'utf-8')) as ContractState;
+      // prepare warp
+      const warp =
+        args.target === 'mainnet'
+          ? WarpFactory.forMainnet().use(new DeployPlugin())
+          : WarpFactory.forTestnet().use(new DeployPlugin());
 
-      if (args.codePath) {
-        const code = readFileSync(args.codePath, 'utf-8');
-        deploy(wallet, warp, initialState, code);
+      // read wallet
+      const wallet = JSON.parse(readFileSync(args.wallet, 'utf-8')) as JWKInterface;
+
+      // prepare initial state
+      const initialState = JSON.parse(
+        readFileSync('./src/contracts/states/' + args.name + '.json', 'utf-8')
+      ) as ContractState;
+      const preparedState = await prepareState(wallet, initialState, warp);
+
+      // deploy
+      let result;
+      if (args.sourceTxId) {
+        result = await deployFromSrc(wallet, warp, preparedState, args.sourceTxId);
+        console.log(`${args.name} contract deployed.`);
       } else {
-        deployFromSrc(wallet, warp, initialState, args.sourceTxId);
+        const code = readFileSync('./src/contracts/build/' + args.name + '.contract.js', 'utf-8');
+        result = await deploy(wallet, warp, preparedState, code);
+        console.log(`${args.name} contract deployed from source ${args.sourceTxId}.`);
       }
+      console.log(result);
     }
   )
 

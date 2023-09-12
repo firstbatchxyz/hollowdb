@@ -5,7 +5,7 @@ import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
 import {MockBundlr} from './mock/bundlr';
-import initialState from '../src/contracts/states/hollowdb-htx';
+import {hollowdbHtx as initialState} from '../src/contracts/states/';
 
 type ValueType = {val: string};
 type HTXValueType = `${string}.${string}`;

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.svg" alt="logo" width="142">
+  <img src="https://raw.githubusercontent.com/firstbatchxyz/hollowdb/master/logo.svg" alt="logo" width="142">
 </p>
 
 <p align="center">

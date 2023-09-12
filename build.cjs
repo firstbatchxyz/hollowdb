@@ -3,7 +3,7 @@ const replace = require('replace-in-file');
 const {readdirSync} = require('fs');
 
 const outBase = './src/contracts';
-const outDir = './build';
+const outDir = outBase + '/build';
 
 // read contracts from the folder
 const contracts = readdirSync(outBase).filter(file => file.endsWith('.contract.ts'));

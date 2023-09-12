@@ -52,7 +52,7 @@ export async function deployContract(
   initialState: ContractState,
   contractName = 'hollowdb'
 ): Promise<string> {
-  const contractSource = readFileSync(`./build/${contractName}.contract.js`, 'utf8');
+  const contractSource = readFileSync(`./src/contracts/build/${contractName}.contract.js`, 'utf8');
   const contractTxId = await deploy(signer, warp, initialState, contractSource).then(result => result.contractTxId);
 
   const contractTx = await warp.arweave.transactions.get(contractTxId);
