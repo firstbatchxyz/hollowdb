@@ -1,9 +1,7 @@
 import {JWKInterface, Warp} from 'warp-contracts';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
-/**
- * Evolve an existing contract with a new source code.
- */
+/** Evolve an existing contract with a new source code. */
 export async function evolve(
   owner: JWKInterface,
   warp: Warp,
@@ -19,9 +17,7 @@ export async function evolve(
   return evolveFromSrc(owner, warp, contractTxId, newSrcTxId);
 }
 
-/**
- * Evolve an existing contract with a source code of an existing contract.
- */
+/** Evolve an existing contract with a source code of an existing contract. */
 export async function evolveFromSrc(
   owner: JWKInterface,
   warp: Warp,

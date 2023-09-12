@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-import {existsSync, readFileSync} from 'fs';
-import {JWKInterface, WarpFactory} from 'warp-contracts';
+import {copyFileSync, existsSync, readFileSync} from 'fs';
 import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
 import {deploy, deployFromSrc, evolve, evolveFromSrc} from '../tools';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-import {ContractState} from '../contracts/types';
-import {prepareState} from '../tools/deploy';
+import {getPath, prepareCode, prepareState, prepareWallet, prepareWrap} from './utils';
+
+const BASE_CONTRACT_NAME = 'hollowdb';
 
 yargs(hideBin(process.argv))
   .scriptName('hollowdb-contracts')
@@ -14,13 +13,6 @@ yargs(hideBin(process.argv))
     alias: 'w',
     describe: 'Path to Arweave wallet',
     string: true,
-    demandOption: true,
-  })
-  .check(yargs => {
-    if (!existsSync(yargs.wallet)) {
-      throw new Error('A wallet does not exist at the given path.');
-    }
-    return true;
   })
 
   .option('name', {
@@ -28,7 +20,6 @@ yargs(hideBin(process.argv))
     describe: 'Name of the contract.',
     string: true,
   })
-
   .option('sourceTxId', {
     alias: 's',
     describe: 'Source transaction id',
@@ -37,38 +28,32 @@ yargs(hideBin(process.argv))
   .option('target', {
     alias: 't',
     describe: 'Target network',
-    default: 'mainnet',
-    choices: ['mainnet', 'testnet', 'local'],
+    default: 'main',
+    choices: ['main', 'test'],
   })
 
   .command(
     'evolve',
     'Evolve an existing contract',
-    yargs => {
-      yargs.option('contractTxId', {
+    yargs =>
+      yargs.demandOption('wallet').option('contractTxId', {
         alias: 'c',
         describe: 'Contract transaction id',
         string: true,
         demandOption: true,
-      });
-    },
+      }),
     async args => {
-      // prepare warp
-      const warp =
-        args.target === 'mainnet'
-          ? WarpFactory.forMainnet().use(new DeployPlugin())
-          : WarpFactory.forTestnet().use(new DeployPlugin());
-
-      // read wallet
-      const wallet = JSON.parse(readFileSync(args.wallet, 'utf-8')) as JWKInterface;
+      const warp = prepareWrap(args.target);
+      const wallet = prepareWallet(args.wallet);
 
       let result;
       if (args.sourceTxId) {
-        result = await evolveFromSrc(wallet, warp, args.contractTxId as string, args.sourceTxId);
+        result = await evolveFromSrc(wallet, warp, args.contractTxId, args.sourceTxId);
         console.log(`Contract ${args.contractTxId} evolved from source ${args.sourceTxId}.`);
       } else {
-        const code = readFileSync('./src/contracts/build/' + args.name + '.contract.js', 'utf-8');
-        result = await evolve(wallet, warp, args.contractTxId as string, code);
+        // TODO: check if name is valid
+        const code = prepareCode(args.name!);
+        result = await evolve(wallet, warp, args.contractTxId, code);
         console.log(`Contract ${args.contractTxId} evolved from local ${args.name} code.`);
       }
       console.log(result);
@@ -78,37 +63,37 @@ yargs(hideBin(process.argv))
   .command(
     'deploy',
     'Deploy a new contract',
-    yargs => {
-      yargs.demandOption('name');
-      yargs.demandOption('target');
-    },
+    yargs => yargs.demandOption('name').demandOption('target').demandOption('wallet'),
     async args => {
-      // prepare warp
-      const warp =
-        args.target === 'mainnet'
-          ? WarpFactory.forMainnet().use(new DeployPlugin())
-          : WarpFactory.forTestnet().use(new DeployPlugin());
+      const warp = prepareWrap(args.target);
+      const wallet = prepareWallet(args.wallet);
+      const state = await prepareState(wallet, args.name, warp);
 
-      // read wallet
-      const wallet = JSON.parse(readFileSync(args.wallet, 'utf-8')) as JWKInterface;
-
-      // prepare initial state
-      const initialState = JSON.parse(
-        readFileSync('./src/contracts/states/' + args.name + '.json', 'utf-8')
-      ) as ContractState;
-      const preparedState = await prepareState(wallet, initialState, warp);
-
-      // deploy
       let result;
       if (args.sourceTxId) {
-        result = await deployFromSrc(wallet, warp, preparedState, args.sourceTxId);
+        result = await deployFromSrc(wallet, warp, state, args.sourceTxId);
         console.log(`${args.name} contract deployed.`);
       } else {
-        const code = readFileSync('./src/contracts/build/' + args.name + '.contract.js', 'utf-8');
-        result = await deploy(wallet, warp, preparedState, code);
+        const code = prepareCode(args.name);
+        result = await deploy(wallet, warp, state, code);
         console.log(`${args.name} contract deployed from source ${args.sourceTxId}.`);
       }
       console.log(result);
+    }
+  )
+
+  .command(
+    'new',
+    'Setup a new custom contract.',
+    yargs => yargs.demandOption('name').check(args => args.name !== BASE_CONTRACT_NAME),
+    async args => {
+      const baseContractPath = getPath(BASE_CONTRACT_NAME, 'contract');
+      const newContractPath = getPath(args.name, 'contract');
+      copyFileSync(baseContractPath, newContractPath);
+
+      const baseStatePath = getPath(BASE_CONTRACT_NAME, 'state');
+      const newStatePath = getPath(args.name, 'state');
+      copyFileSync(baseStatePath, newStatePath);
     }
   )
 
