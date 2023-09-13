@@ -9,8 +9,10 @@ export function getPath(name: string, type: 'state' | 'source' | 'contract'): st
     return './src/contracts/' + name + '.contract.ts';
   } else if (type === 'source') {
     return './src/contracts/build/' + name + '.contract.js';
+  } else if (type === 'state') {
+    return './src/contracts/states/' + name + '.state.json';
   } else {
-    return './src/contracts/states/' + name + '.state.ts';
+    throw new Error('Unknown path type: ' + type);
   }
 }
 
@@ -33,5 +35,5 @@ export async function prepareState(wallet: JWKInterface, name: string, warp: War
 }
 
 export function prepareCode(name: string): string {
-  return JSON.parse(readFileSync(getPath(name, 'source'), 'utf-8'));
+  return readFileSync(getPath(name, 'source'), 'utf-8');
 }
