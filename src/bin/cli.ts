@@ -1,14 +1,18 @@
 #!/usr/bin/env node
-import {copyFileSync, existsSync, readFileSync} from 'fs';
+import {copyFileSync, existsSync, readFileSync, writeFileSync} from 'fs';
 import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
-import {deploy, deployFromSrc, evolve, evolveFromSrc} from '../tools';
-import {getPath, prepareCode, prepareState, prepareWallet, prepareWrap} from './utils';
 
+import {deploy, deployFromSrc} from './deploy';
+import {evolve, evolveFromSrc} from './evolve';
+import {getPath, prepareCode, prepareState, prepareWallet, prepareWarp} from './utils';
+import {build} from './build';
+
+// Contract creation script will use existing hollowdb contract & state
 const BASE_CONTRACT_NAME = 'hollowdb';
 
 yargs(hideBin(process.argv))
-  .scriptName('hollowdb-contracts')
+  .scriptName('yarn contract')
   .option('wallet', {
     alias: 'w',
     describe: 'Path to Arweave wallet',
@@ -43,7 +47,7 @@ yargs(hideBin(process.argv))
         demandOption: true,
       }),
     async args => {
-      const warp = prepareWrap(args.target);
+      const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
 
       let result;
@@ -65,7 +69,7 @@ yargs(hideBin(process.argv))
     'Deploy a new contract',
     yargs => yargs.demandOption('name').demandOption('target').demandOption('wallet'),
     async args => {
-      const warp = prepareWrap(args.target);
+      const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
       const state = await prepareState(wallet, args.name, warp);
 
@@ -83,17 +87,28 @@ yargs(hideBin(process.argv))
   )
 
   .command(
-    'new',
-    'Setup a new custom contract.',
+    'create',
+    'Create your own custom contract.',
     yargs => yargs.demandOption('name').check(args => args.name !== BASE_CONTRACT_NAME),
     async args => {
+      // copy contract code
       const baseContractPath = getPath(BASE_CONTRACT_NAME, 'contract');
       const newContractPath = getPath(args.name, 'contract');
       copyFileSync(baseContractPath, newContractPath);
 
-      const baseStatePath = getPath(BASE_CONTRACT_NAME, 'state');
-      const newStatePath = getPath(args.name, 'state');
-      copyFileSync(baseStatePath, newStatePath);
+      // copy state with contract name updated
+      const baseState = readFileSync(getPath(BASE_CONTRACT_NAME, 'state'), 'utf-8');
+      const newState = baseState.replace('hollowdb', args.name);
+      writeFileSync(getPath(args.name, 'state'), newState);
+    }
+  )
+
+  .command(
+    'build',
+    'Build a contract.',
+    yargs => yargs,
+    async args => {
+      build(args.name);
     }
   )
 

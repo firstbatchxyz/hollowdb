@@ -1,7 +1,7 @@
 import {readFileSync} from 'fs';
 import {JWKInterface, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-import {prepareState as prepareStateWithWarp} from '../tools/deploy';
+import {prepareState as prepareStateWithWarp} from './deploy';
 import {ContractState} from '../contracts/types';
 
 export function getPath(name: string, type: 'state' | 'source' | 'contract'): string {
@@ -10,11 +10,11 @@ export function getPath(name: string, type: 'state' | 'source' | 'contract'): st
   } else if (type === 'source') {
     return './src/contracts/build/' + name + '.contract.js';
   } else {
-    return './src/contracts/states/' + name + '.json';
+    return './src/contracts/states/' + name + '.state.ts';
   }
 }
 
-export function prepareWrap(target: string): Warp {
+export function prepareWarp(target: string): Warp {
   const warp =
     target === 'main'
       ? WarpFactory.forMainnet().use(new DeployPlugin())

@@ -1,4 +1,4 @@
-name: style
+name: build
 
 # run when `dev` has a push or PR
 # or when `master` has a push

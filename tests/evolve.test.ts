@@ -3,7 +3,7 @@ import {SDK} from '../src/hollowdb';
 import {setupWarp} from './hooks';
 import {deployContract} from './utils';
 import {hollowdb as initialState} from '../src/contracts/states/';
-import {evolve} from '../src/tools';
+import {evolve} from '../src/bin/evolve';
 
 describe('evolve contract', () => {
   const warpHook = setupWarp();

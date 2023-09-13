@@ -1,7 +1,7 @@
 import {randomBytes} from 'crypto';
 import {Warp, JWKInterface} from 'warp-contracts';
 import {readFileSync} from 'fs';
-import {deploy} from '../../src/tools';
+import {deploy} from '../../src/bin/deploy';
 import {computeKey} from 'hollowdb-prover';
 import {ContractState} from '../../src/contracts/types';
 

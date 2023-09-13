@@ -15,12 +15,10 @@ Within this directory:
 
 A SmartWeave contract for Warp Contracts is basically a single JS file that exports a `handle` function. We write our contracts in TypeScript and then use [esbuild](https://esbuild.github.io/) to obtain the contract source code. The base HollowDB contract provides the necessary functions of a CRUD database, along with several admin operations such as changing the owner.
 
-To begin writing your own contract, duplicate `hollowdb.contract.ts` in this directory and change the name to `<your-contract-name>.contract.ts`.
+````sh
+yarn cli c```
 
-There are two ways you can write your own contract:
-
-- Change existing functions
-- Add new functions
+Within your newly created contract, you can modify the existing functions or add your own.
 
 ### Contract Functions
 
@@ -35,7 +33,7 @@ case 'functionName': {
   return {state};  // for write interactions; or,
   return {result}; // for read interactions
 }
-```
+````
 
 For example:
 
@@ -117,19 +115,18 @@ When `esbuild` builds the contract, it will put all necessary files within the b
 
 To avoid this issue, simply try to be 0-dependency, or use [Warp Plugins](https://academy.warp.cc/docs/sdk/advanced/plugins/overview) if convenient.
 
-## Extending SDK
+## Extending the SDK
 
 If you've added new contract functions, and would like to be able to call them using the HollowDB SDK, you have to extend the SDK with your custom functions.
 
-HollowDB provides `BaseSDK` and `BaseAdmin` which implement all core functionalities without type-safety. To make them type-safe, we provide the template parameters. As an example, here is the actual HollowDB SDK and Admin classes:
+HollowDB provides a `BaseSDK` which implement all core functionalities. To make them type-safe, we provide the template parameters. As an example, here is the actual HollowDB SDK class:
 
 ```ts
-import {SDK as BaseSDK, Admin as BaseAdmin} from './base';
+import {SDK as BaseSDK} from './base';
 
 type Mode = {proofs: ['auth']; whitelists: ['put', 'update']};
 
 export class SDK<V = unknown> extends BaseSDK<V, Mode> {}
-export class Admin<V = unknown> extends BaseAdmin<V, Mode> {}
 ```
 
 By providing the `Mode` type, we get type-safety for our whitelist names and circuit names; and, we provide the option to define a type for the values `V` to be stored in the database.
@@ -146,18 +143,18 @@ type FooInput = {
 We can handle this function as we extend the `BaseSDK`:
 
 ```ts
-import {SDK as BaseSDK, Admin as BaseAdmin} from './base';
+import {SDK as BaseSDK} from './base';
 
-type Mode = /* your contract mode, if you have any */;
+type Mode = {
+  /* your contract mode, if you have any */
+};
 
 export class FooSDK<V = unknown> extends BaseSDK<V, Mode> {
   async foo(value: number) {
-    return this.dryWriteInteraction<FooInput>({
+    return this.base.dryWriteInteraction<FooInput>({
       function: 'foo',
       value,
     });
   }
 }
 ```
-
-TODO: how to handle SDK and Admin together?
