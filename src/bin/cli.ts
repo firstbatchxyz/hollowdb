@@ -13,21 +13,17 @@ const BASE_CONTRACT_NAME = 'hollowdb';
 
 yargs(hideBin(process.argv))
   .scriptName('yarn contract')
+  // .example('$0 build -n my-contract', 'Build your contract')
+  // .example('$0 deploy -n my-contract -w ./my/wallet.json', 'Deploy to mainnet')
+  // .example('$0 evolve -n new-contract -c txId -w ./my/wallet.json', 'Evolve an existing contract with new source')
+
   .option('wallet', {
     alias: 'w',
     describe: 'Path to Arweave wallet',
-    string: true,
   })
-
   .option('name', {
     alias: 'n',
     describe: 'Name of the contract.',
-    string: true,
-  })
-  .option('sourceTxId', {
-    alias: 's',
-    describe: 'Source transaction id',
-    string: true,
   })
   .option('target', {
     alias: 't',
@@ -35,17 +31,20 @@ yargs(hideBin(process.argv))
     default: 'main',
     choices: ['main', 'test'],
   })
+  .option('sourceTxId', {
+    alias: 's',
+    describe: 'Source transaction id',
+  })
+  .option('contractTxId', {
+    alias: 'c',
+    describe: 'Contract transaction id',
+  })
+  .string(['wallet', 'name', 'target', 'sourceTxId', 'contractTxId'])
 
   .command(
     'evolve',
     'Evolve an existing contract',
-    yargs =>
-      yargs.demandOption('wallet').option('contractTxId', {
-        alias: 'c',
-        describe: 'Contract transaction id',
-        string: true,
-        demandOption: true,
-      }),
+    yargs => yargs.demandOption(['wallet', 'contractTxId']),
     async args => {
       const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
@@ -54,11 +53,12 @@ yargs(hideBin(process.argv))
       if (args.sourceTxId) {
         result = await evolveFromSrc(wallet, warp, args.contractTxId, args.sourceTxId);
         console.log(`Contract ${args.contractTxId} evolved from source ${args.sourceTxId}.`);
-      } else {
-        // TODO: check if name is valid
-        const code = prepareCode(args.name!);
+      } else if (args.name) {
+        const code = prepareCode(args.name);
         result = await evolve(wallet, warp, args.contractTxId, code);
         console.log(`Contract ${args.contractTxId} evolved from local ${args.name} code.`);
+      } else {
+        throw new Error('You must provide a contract name or source txId.');
       }
       console.log(result);
     }
@@ -67,7 +67,7 @@ yargs(hideBin(process.argv))
   .command(
     'deploy',
     'Deploy a new contract',
-    yargs => yargs.demandOption('name').demandOption('target').demandOption('wallet'),
+    yargs => yargs.demandOption(['name', 'target', 'wallet']),
     async args => {
       const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
