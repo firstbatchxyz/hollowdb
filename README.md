@@ -45,9 +45,7 @@ pnpm add hollowdb     # pnpm
 Depending on your use-cases, we have several optional dependencies:
 
 - You can use [hollowdb-prover](https://www.npmjs.com/package/hollowdb-prover) as a simple utility that generates zero-knowledge proofs that are verifiable by HollowDB.
-
 - You can use LMDB cache within your Warp instance via [warp-contracts-lmdb](https://www.npmjs.com/package/warp-contracts-lmdb).
-
 - You can use Redis cache within your warp instance via [warp-contracts-redis](https://www.npmjs.com/package/warp-contracts-redis) together with [ioredis](https://www.npmjs.com/package/ioredis).
 
 ## Usage
@@ -63,15 +61,6 @@ yarn test
 ```
 
 Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
-
-The tests are as follows:
-
-- `evolve` tests for evolve functionality.
-- `whitelists` tests for Whitelist functionality, both enabled and disabled.
-- `proofs` tests for Proofs functionality, both enabled and disabled.
-- `crud` tests for basic CRUD functionality, such as checking for existing keys, not removing an already removed key and such.
-- `htx` tests use a custom contract where assume Bundlr usage and instead of values themselves, we store `valueHash.txid` as values.
-- `multi` tests using a single Warp instance with multiple contracts, and multiple HollowDB instances.
 
 ## Styling
 

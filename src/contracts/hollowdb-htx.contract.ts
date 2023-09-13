@@ -1,6 +1,7 @@
-import {CantEvolveError, InvalidFunctionError, KeyExistsError} from './errors';
-import {apply, onlyOwner, onlyWhitelisted, onlyProofVerifiedHTX, onlyNonNullValue} from './modifiers';
-import type {ContractHandle} from './types';
+import {CantEvolveError, ExpectedProofError, InvalidFunctionError, InvalidProofError, KeyExistsError} from './errors';
+import {apply, onlyOwner, onlyWhitelisted, onlyNonNullValue} from './modifiers';
+import {verifyProof} from './utils';
+import type {ContractHandle, ContractState} from './types';
 
 type Mode = {proofs: ['auth']; whitelists: ['put', 'update']};
 type Value = `${string}.${string}`;
@@ -101,3 +102,41 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
       throw InvalidFunctionError;
   }
 };
+
+/**
+ * A modifier specific to HTX contract, where values are in form `hash.txid` and txId represents
+ * a Bundlr upload transaction id.
+ */
+export function onlyProofVerifiedHTX(circuit: string) {
+  return async <I extends {key: string; value?: `${string}.${string}`; proof?: object}, S extends ContractState>(
+    _: string,
+    input: I,
+    state: S
+  ) => {
+    // must have proofs enabled for this circuit
+    if (!state.isProofRequired[circuit]) {
+      return input;
+    }
+    // must have a proof object
+    if (!input.proof) {
+      throw ExpectedProofError;
+    }
+
+    // get old value to provide the public signal for proof verification
+    const oldValue = (await SmartWeave.kv.get(input.key)) as `${string}.${string}`;
+    const [oldHash] = oldValue.split('.');
+    const [newHash] = input.value ? input.value.split('.') : [0];
+
+    // verify proof
+    const ok = await verifyProof(
+      input.proof,
+      [BigInt(oldHash), BigInt(newHash), BigInt(input.key)],
+      state.verificationKeys[circuit]
+    );
+    if (!ok) {
+      throw InvalidProofError;
+    }
+
+    return input;
+  };
+}

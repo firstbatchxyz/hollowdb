@@ -34,11 +34,17 @@ Options:
   -c, --contractTxId  Contract transaction id                           [string]
 ```
 
-## Deploying & Evolving a Contract
+## Building & Deploying & Evolving a Contract
 
-As shown in the help message above, deploying a contract or evolving one is quite simple.
+As shown in the help message above, building, deploying, or evolving a contract is quite simple.
 
 ```sh
+# build all contracts
+yarn contract build
+
+# build a specific contract
+yarn contract build -n contract-name
+
 # deploy to mainnet from a local source code
 yarn contract deploy -w ./secret/wallet.json -n contract-name
 
@@ -156,6 +162,10 @@ export const handle: ContractHandle<Value, Mode, FooInput | BarInput> = async (s
 Now you can add the respective cases without any type errors, and also type-inference will understand the type of your `input.value` based on which case you are handling!
 
 > When `esbuild` builds the contract, it will put all necessary files within the build file. If you are using an NPM package within your contract, the entire package will be written into the output! This will cause the contract to be unreadable with huge lines of code. To avoid this issue, simply try to be 0-dependency, or use [Warp Plugins](https://academy.warp.cc/docs/sdk/advanced/plugins/overview) if convenient.
+
+### Building your Contract
+
+When you are done writing the contract, you can build it
 
 ## Extending the SDK
 
