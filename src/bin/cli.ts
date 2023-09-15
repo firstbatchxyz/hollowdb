@@ -23,11 +23,11 @@ yargs(hideBin(process.argv))
   })
   .option('name', {
     alias: 'n',
-    describe: 'Name of the contract.',
+    describe: 'Name of the contract',
   })
   .option('init', {
     alias: 'i',
-    describe: 'A specific initial state.',
+    describe: 'A specific initial state',
   })
   .option('target', {
     alias: 't',
@@ -94,7 +94,7 @@ yargs(hideBin(process.argv))
 
   .command(
     'create',
-    'Create your own custom contract.',
+    'Create your own custom contract',
     yargs => yargs.demandOption('name').check(args => args.name !== BASE_CONTRACT_NAME),
     async args => {
       // copy contract code
@@ -111,7 +111,7 @@ yargs(hideBin(process.argv))
 
   .command(
     'build',
-    'Build a contract.',
+    'Build a contract',
     yargs => yargs,
     async args => {
       build(args.name);

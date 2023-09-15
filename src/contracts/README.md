@@ -18,16 +18,17 @@ Our command-line tool can be called via `yarn contract`. You will see the messag
 yarn contract <command>
 
 Commands:
-  yarn contract evolve  Evolve an existing contract
   yarn contract deploy  Deploy a new contract
-  yarn contract create  Create your own custom contract.
-  yarn contract build   Build a contract.
+  yarn contract evolve  Evolve an existing contract
+  yarn contract create  Create your own custom contract
+  yarn contract build   Build a contract
 
 Options:
       --help          Show help                                        [boolean]
       --version       Show version number                              [boolean]
   -w, --wallet        Path to Arweave wallet                            [string]
-  -n, --name          Name of the contract.                             [string]
+  -n, --name          Name of the contract                              [string]
+  -i, --init          A specific initial state                          [string]
   -t, --target        Target network
                             [string] [choices: "main", "test"] [default: "main"]
   -s, --sourceTxId    Source transaction id                             [string]
@@ -50,6 +51,9 @@ yarn contract deploy -w ./secret/wallet.json -n contract-name
 
 # deploy to mainnet from an existing contract source
 yarn contract deploy -w ./secret/wallet.json -s sourceTxId
+
+# deploy to testnet from a local source code with a specific state
+yarn contract deploy -w ./secret/wallet.json -n contract-name -t test -i ./path/to/state.json
 
 # evolve a contract on mainnet to a local source code
 yarn contract evolve -w ./secret/wallet.json -c contractTxId -n contract-name
