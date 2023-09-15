@@ -30,7 +30,11 @@ export function prepareWallet(path: string): JWKInterface {
 }
 
 export async function prepareState(wallet: JWKInterface, name: string, warp: Warp): Promise<ContractState> {
-  const initialState: ContractState = JSON.parse(readFileSync(getPath(name, 'state'), 'utf-8'));
+  return prepareStateAtPath(wallet, getPath(name, 'state'), warp);
+}
+
+export async function prepareStateAtPath(wallet: JWKInterface, path: string, warp: Warp): Promise<ContractState> {
+  const initialState: ContractState = JSON.parse(readFileSync(path, 'utf-8'));
   return await prepareStateWithWarp(wallet, initialState, warp);
 }
 

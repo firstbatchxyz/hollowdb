@@ -45,7 +45,7 @@
     "build": "parcel build",
     "clean": "rimraf ./lib",
     "check": "tsc --noEmit",
-    "contract": "node --loader ts-node/esm ./src/bin/cli.ts",
+    "contract": "node --no-warnings --loader ts-node/esm ./src/bin/cli.ts",
     "compile": "rimraf ./dist && npx tsc",
     "test": "jest",
     "pretest": "yarn contract build",

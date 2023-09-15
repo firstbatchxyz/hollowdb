@@ -5,7 +5,7 @@ import {hideBin} from 'yargs/helpers';
 
 import {deploy, deployFromSrc} from './deploy';
 import {evolve, evolveFromSrc} from './evolve';
-import {getPath, prepareCode, prepareState, prepareWallet, prepareWarp} from './utils';
+import {getPath, prepareCode, prepareState, prepareStateAtPath, prepareWallet, prepareWarp} from './utils';
 import {build} from './build';
 
 // Contract creation script will use existing hollowdb contract & state
@@ -25,6 +25,10 @@ yargs(hideBin(process.argv))
     alias: 'n',
     describe: 'Name of the contract.',
   })
+  .option('init', {
+    alias: 'i',
+    describe: 'A specific initial state.',
+  })
   .option('target', {
     alias: 't',
     describe: 'Target network',
@@ -39,7 +43,31 @@ yargs(hideBin(process.argv))
     alias: 'c',
     describe: 'Contract transaction id',
   })
-  .string(['wallet', 'name', 'target', 'sourceTxId', 'contractTxId'])
+  .string(['wallet', 'name', 'init', 'target', 'sourceTxId', 'contractTxId'])
+
+  .command(
+    'deploy',
+    'Deploy a new contract',
+    yargs => yargs.demandOption(['name', 'target', 'wallet']),
+    async args => {
+      const warp = prepareWarp(args.target);
+      const wallet = prepareWallet(args.wallet);
+      const state = args.init
+        ? await prepareStateAtPath(wallet, args.init, warp)
+        : await prepareState(wallet, args.name, warp);
+
+      let result;
+      if (args.sourceTxId) {
+        result = await deployFromSrc(wallet, warp, state, args.sourceTxId);
+        console.log(`${args.name} contract deployed.`);
+      } else {
+        const code = prepareCode(args.name);
+        result = await deploy(wallet, warp, state, code);
+        console.log(`${args.name} contract deployed from source ${args.sourceTxId}.`);
+      }
+      console.log(result);
+    }
+  )
 
   .command(
     'evolve',
@@ -59,28 +87,6 @@ yargs(hideBin(process.argv))
         console.log(`Contract ${args.contractTxId} evolved from local ${args.name} code.`);
       } else {
         throw new Error('You must provide a contract name or source txId.');
-      }
-      console.log(result);
-    }
-  )
-
-  .command(
-    'deploy',
-    'Deploy a new contract',
-    yargs => yargs.demandOption(['name', 'target', 'wallet']),
-    async args => {
-      const warp = prepareWarp(args.target);
-      const wallet = prepareWallet(args.wallet);
-      const state = await prepareState(wallet, args.name, warp);
-
-      let result;
-      if (args.sourceTxId) {
-        result = await deployFromSrc(wallet, warp, state, args.sourceTxId);
-        console.log(`${args.name} contract deployed.`);
-      } else {
-        const code = prepareCode(args.name);
-        result = await deploy(wallet, warp, state, code);
-        console.log(`${args.name} contract deployed from source ${args.sourceTxId}.`);
       }
       console.log(result);
     }
