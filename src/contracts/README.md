@@ -91,13 +91,12 @@ case 'functionName': {
 }
 ```
 
-For example:
+For example, here is `updateOwner` that updates the state of the contract, meaning that this is a "write interaction":
 
 ```ts
 case 'updateOwner': {
-  const {newOwner} = await apply(caller, input.value, state,
-    // ensures caller is owner
-    onlyOwner);
+  // `onlyOwner` modifier ensures caller is owner
+  const {newOwner} = await apply(caller, input.value, state, onlyOwner);
 
   // updates the owner
   state.owner = newOwner;
@@ -107,15 +106,27 @@ case 'updateOwner': {
 }
 ```
 
+Another simple example that returns a result, meaning that this is a "read interaction":
+
+```ts
+case 'get': {
+  const {key} = await apply(caller, input.value, state);
+
+  return {
+    result: await SmartWeave.kv.get(key)
+  };
+}
+```
+
 ### Modifiers
 
-The `apply` function is a utility that enables you to add modifiers to your function, just like Solidity modifiers. The first 3 arguments to `apply` must be the following:
+The `apply` function is a utility that enables you to add modifiers to your function, just like [Solidity modifiers](https://docs.soliditylang.org/en/latest/contracts.html#function-modifiers). The first 3 arguments to `apply` must be the following:
 
 - `caller` is like the `msg.sender` in Solidity, it is the wallet address that is making the interaction
 - `input.value` is the input value of this interaction
 - `state` is the current contract state
 
-All of these are available at the top of the contract already, so you do not have to worry about preparing them. The remaining arguments are modifiers, which always take three arguments:
+All of these are available at the top of the contract already, so you do not have to worry about preparing them. The remaining arguments are modifiers, which always take three arguments, exactly in the same order that we have given them to `apply` above:
 
 - **caller**: a string that represents address of the caller account, similar to `msg.sender`
 - **input**: the input to this contract function
