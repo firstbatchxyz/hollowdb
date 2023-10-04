@@ -79,6 +79,11 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
     });
   }
 
+  /** Returns all keys in the database. */
+  async getAllKeys(): Promise<string[]> {
+    return this.getKeys();
+  }
+
   /**
    * Returns a mapping of keys and values with respect to a range option.
    * If no option is provided, all values are returned.
