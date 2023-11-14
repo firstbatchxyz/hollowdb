@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {copyFileSync, existsSync, readFileSync, writeFileSync} from 'fs';
+import {copyFileSync, readFileSync, writeFileSync} from 'fs';
 import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
 
