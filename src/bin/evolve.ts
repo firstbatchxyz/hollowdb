@@ -1,22 +1,32 @@
-import {WarpFactory, JWKInterface} from 'warp-contracts';
-import {Admin} from '../hollowdb';
-import fs from 'fs';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
+import {JWKInterface, Warp} from 'warp-contracts';
+import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
-async function main() {
-  if (process.argv.length !== 4) {
-    throw new Error('Usage: yarn contract:evolve <wallet-name> <contract-tx-id>');
-  }
-  const walletName = process.argv[2];
-  const contractTxId = process.argv[3];
+/** Evolve an existing contract with a new source code. */
+export async function evolve(
+  owner: JWKInterface,
+  warp: Warp,
+  contractTxId: string,
+  contractSourceCode: string
+): Promise<{contractTxId: string; srcTxId: string}> {
+  const newSource = await warp.createSource(
+    {src: contractSourceCode},
+    warp.environment === 'local' ? owner : new ArweaveSigner(owner)
+  );
+  const newSrcTxId = await warp.saveSource(newSource);
 
-  const wallet = JSON.parse(fs.readFileSync(`./config/wallets/${walletName}.json`, 'utf-8')) as JWKInterface;
-  const contractSource = fs.readFileSync('./build/hollowdb.js', 'utf-8');
-  const warp = WarpFactory.forMainnet().use(new DeployPlugin());
-
-  console.log('Evolving contract...');
-  const result = await Admin.evolve(wallet, contractSource, contractTxId, warp);
-  console.log('Evolved.', result);
+  return evolveFromSrc(owner, warp, contractTxId, newSrcTxId);
 }
 
-main();
+/** Evolve an existing contract with a source code of an existing contract. */
+export async function evolveFromSrc(
+  owner: JWKInterface,
+  warp: Warp,
+  contractTxId: string,
+  srcTxId: string
+): Promise<{contractTxId: string; srcTxId: string}> {
+  const contract = warp.contract(contractTxId).connect(owner);
+
+  await contract.evolve(srcTxId);
+
+  return {contractTxId, srcTxId};
+}

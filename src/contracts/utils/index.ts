@@ -12,7 +12,7 @@ import type {ContractState} from '../types/contract';
 /** Verifies a zero-knowledge proof. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const verifyProof = async (proof: object, psignals: bigint[], verificationKey: any): Promise<boolean> => {
-  if (verificationKey === null) {
+  if (!verificationKey) {
     throw NoVerificationKeyError;
   }
   if (verificationKey.protocol !== 'groth16' && verificationKey.protocol !== 'plonk') {

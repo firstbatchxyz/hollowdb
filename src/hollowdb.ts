@@ -1,5 +1,4 @@
-import {BaseSDK, BaseAdmin} from './base';
-import {HollowState} from './contracts/hollowdb';
+import {BaseSDK} from './';
 
-export class SDK<V = unknown> extends BaseSDK<HollowState, V> {}
-export class Admin<V = unknown> extends BaseAdmin<HollowState, V> {}
+type Mode = {proofs: ['auth']; whitelists: ['put', 'update']};
+export class SDK<V = unknown> extends BaseSDK<V, Mode> {}

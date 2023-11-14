@@ -1,4 +1,5 @@
 import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
+import {OpitonalArray} from '.';
 
 export type GetInput = {
   function: 'get';
@@ -7,11 +8,20 @@ export type GetInput = {
   };
 };
 
-export type PutInput = {
+export type PutInput<V> = {
   function: 'put';
   value: {
     key: string;
-    value: unknown;
+    value: V;
+  };
+};
+
+export type UpdateInput<V> = {
+  function: 'update';
+  value: {
+    key: string;
+    value: V;
+    proof?: object;
   };
 };
 
@@ -19,16 +29,6 @@ export type RemoveInput = {
   function: 'remove';
   value: {
     key: string;
-    proof?: object;
-  };
-};
-
-export type UpdateInput = {
-  function: 'update';
-  value: {
-    key: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value: any;
     proof?: object;
   };
 };
@@ -47,19 +47,20 @@ export type GetKVMapInput = {
   };
 };
 
-export type UpdateRequirementInput = {
-  function: 'updateRequirement';
-  value:
-    | {
-        type: 'whitelist';
-        name: string; // keyof whitelist
-        value: boolean;
-      }
-    | {
-        type: 'proof';
-        name: string; // keyof proof
-        value: boolean;
-      };
+export type UpdateWhitelistRequirementInput<N extends string[]> = {
+  function: 'updateWhitelistRequirement';
+  value: {
+    name: OpitonalArray<N, string>;
+    value: boolean;
+  };
+};
+
+export type UpdateProofRequirementInput<N extends string[]> = {
+  function: 'updateProofRequirement';
+  value: {
+    name: OpitonalArray<N, string>;
+    value: boolean;
+  };
 };
 
 export type UpdateOwnerInput = {
@@ -69,20 +70,20 @@ export type UpdateOwnerInput = {
   };
 };
 
-export type UpdateVerificationKeyInput = {
+export type UpdateVerificationKeyInput<N extends string[]> = {
   function: 'updateVerificationKey';
   value: {
     verificationKey: object;
-    name: string;
+    name: OpitonalArray<N, string>;
   };
 };
 
-export type UpdateWhitelistInput = {
+export type UpdateWhitelistInput<N extends string[]> = {
   function: 'updateWhitelist';
   value: {
     add: string[];
     remove: string[];
-    name: string;
+    name: OpitonalArray<N, string>;
   };
 };
 

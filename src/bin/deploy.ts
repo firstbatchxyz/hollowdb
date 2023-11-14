@@ -1,34 +1,80 @@
-import {WarpFactory, JWKInterface} from 'warp-contracts';
-import {Admin} from '../hollowdb';
-import fs from 'fs';
-import initialHollowState from '../contracts/states/hollowdb';
-import {DeployPlugin} from 'warp-contracts-plugin-deploy';
+import {JWKInterface, Warp} from 'warp-contracts';
+import {ContractState} from '../contracts/types';
+import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
-async function main() {
-  let protocol = '';
-  let walletName = '';
-  if (process.argv.length <= 2) {
-    throw new Error('Usage: yarn contract:deploy <wallet-name> [<groth16 | plonk>]');
-  }
-  if (process.argv.length > 3) {
-    protocol = process.argv[3];
-  }
-  walletName = process.argv[2];
+/** Sets the contract owner as the deployer wallet's address, adds the owner to whitelists and sets contract version. */
+export async function prepareState(
+  owner: JWKInterface,
+  initialState: ContractState,
+  warp: Warp
+): Promise<ContractState> {
+  const ownerAddress = await warp.arweave.wallets.jwkToAddress(owner);
 
-  const wallet = JSON.parse(fs.readFileSync(`./config/wallets/${walletName}.json`, 'utf-8')) as JWKInterface;
-  const contractSource = fs.readFileSync('./build/hollowdb.js', 'utf-8');
-  const warp = WarpFactory.forMainnet().use(new DeployPlugin());
+  // owner is the deploying wallet
+  initialState.owner = ownerAddress;
 
-  if (protocol === 'groth16' || protocol === 'plonk') {
-    initialHollowState.verificationKeys.auth = JSON.parse(
-      fs.readFileSync(`./config/circuits/hollow-authz-${protocol}/verification_key.json`, 'utf-8')
-    );
+  // owner is whitelisted on all lists
+  for (const list in initialState.whitelists) {
+    initialState.whitelists[list as keyof typeof initialState.whitelists][ownerAddress] = true;
   }
 
-  console.log('Deploying contract...');
-  const result = await Admin.deploy(wallet, initialHollowState, contractSource, warp);
-  console.log('Deployed.', result);
-  console.log(`https://sonar.warp.cc/#/app/contract/${result.contractTxId}`);
+  // if available, hollowdb version is written
+  const version = process.env.npm_package_version;
+  initialState.version = version || '1.2.x';
+
+  return initialState;
 }
 
-main();
+/** Deploy a new contract. */
+export async function deploy(
+  owner: JWKInterface,
+  warp: Warp,
+  initialState: ContractState,
+  contractSourceCode: string
+): Promise<{contractTxId: string; srcTxId: string | undefined}> {
+  const preparedState = await prepareState(owner, initialState, warp);
+  // throw new Error('nope');
+  const {contractTxId, srcTxId} = await warp.deploy(
+    {
+      wallet: warp.environment === 'local' ? owner : new ArweaveSigner(owner),
+      initState: JSON.stringify(preparedState),
+      src: contractSourceCode,
+      evaluationManifest: {
+        evaluationOptions: {
+          allowBigInt: true,
+          useKVStorage: true,
+        },
+      },
+    },
+    warp.environment === 'local' // if local, bundling should be disabled
+  );
+
+  return {contractTxId, srcTxId};
+}
+
+/** Deploy a new contract from an existing contract's source code. */
+export async function deployFromSrc(
+  owner: JWKInterface,
+  warp: Warp,
+  initialState: ContractState,
+  srcTxId: string
+): Promise<{contractTxId: string; srcTxId: string | undefined}> {
+  const preparedState = await prepareState(owner, initialState, warp);
+
+  const {contractTxId} = await warp.deployFromSourceTx(
+    {
+      wallet: warp.environment === 'local' ? owner : new ArweaveSigner(owner),
+      initState: JSON.stringify(preparedState),
+      srcTxId: srcTxId,
+      evaluationManifest: {
+        evaluationOptions: {
+          allowBigInt: true,
+          useKVStorage: true,
+        },
+      },
+    },
+    warp.environment === 'local'
+  );
+
+  return {contractTxId, srcTxId};
+}

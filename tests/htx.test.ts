@@ -3,15 +3,15 @@ import {Prover, hashToGroup} from 'hollowdb-prover';
 import constants from './constants';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
-import {Admin} from '../src/hollowdb';
+import {SDK} from '../src/hollowdb';
 import {MockBundlr} from './mock/bundlr';
-import initialHollowState from '../src/contracts/states/hollowdb';
+import {hollowdbHtx as initialState} from '../src/contracts/states/';
 
 type ValueType = {val: string};
 type HTXValueType = `${string}.${string}`;
 
-const PROTOCOL = 'groth16';
 describe('hash.txid value tests', () => {
+  const PROTOCOL = 'groth16';
   const mockBundlr = new MockBundlr<ValueType>();
   const warpHook = setupWarp();
   const prover = new Prover(
@@ -20,24 +20,24 @@ describe('hash.txid value tests', () => {
     PROTOCOL
   );
 
-  let owner: Admin<HTXValueType>;
+  let owner: SDK<HTXValueType>;
 
   const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues<ValueType>();
 
   beforeAll(async () => {
     const hook = warpHook();
     const [ownerWallet] = hook.wallets;
-    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialHollowState, 'hollowdb-htx');
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialState, 'hollowdb-htx');
 
-    owner = new Admin(ownerWallet.jwk, contractTxId, hook.warp);
+    owner = new SDK(ownerWallet.jwk, contractTxId, hook.warp);
   });
 
   it('should set verification key', async () => {
     const verificationKey = JSON.parse(
       fs.readFileSync(constants.PROVERS[PROTOCOL].HOLLOWDB.VERIFICATIONKEY_PATH, 'utf8')
     );
-    await owner.updateVerificationKey('auth', verificationKey);
-    const {cachedValue} = await owner.readState();
+    await owner.admin.updateVerificationKey('auth', verificationKey);
+    const {cachedValue} = await owner.base.readState();
     expect(cachedValue.state.verificationKeys.auth).toEqual(verificationKey);
   });
 
@@ -76,13 +76,13 @@ describe('hash.txid value tests', () => {
     const {VALUE, NEXT_VALUE, KEY} = createValues<ValueType>();
 
     beforeAll(async () => {
-      const {cachedValue} = await owner.readState();
-      expect(cachedValue.state.isProofRequired.auth).toEqual(true);
+      const state = await owner.getState();
+      expect(state.isProofRequired.auth).toEqual(true);
 
-      await owner.updateProofRequirement('auth', false);
+      await owner.admin.updateProofRequirement('auth', false);
 
-      const {cachedValue: newCachedValue} = await owner.readState();
-      expect(newCachedValue.state.isProofRequired.auth).toEqual(false);
+      const newState = await owner.getState();
+      expect(newState.isProofRequired.auth).toEqual(false);
     });
 
     it('should put a value to a key & read it', async () => {

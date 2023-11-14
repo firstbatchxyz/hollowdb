@@ -9,3 +9,4 @@ export const ExpectedProofError = new ContractError('Expected a proof.');
 export const NullValueError = new ContractError('Value cant be null, use remove instead.');
 export const NotOwnerError = new ContractError('Not contract owner.');
 export const InvalidFunctionError = new ContractError('Invalid function.');
+export const NullValueError = new ContractError('Value cant be null, use remove instead.');

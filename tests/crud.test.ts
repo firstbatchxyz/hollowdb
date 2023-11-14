@@ -2,9 +2,10 @@ import {randomBytes} from 'crypto';
 import {createValues, deployContract} from './utils';
 import {setupWarp} from './hooks';
 import {SDK} from '../src/hollowdb';
-import initialHollowState from '../src/contracts/states/hollowdb';
+import {hollowdb as initialState} from '../src/contracts/states/';
 
 type ValueType = {val: string};
+
 describe('crud operations', () => {
   describe.each(['redis', 'lmdb', 'default'] as const)('cache type: %s', cacheType => {
     const warpHook = setupWarp(cacheType);
@@ -16,7 +17,7 @@ describe('crud operations', () => {
       const hook = warpHook();
       const userWallet = hook.wallets[0];
       const contractTxId = await deployContract(hook.warp, userWallet.jwk, {
-        ...initialHollowState,
+        ...initialState,
         isProofRequired: {
           auth: false,
         },
@@ -29,11 +30,11 @@ describe('crud operations', () => {
     });
 
     it('should deploy with correct state', async () => {
-      const {cachedValue} = await user.readState();
-      expect(cachedValue.state.verificationKeys.auth).toEqual(null);
-      expect(cachedValue.state.isProofRequired.auth).toEqual(false);
-      expect(cachedValue.state.isWhitelistRequired.put).toEqual(false);
-      expect(cachedValue.state.isWhitelistRequired.update).toEqual(false);
+      const state = await user.getState();
+      expect(state.verificationKeys.auth).toEqual(null);
+      expect(state.isProofRequired.auth).toEqual(false);
+      expect(state.isWhitelistRequired.put).toEqual(false);
+      expect(state.isWhitelistRequired.update).toEqual(false);
     });
 
     describe('put & get', () => {
@@ -77,8 +78,8 @@ describe('crud operations', () => {
         }
       });
 
-      it('should get keys with getAllKeys', async () => {
-        const keys = await user.getAllKeys();
+      it('should get all keys with getKeys', async () => {
+        const keys = await user.getKeys();
         for (let i = 0; i < values.length; ++i) {
           expect(keys.includes(KEY + i)).toBe(true);
         }
@@ -113,9 +114,10 @@ describe('crud operations', () => {
         expect(await user.get(KEY)).toEqual(null);
       });
 
-      it('should NOT remove an already removed value', async () => {
+      it('should be able to call remove to an already removed value', async () => {
         expect(await user.get(KEY)).toEqual(null);
-        await expect(user.remove(KEY)).rejects.toThrow('Contract Error [remove]: Key does not exist');
+        await user.remove(KEY);
+        expect(await user.get(KEY)).toEqual(null);
       });
     });
   });

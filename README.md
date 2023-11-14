@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./logo.svg" alt="logo" width="142">
+  <img src="https://raw.githubusercontent.com/firstbatchxyz/hollowdb/master/logo.svg" alt="logo" width="142">
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
         <img alt="Workflow: Tests" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master">
     </a>
     <a href="./.github/workflows/build.yml" target="_blank">
-        <img alt="Workflow: Styles" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/build.yml/badge.svg?branch=master">
+        <img alt="Workflow: Build" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/build.yml/badge.svg?branch=master">
     </a>
     <a href="https://discord.gg/2wuU9ym6fq" target="_blank">
         <img alt="Discord" src="https://dcbadge.vercel.app/api/server/2wuU9ym6fq?style=flat">
@@ -42,9 +42,15 @@ npm install hollowdb  # npm
 pnpm add hollowdb     # pnpm
 ```
 
-## Documentation
+Depending on your use-cases, we have several optional dependencies:
 
-You can read the full documentation at <https://docs.hollowdb.xyz>.
+- You can use [hollowdb-prover](https://www.npmjs.com/package/hollowdb-prover) as a simple utility that generates zero-knowledge proofs that are verifiable by HollowDB.
+- You can use LMDB cache within your Warp instance via [warp-contracts-lmdb](https://www.npmjs.com/package/warp-contracts-lmdb).
+- You can use Redis cache within your warp instance via [warp-contracts-redis](https://www.npmjs.com/package/warp-contracts-redis) together with [ioredis](https://www.npmjs.com/package/ioredis).
+
+## Usage
+
+You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>. If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
 
 ## Testing
 
@@ -54,22 +60,11 @@ You can run all tests via:
 yarn test
 ```
 
-Tests operate on a local Arweave instance using [ArLocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB).
-
-Note that you need to have a Redis server running for Redis tests to pass, the URL shall be specified within [jest.config.cjs](./jest.config.cjs).
-
-The tests are as follows:
-
-- `evolve` tests for evolve functionality.
-- `whitelists` tests for Whitelist functionality, both enabled and disabled.
-- `proofs` tests for Proofs functionality, both enabled and disabled.
-- `crud` tests for basic CRUD functionality, such as checking for existing keys, not removing an already removed key and such.
-- `htx` tests use a custom contract where assume Bundlr usage and instead of values themselves, we store `valueHash.txid` as values.
-- `multi` tests using a single Warp instance with multiple contracts, and multiple HollowDB instances.
+Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
 
 ## Styling
 
-We are using the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html).
+You can check the formatting of the code or lint everything with the following commands:
 
 ```sh
 yarn format # prettier

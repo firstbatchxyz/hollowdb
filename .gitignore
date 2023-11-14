@@ -12,8 +12,9 @@ logs
 .parcel-cache/
 cache/
 lib/
-build/
 dist/
+
+# Redis stuff
 dump.rdb
 
 # Temporary stuff not-to-be pushed
