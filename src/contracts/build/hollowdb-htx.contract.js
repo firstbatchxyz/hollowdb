@@ -8,9 +8,9 @@
   var NotWhitelistedError = new ContractError("Not whitelisted.");
   var InvalidProofError = new ContractError("Invalid proof.");
   var ExpectedProofError = new ContractError("Expected a proof.");
+  var NullValueError = new ContractError("Value cant be null, use remove instead.");
   var NotOwnerError = new ContractError("Not contract owner.");
   var InvalidFunctionError = new ContractError("Invalid function.");
-  var NullValueError = new ContractError("Value cant be null, use remove instead.");
 
   // src/contracts/utils/index.ts
   var verifyProof = async (proof, psignals, verificationKey) => {

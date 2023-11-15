@@ -1,5 +1,4 @@
 import {build as esbuild} from 'esbuild';
-import {getPath} from './utils';
 import {readdirSync} from 'fs';
 import replace from 'replace-in-file';
 
@@ -11,7 +10,7 @@ const DEST = CONTRACTS_DIR + '/build';
  * If no name is provided, all contracts will be built.
  */
 export async function build(name?: string) {
-  let contracts = name
+  const contracts = name
     ? [name + '.contract.ts']
     : readdirSync(CONTRACTS_DIR).filter(file => file.endsWith('.contract.ts'));
 
@@ -24,8 +23,7 @@ export async function build(name?: string) {
     format: 'iife',
   })
     .catch(() => {
-      console.error('Build failed');
-      process.exit(1);
+      throw new Error('Build failed.');
     })
     .finally(() => {
       const files = contracts.map(source => `${DEST}/${source}`.replace('.ts', '.js'));
