@@ -59,11 +59,19 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
       - run: yarn
       - run: yarn build
-      - run: yarn publish
+      - uses: JS-DevTools/npm-publish@v3
+        id: publish
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - if: ${{ steps.publish.outputs.type }}
+        run: echo "$PCKG_ID published to $PCKG_TAG, old version was [$OLD_VER]"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          OLD_VER: ${{ steps.publish.outputs.old-version }}
+          PCKG_ID: ${{ steps.publish.outputs.id }}
+          PCKG_TAG: ${{ steps.publish.outputs.tag }}
