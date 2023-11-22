@@ -5,9 +5,11 @@ import type {
   ContractMode,
   ContractState,
   GetInput,
+  GetManyInput,
   GetKVMapInput,
   GetKeysInput,
   PutInput,
+  PutManyInput,
   RemoveInput,
   UpdateInput,
 } from '../contracts/types';
@@ -52,18 +54,6 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async getState(): Promise<ContractState<M>> {
     return await this.base.readState().then(s => s.cachedValue.state);
-  }
-
-  /**
-   * Gets the values at the given keys as an array.
-   *
-   * If a value does not exist, it is returned as `null`.
-   *
-   * @param keys an array of keys
-   * @returns an array of corresponding values
-   */
-  async getMany(keys: string[]): Promise<(V | null)[]> {
-    return await Promise.all(keys.map(key => this.get(key)));
   }
 
   /**
@@ -134,7 +124,29 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
   }
 
   /**
+   * Gets the values at the given keys as an array.
+   *
+   * If a value does not exist, it is returned as `null`.
+   *
+   * Note that the transaction limit may become a problem for too many keys.
+   *
+   * @param keys an array of keys
+   * @returns an array of corresponding values
+   */
+  async getMany(keys: string[]): Promise<(V | null)[]> {
+    return await this.base.safeReadInteraction<GetManyInput, (V | null)[]>({
+      function: 'getMany',
+      value: {
+        keys,
+      },
+    });
+  }
+
+  /**
    * Inserts the given value into database.
+   *
+   * There must not be a value at the given key.
+   *
    * @param key the key of the value to be inserted
    * @param value the value to be inserted
    */
@@ -144,6 +156,24 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
       value: {
         key,
         value,
+      },
+    });
+  }
+
+  /**
+   * Inserts an array of value into database.
+   *
+   * There must not be a value at the given key.
+   *
+   * @param keys the keys of the values to be inserted
+   * @param values the values to be inserted
+   */
+  async putMany(keys: string[], values: V[]): Promise<void> {
+    await this.base.dryWriteInteraction<PutManyInput<V>>({
+      function: 'putMany',
+      value: {
+        keys,
+        values,
       },
     });
   }

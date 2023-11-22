@@ -1,5 +1,5 @@
 import {CantEvolveError, InvalidFunctionError, KeyExistsError} from './errors';
-import {apply, onlyNonNullValue, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
+import {apply, onlyNonNullValue, onlyNonNullValues, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
 import type {ContractHandle} from './types';
 import {hashToGroup} from './utils';
 
@@ -14,6 +14,12 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
       return {result: (await SmartWeave.kv.get(key)) as Value | null};
     }
 
+    case 'getMany': {
+      const {keys} = await apply(caller, input.value, state);
+      const values = (await Promise.all(keys.map(key => SmartWeave.kv.get(key)))) as (Value | null)[];
+      return {result: values};
+    }
+
     case 'getKeys': {
       const {options} = await apply(caller, input.value, state);
       return {result: await SmartWeave.kv.keys(options)};
@@ -25,11 +31,24 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
     }
 
     case 'put': {
-      const {key, value} = await apply(caller, input.value, state, onlyNonNullValue, onlyWhitelisted('put'));
+      const {key, value} = await apply(caller, input.value, state, onlyWhitelisted('put'), onlyNonNullValue);
       if ((await SmartWeave.kv.get(key)) !== null) {
         throw KeyExistsError;
       }
       await SmartWeave.kv.put(key, value);
+      return {state};
+    }
+
+    case 'putMany': {
+      const {keys, values} = await apply(caller, input.value, state, onlyWhitelisted('put'), onlyNonNullValues);
+      if (keys.length !== values.length) {
+        throw new ContractError('Key and value counts mismatch');
+      }
+
+      if (await Promise.all(keys.map(key => SmartWeave.kv.get(key))).then(values => values.some(val => val !== null))) {
+        throw KeyExistsError;
+      }
+      await Promise.all(keys.map((key, i) => SmartWeave.kv.put(key, values[i])));
       return {state};
     }
 

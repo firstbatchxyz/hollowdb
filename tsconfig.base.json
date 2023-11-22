@@ -10,7 +10,7 @@
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "noImplicitOverride": true,
+    // "noImplicitOverride": true,
     "pretty": true,
     "sourceMap": true,
     "strict": true,

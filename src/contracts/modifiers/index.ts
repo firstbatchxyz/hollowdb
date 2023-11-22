@@ -24,6 +24,14 @@ export const onlyNonNullValue = <I extends {value: unknown}>(_: string, input: I
   return input;
 };
 
+/** Just like {@link onlyNonNullValue} but for arrays. */
+export const onlyNonNullValues = <I extends {values: unknown[]}>(_: string, input: I) => {
+  if (input.values.some(val => val === null)) {
+    throw NullValueError;
+  }
+  return input;
+};
+
 /** Returns a modifier that ensures `caller` is whitelisted for `list`. */
 export const onlyWhitelisted = <I, S extends ContractState>(list: keyof S['whitelists']) => {
   return (caller: string, input: I, state: S) => {
