@@ -43,16 +43,25 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
     return this.base.signer;
   }
 
-  /** Returns the latest contract state.
+  /**
+   * Returns the latest contract state.
    *
    * For a more fine-grained state data, use `base.readState()`.
    *
+   * @returns contract state object
    */
   async getState(): Promise<ContractState<M>> {
     return await this.base.readState().then(s => s.cachedValue.state);
   }
 
-  /** Gets the values at the given keys as an array. */
+  /**
+   * Gets the values at the given keys as an array.
+   *
+   * If a value does not exist, it is returned as `null`.
+   *
+   * @param keys an array of keys
+   * @returns an array of corresponding values
+   */
   async getMany(keys: string[]): Promise<(V | null)[]> {
     return await Promise.all(keys.map(key => this.get(key)));
   }
@@ -60,8 +69,11 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
   /**
    * Alternative method of getting key values. Uses the underlying `getStorageValues`
    * function, returns a Map instead of an array.
+   *
+   * @param keys an array of keys
+   * @returns `SortKeyCacheResult` of a key-value `Map`
    */
-  async getStorageValues(keys: string[]) {
+  async getStorageValues(keys: string[]): Promise<SortKeyCacheResult<Map<string, V | null>>> {
     return (await this.contract.getStorageValues(keys)) as SortKeyCacheResult<Map<string, V | null>>;
   }
 
@@ -69,6 +81,9 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    * Returns keys with respect to a range option.
    *
    * If no option is provided, it will get all keys.
+   *
+   * @param options optional range
+   * @returns an array of keys
    */
   async getKeys(options?: SortKeyCacheRangeOptions): Promise<string[]> {
     return await this.base.safeReadInteraction<GetKeysInput, string[]>({
@@ -79,7 +94,11 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
     });
   }
 
-  /** Returns all keys in the database. */
+  /**
+   * Returns all keys in the database.
+   *
+   * @returns an array of all keys
+   */
   async getAllKeys(): Promise<string[]> {
     return this.getKeys();
   }
@@ -87,6 +106,9 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
   /**
    * Returns a mapping of keys and values with respect to a range option.
    * If no option is provided, all values are returned.
+   *
+   * @param options optional range
+   * @returns a key-value `Map`
    */
   async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V>> {
     return await this.base.safeReadInteraction<GetKVMapInput, Map<string, V>>({

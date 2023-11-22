@@ -11,7 +11,7 @@ describe('crud operations', () => {
     const warpHook = setupWarp(cacheType);
     let user: SDK<ValueType>;
 
-    const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
+    const {KEY, VALUE, NEXT_VALUE} = createValues();
 
     beforeAll(async () => {
       const hook = warpHook();

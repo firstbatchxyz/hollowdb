@@ -14,7 +14,7 @@ describe('proofs mode', () => {
     let owner: SDK<ValueType>;
     let alice: SDK<ValueType>;
 
-    const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues<ValueType>();
+    const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues();
 
     beforeAll(async () => {
       const hook = warpHook();
@@ -103,7 +103,7 @@ describe('proofs mode', () => {
     });
 
     describe('disabling proofs', () => {
-      const {VALUE, NEXT_VALUE} = createValues<ValueType>();
+      const {VALUE, NEXT_VALUE} = createValues();
       const KEY = 'some-non-bigint-friendly-key';
 
       beforeAll(async () => {

@@ -11,7 +11,7 @@ describe('whitelists mode', () => {
   let bob: SDK<ValueType>;
   let aliceAddress: string;
 
-  const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
+  const {KEY, VALUE, NEXT_VALUE} = createValues();
 
   beforeAll(async () => {
     const hook = warpHook();
@@ -85,7 +85,7 @@ describe('whitelists mode', () => {
   });
 
   describe('disabling whitelists', () => {
-    const {KEY, VALUE, NEXT_VALUE} = createValues<ValueType>();
+    const {KEY, VALUE, NEXT_VALUE} = createValues();
 
     beforeAll(async () => {
       const state = await owner.getState();

@@ -22,7 +22,7 @@ describe('hash.txid value tests', () => {
 
   let owner: SDK<HTXValueType>;
 
-  const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues<ValueType>();
+  const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues();
 
   beforeAll(async () => {
     const hook = warpHook();
@@ -73,7 +73,7 @@ describe('hash.txid value tests', () => {
   });
 
   describe('disabling proofs', () => {
-    const {VALUE, NEXT_VALUE, KEY} = createValues<ValueType>();
+    const {VALUE, NEXT_VALUE, KEY} = createValues();
 
     beforeAll(async () => {
       const state = await owner.getState();

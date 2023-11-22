@@ -16,7 +16,7 @@ describe('null value tests with proofs', () => {
   let prover: Prover;
   let owner: SDK<ValueType>;
 
-  const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues<ValueType>();
+  const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues();
 
   beforeAll(async () => {
     const hook = warpHook();
