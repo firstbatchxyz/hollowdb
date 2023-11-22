@@ -25,7 +25,7 @@ export function decimalToHex(bigIntString: string): string {
  * Utility to create a key with its preimage, a value and a next value.
  * @param numBytes number of random bytes
  */
-export function createValues<ValueType = unknown>(numBytes = 10) {
+export function createValues(numBytes = 10) {
   const KEY_PREIMAGE = BigInt('0x' + randomBytes(numBytes).toString('hex'));
   const KEY = computeKey(KEY_PREIMAGE);
   const VALUE = {
@@ -37,8 +37,8 @@ export function createValues<ValueType = unknown>(numBytes = 10) {
   return {
     KEY,
     KEY_PREIMAGE,
-    VALUE: VALUE as ValueType,
-    NEXT_VALUE: NEXT_VALUE as ValueType,
+    VALUE: VALUE,
+    NEXT_VALUE: NEXT_VALUE,
   };
 }
 

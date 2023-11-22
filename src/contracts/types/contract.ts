@@ -12,6 +12,8 @@ import {
   UpdateVerificationKeyInput,
   UpdateWhitelistRequirementInput,
   UpdateWhitelistInput,
+  GetManyInput,
+  PutManyInput,
 } from './inputs';
 
 /**
@@ -28,7 +30,9 @@ export type ContractInput<V = any, M extends ContractMode = ContractMode> =
   | GetKVMapInput
   | GetKeysInput
   | GetInput
+  | GetManyInput
   | PutInput<V>
+  | PutManyInput<V>
   | UpdateInput<V>
   | RemoveInput
   | UpdateOwnerInput
@@ -98,8 +102,9 @@ export type ContractHandle<V = any, M extends ContractMode = ContractMode, I ext
   | {
       // read interaction returns a result
       result:
-        | null // no value exists
-        | V // value exists
+        | null // no value
+        | V // value
+        | (V | null)[] // array of values or nulls
         | string[] // for `getKeys`
         | Map<string, V>; // for `getKVMap`
     }

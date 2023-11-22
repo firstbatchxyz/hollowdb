@@ -11,6 +11,7 @@
   var NullValueError = new ContractError("Value cant be null, use remove instead.");
   var NotOwnerError = new ContractError("Not contract owner.");
   var InvalidFunctionError = new ContractError("Invalid function.");
+  var ArrayLengthMismatchError = new ContractError("Key and value counts mismatch.");
 
   // src/contracts/utils/index.ts
   var verifyProof = async (proof, psignals, verificationKey) => {
@@ -32,6 +33,12 @@
   };
   var onlyNonNullValue = (_, input) => {
     if (input.value === null) {
+      throw NullValueError;
+    }
+    return input;
+  };
+  var onlyNonNullValues = (_, input) => {
+    if (input.values.some((val) => val === null)) {
       throw NullValueError;
     }
     return input;
@@ -70,12 +77,28 @@
         const { options } = await apply(caller, input.value, state);
         return { result: await SmartWeave.kv.kvMap(options) };
       }
+      case "getMany": {
+        const { keys } = await apply(caller, input.value, state);
+        const values = await Promise.all(keys.map((key) => SmartWeave.kv.get(key)));
+        return { result: values };
+      }
       case "put": {
         const { key, value } = await apply(caller, input.value, state, onlyNonNullValue, onlyWhitelisted("put"));
         if (await SmartWeave.kv.get(key) !== null) {
           throw KeyExistsError;
         }
         await SmartWeave.kv.put(key, value);
+        return { state };
+      }
+      case "putMany": {
+        const { keys, values } = await apply(caller, input.value, state, onlyWhitelisted("put"), onlyNonNullValues);
+        if (keys.length !== values.length) {
+          throw new ContractError("Key and value counts mismatch");
+        }
+        if (await Promise.all(keys.map((key) => SmartWeave.kv.get(key))).then((values2) => values2.some((val) => val !== null))) {
+          throw KeyExistsError;
+        }
+        await Promise.all(keys.map((key, i) => SmartWeave.kv.put(key, values[i])));
         return { state };
       }
       case "update": {

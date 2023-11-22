@@ -8,11 +8,26 @@ export type GetInput = {
   };
 };
 
+export type GetManyInput = {
+  function: 'getMany';
+  value: {
+    keys: string[];
+  };
+};
+
 export type PutInput<V> = {
   function: 'put';
   value: {
     key: string;
     value: V;
+  };
+};
+
+export type PutManyInput<V> = {
+  function: 'putMany';
+  value: {
+    keys: string[];
+    values: V[];
   };
 };
 

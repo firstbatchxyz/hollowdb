@@ -59,11 +59,11 @@ yargs(hideBin(process.argv))
       let result;
       if (args.sourceTxId) {
         result = await deployFromSrc(wallet, warp, state, args.sourceTxId);
-        console.log(`${args.name} contract deployed.`);
+        console.log(`${args.name} contract deployed from source ${args.sourceTxId}.`);
       } else {
         const code = prepareCode(args.name);
         result = await deploy(wallet, warp, state, code);
-        console.log(`${args.name} contract deployed from source ${args.sourceTxId}.`);
+        console.log(`${args.name} contract deployed.`);
       }
       console.log(result);
     }

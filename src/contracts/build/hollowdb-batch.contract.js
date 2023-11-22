@@ -11,7 +11,6 @@
   var NullValueError = new ContractError("Value cant be null, use remove instead.");
   var NotOwnerError = new ContractError("Not contract owner.");
   var InvalidFunctionError = new ContractError("Invalid function.");
-  var ArrayLengthMismatchError = new ContractError("Key and value counts mismatch.");
 
   // src/contracts/utils/index.ts
   var verifyProof = async (proof, psignals, verificationKey) => {
@@ -40,12 +39,6 @@
   };
   var onlyNonNullValue = (_, input) => {
     if (input.value === null) {
-      throw NullValueError;
-    }
-    return input;
-  };
-  var onlyNonNullValues = (_, input) => {
-    if (input.values.some((val) => val === null)) {
       throw NullValueError;
     }
     return input;
@@ -87,7 +80,7 @@
     return input;
   }
 
-  // src/contracts/hollowdb.contract.ts
+  // src/contracts/hollowdb-batch.contract.ts
   var handle = async (state, action) => {
     const { caller, input } = action;
     switch (input.function) {
@@ -95,10 +88,9 @@
         const { key } = await apply(caller, input.value, state);
         return { result: await SmartWeave.kv.get(key) };
       }
-      case "getMany": {
+      case "getMulti": {
         const { keys } = await apply(caller, input.value, state);
-        const values = await Promise.all(keys.map((key) => SmartWeave.kv.get(key)));
-        return { result: values };
+        return { result: await Promise.all(keys.map((key) => SmartWeave.kv.get(key))) };
       }
       case "getKeys": {
         const { options } = await apply(caller, input.value, state);
@@ -109,19 +101,23 @@
         return { result: await SmartWeave.kv.kvMap(options) };
       }
       case "put": {
-        const { key, value } = await apply(caller, input.value, state, onlyWhitelisted("put"), onlyNonNullValue);
+        const { key, value } = await apply(caller, input.value, state, onlyNonNullValue, onlyWhitelisted("put"));
         if (await SmartWeave.kv.get(key) !== null) {
           throw KeyExistsError;
         }
         await SmartWeave.kv.put(key, value);
         return { state };
       }
-      case "putMany": {
-        const { keys, values } = await apply(caller, input.value, state, onlyWhitelisted("put"), onlyNonNullValues);
-        if (keys.length !== values.length) {
+      case "putMulti": {
+        const { keys, values } = await apply(caller, input.value, state, onlyWhitelisted("put"));
+        if (values.some((val) => val === null)) {
           throw new ContractError("Key and value counts mismatch");
         }
-        if (await Promise.all(keys.map((key) => SmartWeave.kv.get(key))).then((values2) => values2.some((val) => val !== null))) {
+        if (values.some((val) => val === null)) {
+          throw NullValueError;
+        }
+        const existing = await Promise.all(keys.map((key) => SmartWeave.kv.get(key)));
+        if (existing.some((val) => val !== null)) {
           throw KeyExistsError;
         }
         await Promise.all(keys.map((key, i) => SmartWeave.kv.put(key, values[i])));

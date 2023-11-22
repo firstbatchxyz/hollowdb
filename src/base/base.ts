@@ -78,11 +78,10 @@ export class Base<M extends ContractMode> {
   }
 
   /**
-   * A typed wrapper around `viewState` followed with a repsonse type check. If
-   * response type is not `ok`, it will throw an error with an optional prefix.
+   * A typed wrapper around `viewState` followed with a repsonse type check.
+   * If response type is not `ok`, it will throw an error.
    * @param input input in the form of `{function, value}`
-   * @param errorPrefix optional prefix for the error message
-   * @returns
+   * @returns interaction result
    */
   async safeReadInteraction<I extends ContractInputGeneric, V>(input: I) {
     const response = await this.viewState<I, V>(input);
