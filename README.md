@@ -52,6 +52,13 @@ Depending on your use-cases, we have several optional dependencies:
 
 You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>. If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
 
+## Examples
+
+Check out the [examples](./examples/) folder for a few examples of HollowDB usage:
+
+- **Simple**: a single JS file that demonstrates getting & setting a key.
+- **Micro**: a Vercel Micro backend that can serves HollowDB as API endpoints, useful when you want to use HollowDB from another language.
+
 ## Testing
 
 You can run all tests via:
