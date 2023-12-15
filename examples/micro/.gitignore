@@ -1,0 +1,14 @@
+node_modules
+build
+cache
+logs
+
+dump.rdb
+
+.vscode
+.DS_Store
+
+!src/cache
+
+.env
+tmp.md
