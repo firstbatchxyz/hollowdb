@@ -21,6 +21,8 @@ const config: JestConfigWithTsJest = {
   // tests may hang randomly (not known why yet, it was fixed before)
   // that will cause workflow to run all the way, so we might force exit
   forceExit: true,
+  // ignore tests under examples
+  testPathIgnorePatterns: ['/node_modules/', '/examples/'],
 };
 
 export default config;
