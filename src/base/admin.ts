@@ -25,9 +25,6 @@ export class Admin<M extends ContractMode = ContractMode> {
     });
   }
 
-  // TODO: transfer ownership
-  // remove yourself from whitelists and such
-
   /**
    * Changes the whitelist for the selected list.
    * @param users an array of user addresses
