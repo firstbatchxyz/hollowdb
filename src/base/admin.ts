@@ -7,7 +7,7 @@ import type {
   UpdateWhitelistInput,
   OpitonalArray,
 } from '../contracts/types';
-import {Base} from './base';
+import type {Base} from './base';
 
 export class Admin<M extends ContractMode = ContractMode> {
   constructor(private readonly base: Base<M>) {}
@@ -24,9 +24,6 @@ export class Admin<M extends ContractMode = ContractMode> {
       },
     });
   }
-
-  // TODO: transfer ownership
-  // remove yourself from whitelists and such
 
   /**
    * Changes the whitelist for the selected list.

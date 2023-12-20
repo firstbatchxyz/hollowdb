@@ -23,13 +23,19 @@
   "targets": {
     "cjs": {
       "outputFormat": "commonjs",
-      "isLibrary": true,
-      "context": "node"
+      "isLibrary": false,
+      "context": "node",
+      "scopeHoist": false,
+      "includeNodeModules": false,
+      "optimize": false
     },
     "mjs": {
       "outputFormat": "esmodule",
-      "isLibrary": true,
-      "context": "node"
+      "isLibrary": false,
+      "context": "node",
+      "scopeHoist": false,
+      "includeNodeModules": false,
+      "optimize": false
     }
   },
   "engines": {

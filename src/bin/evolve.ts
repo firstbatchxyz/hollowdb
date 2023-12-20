@@ -1,4 +1,4 @@
-import {JWKInterface, Warp} from 'warp-contracts';
+import type {JWKInterface, Warp} from 'warp-contracts';
 import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
 
 /** Evolve an existing contract with a new source code. */
