@@ -1,5 +1,6 @@
 import {readFileSync} from 'fs';
-import {JWKInterface, Warp, WarpFactory} from 'warp-contracts';
+import type {JWKInterface, Warp} from 'warp-contracts';
+import {WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import {prepareState as prepareStateWithWarp} from './deploy';
 import {ContractState} from '../contracts/types';

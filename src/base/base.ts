@@ -1,4 +1,4 @@
-import {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
+import {Warp, Contract, ArWallet, type CustomSignature} from 'warp-contracts';
 import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
 import {EthersExtension} from 'warp-contracts-plugin-ethers';
 import type {ContractInputGeneric, ContractMode, ContractState} from '../contracts/types/contract';

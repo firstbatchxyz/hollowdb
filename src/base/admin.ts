@@ -7,7 +7,7 @@ import type {
   UpdateWhitelistInput,
   OpitonalArray,
 } from '../contracts/types';
-import {Base} from './base';
+import type {Base} from './base';
 
 export class Admin<M extends ContractMode = ContractMode> {
   constructor(private readonly base: Base<M>) {}

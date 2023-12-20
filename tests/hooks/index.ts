@@ -3,7 +3,7 @@ import {LoggerFactory, Warp, WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
 import {Redis} from 'ioredis';
 import {overrideCache} from '../utils/cache';
-import {Wallet} from 'warp-contracts/lib/types/contract/testing/Testing';
+import type {Wallet} from 'warp-contracts/lib/types/contract/testing/Testing';
 
 /**
  * Setup Warp instance for a test, connected to Arlocal at the provided port.

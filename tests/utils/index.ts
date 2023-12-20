@@ -1,8 +1,8 @@
+import type {Warp, JWKInterface} from 'warp-contracts';
 import {randomBytes} from 'crypto';
-import {Warp, JWKInterface} from 'warp-contracts';
 import {readFileSync} from 'fs';
-import {deploy} from '../../src/bin/deploy';
 import {computeKey} from 'hollowdb-prover';
+import {deploy} from '../../src/bin/deploy';
 import {ContractState} from '../../src/contracts/types';
 
 /** Add funds to any wallet. */
