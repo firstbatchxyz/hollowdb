@@ -6,12 +6,10 @@ import type {ContractInputGeneric, ContractMode, ContractState} from '../contrac
 export class Base<M extends ContractMode> {
   readonly contract: Contract<ContractState<M>>;
   readonly warp: Warp;
-  readonly contractTxId: string;
   readonly signer: ArWallet | CustomSignature;
 
   constructor(signer: ArWallet | CustomSignature, contractTxId: string, warp: Warp) {
     this.signer = signer;
-    this.contractTxId = contractTxId;
     this.warp = warp
       // required for proof verification
       .use(new SnarkjsExtension())
@@ -19,7 +17,7 @@ export class Base<M extends ContractMode> {
       .use(new EthersExtension());
 
     this.contract = this.warp
-      .contract<ContractState<M>>(this.contractTxId)
+      .contract<ContractState<M>>(contractTxId)
       .setEvaluationOptions({
         allowBigInt: true, // bigInt is required for circuits
         useKVStorage: true,

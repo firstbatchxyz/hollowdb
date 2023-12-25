@@ -40,6 +40,11 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
     return this.base.warp;
   }
 
+  /** Contract transaction id. */
+  get contractTxId(): string {
+    return this.base.contract.txId();
+  }
+
   /** Signer. */
   get signer(): ArWallet | CustomSignature {
     return this.base.signer;
@@ -100,7 +105,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    * @param options optional range
    * @returns a key-value `Map`
    */
-  async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V>> {
+  async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V | null>> {
     return await this.base.safeReadInteraction<GetKVMapInput, Map<string, V>>({
       function: 'getKVMap',
       value: {
@@ -114,7 +119,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    * @param key the key of the value to be returned
    * @returns the value of the given key
    */
-  async get(key: string): Promise<V> {
+  async get(key: string): Promise<V | null> {
     return await this.base.safeReadInteraction<GetInput, V>({
       function: 'get',
       value: {

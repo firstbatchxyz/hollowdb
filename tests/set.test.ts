@@ -21,6 +21,8 @@ describe('set tests', () => {
 
   it('should allow putting a value', async () => {
     await owner.put(KEY, VALUE);
+    const value = await owner.get(KEY);
+    expect(value?.val).toBe(VALUE.val);
   });
 
   it('should NOT allow putting a value again', async () => {
@@ -28,19 +30,29 @@ describe('set tests', () => {
   });
 
   it('should allow setting a value at an existing key', async () => {
-    await owner.set(KEY, VALUE);
+    await owner.set(KEY, NEXT_VALUE);
+    const value = await owner.get(KEY);
+    expect(value?.val).toBe(NEXT_VALUE.val);
   });
 
   it('should allow setting a value at a new key', async () => {
     const newKV = createValues();
     await owner.set(newKV.KEY, newKV.VALUE);
+    const value = await owner.get(newKV.KEY);
+    expect(value?.val).toBe(newKV.VALUE.val);
   });
 
   it('should allow setting many values', async () => {
     const kvs = Array.from({length: 5}, () => createValues());
-    await owner.setMany(
-      kvs.map(kv => kv.KEY),
-      kvs.map(kv => kv.VALUE)
-    );
+
+    const keys = kvs.map(kv => kv.KEY);
+    const values = kvs.map(kv => kv.VALUE);
+    await owner.setMany(keys, values);
+
+    const results = await owner.getMany(keys);
+    expect(results.length).toBe(values.length);
+    for (let i = 0; i < results.length; i++) {
+      expect(results[i]?.val).toBe(values[i].val);
+    }
   });
 });
