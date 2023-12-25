@@ -10,7 +10,7 @@ export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelist
   /**
    * Inserts the given value into database.
    *
-   * There must not be a value at the given key.
+   * Overwrites the existing values at the given key.
    *
    * @param key the key of the value to be inserted
    * @param value the value to be inserted
@@ -28,7 +28,7 @@ export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelist
   /**
    * Inserts an array of value into database.
    *
-   * There must not be a value at the given key.
+   * Overwrites the existing values at the given keys.
    *
    * @param keys the keys of the values to be inserted
    * @param values the values to be inserted
