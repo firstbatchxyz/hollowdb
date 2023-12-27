@@ -21,6 +21,7 @@ export class Base<M extends ContractMode> {
       .setEvaluationOptions({
         allowBigInt: true, // bigInt is required for circuits
         useKVStorage: true,
+        sequencerUrl: warp.environment === 'mainnet' ? 'https://gw.warp.cc/' : undefined,
       })
       .connect(this.signer);
   }
