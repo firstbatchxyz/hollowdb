@@ -55,7 +55,7 @@ describe('hash.txid value tests', () => {
     const valueHash = '0x' + hashToGroup(JSON.stringify(NEXT_VALUE)).toString(16);
 
     const curHTX = await owner.get(KEY);
-    const [curValueHash] = curHTX.split('.');
+    const [curValueHash] = curHTX!.split('.');
 
     const {proof} = await prover.proveHashed(KEY_PREIMAGE, BigInt(curValueHash), BigInt(valueHash));
     const val: HTXValueType = `${valueHash}.${txId}`;
@@ -65,7 +65,7 @@ describe('hash.txid value tests', () => {
 
   it('should remove an existing value with proof', async () => {
     const curHTX = await owner.get(KEY);
-    const [curValueHash] = curHTX.split('.');
+    const [curValueHash] = curHTX!.split('.');
 
     const {proof} = await prover.proveHashed(KEY_PREIMAGE, BigInt(curValueHash), BigInt(0));
     await owner.remove(KEY, proof);
