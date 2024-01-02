@@ -1,17 +1,14 @@
 name: test
 
-# run when `dev` has a push or PR
-# or when `master` has a push
 on:
   pull_request:
     types:
       - opened
     branches:
-      - dev
+      - master
   push:
     branches:
       - master
-      - dev
 
 jobs:
   test:

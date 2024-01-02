@@ -50,7 +50,11 @@ Depending on your use-cases, we have several optional dependencies:
 
 ## Usage
 
-You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>. If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
+You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>.
+
+> [!NOTE]
+>
+> If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
 
 ## Examples
 
@@ -64,7 +68,7 @@ Check out the [examples](./examples/) folder for a few examples of HollowDB usag
 You can run all tests via:
 
 ```sh
-yarn test
+pnpm test
 ```
 
 Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
@@ -74,6 +78,6 @@ Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/
 You can check the formatting of the code or lint everything with the following commands:
 
 ```sh
-yarn format # prettier
-yarn lint   # eslint
+pnpm format # prettier
+pnpm lint   # eslint
 ```

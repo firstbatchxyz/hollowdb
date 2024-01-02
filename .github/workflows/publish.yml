@@ -5,53 +5,7 @@ on:
     types: [published]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 19.x
-
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.5.0
-        with:
-          redis-version: 7
-          redis-port: 6379
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-
-      - name: Restore yarn cache
-        uses: actions/cache@v3
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Install dependencies
-        run: yarn
-
-      - name: Formatting
-        run: yarn format
-
-      - name: Linting
-        run: yarn lint
-
-      - name: Build
-        run: yarn build
-
-      - name: Run tests
-        run: yarn test
-
   publish:
-    needs: test
     runs-on: ubuntu-latest
 
     steps:
