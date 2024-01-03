@@ -7,6 +7,7 @@ import {deploy, deployFromSrc} from './deploy';
 import {evolve, evolveFromSrc} from './evolve';
 import {getPath, prepareCode, prepareState, prepareStateAtPath, prepareWallet, prepareWarp} from './utils';
 import {build} from './build';
+import {transfer} from './transfer';
 
 // Contract creation script will use existing hollowdb contract & state
 const BASE_CONTRACT_NAME = 'hollowdb';
@@ -115,6 +116,27 @@ yargs(hideBin(process.argv))
     yargs => yargs,
     async args => {
       build(args.name);
+    }
+  )
+
+  .command(
+    'transfer',
+    'Transfer keys & values from one contract to another',
+    yargs =>
+      yargs
+        .option('destination', {
+          alias: 'd',
+          describe: 'Destination contract transaction id',
+          string: true,
+        })
+        .demandOption(['wallet', 'contractTxId', 'destination']),
+    async args => {
+      const warp = prepareWarp(args.target);
+      const wallet = prepareWallet(args.wallet);
+
+      const numKeys = await transfer(wallet, warp, args.contractTxId, args.destination);
+
+      console.log(`${numKeys} transferred.`);
     }
   )
 

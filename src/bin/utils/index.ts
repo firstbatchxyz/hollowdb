@@ -2,8 +2,8 @@ import {readFileSync} from 'fs';
 import type {JWKInterface, Warp} from 'warp-contracts';
 import {WarpFactory} from 'warp-contracts';
 import {DeployPlugin} from 'warp-contracts-plugin-deploy';
-import {prepareState as prepareStateWithWarp} from './deploy';
-import {ContractState} from '../contracts/types';
+import {prepareState as prepareStateWithWarp} from '../deploy';
+import {ContractState} from '../../contracts/types';
 
 export function getPath(name: string, type: 'state' | 'source' | 'contract'): string {
   if (type === 'contract') {
