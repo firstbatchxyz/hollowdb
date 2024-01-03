@@ -44,6 +44,7 @@ Depending on your use-cases, we have several optional dependencies:
 - You can use [hollowdb-prover](https://www.npmjs.com/package/hollowdb-prover) as a simple utility that generates zero-knowledge proofs that are verifiable by HollowDB.
 - You can use LMDB cache within your Warp instance via [warp-contracts-lmdb](https://www.npmjs.com/package/warp-contracts-lmdb).
 - You can use Redis cache within your warp instance via [warp-contracts-redis](https://www.npmjs.com/package/warp-contracts-redis) together with [ioredis](https://www.npmjs.com/package/ioredis).
+- When you are evaluating a contract that uses ZK proofs, you should also use [warp-contracts-plugin-snarkjs](https://www.npmjs.com/package/warp-contracts-plugin-snarkjs) and [warp-contracts-plugin-ethers](https://www.npmjs.com/package/warp-contracts-plugin-ethers).
 
 ## Usage
 

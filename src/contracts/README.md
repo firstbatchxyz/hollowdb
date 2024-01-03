@@ -9,19 +9,21 @@ To begin, clone the repo and install the packages:
 git clone https://github.com/firstbatchxyz/hollowdb
 
 # install packages
-yarn
+pnpm install
 ```
 
-Our command-line tool can be called via `yarn contract`. You will see the message below if you type `yarn contract --help`:
+Our command-line tool can be called via `pnpm contract`. You will see the message below if you type `pnpm contract --help`:
 
 ```sh
-yarn contract <command>
+pnpm contract <command>
 
 Commands:
-  yarn contract deploy  Deploy a new contract
-  yarn contract evolve  Evolve an existing contract
-  yarn contract create  Create your own custom contract
-  yarn contract build   Build a contract
+  pnpm contract whoami    Display information about your wallet
+  pnpm contract deploy    Deploy a new contract
+  pnpm contract evolve    Evolve an existing contract
+  pnpm contract create    Create your own custom contract
+  pnpm contract build     Build a contract
+  pnpm contract transfer  Transfer keys & values from one contract to another
 
 Options:
       --help          Show help                                        [boolean]
@@ -41,25 +43,25 @@ As shown in the help message above, building, deploying, or evolving a contract 
 
 ```sh
 # build all contracts
-yarn contract build
+pnpm contract build
 
 # build a specific contract
-yarn contract build -n contract-name
+pnpm contract build -n contract-name
 
 # deploy to mainnet from a local source code
-yarn contract deploy -w ./secret/wallet.json -n contract-name
+pnpm contract deploy -w ./secret/wallet.json -n contract-name
 
 # deploy to mainnet from an existing contract source
-yarn contract deploy -w ./secret/wallet.json -s sourceTxId
+pnpm contract deploy -w ./secret/wallet.json -s sourceTxId
 
 # deploy to testnet from a local source code with a specific state
-yarn contract deploy -w ./secret/wallet.json -n contract-name -t test -i ./path/to/state.json
+pnpm contract deploy -w ./secret/wallet.json -n contract-name -t test -i ./path/to/state.json
 
 # evolve a contract on mainnet to a local source code
-yarn contract evolve -w ./secret/wallet.json -c contractTxId -n contract-name
+pnpm contract evolve -w ./secret/wallet.json -c contractTxId -n contract-name
 
 # evolve a contract on mainnet to an existing contract source
-yarn contract evolve -w ./secret/wallet.json -c contractTxId -s sourceTxId
+pnpm contract evolve -w ./secret/wallet.json -c contractTxId -s sourceTxId
 ```
 
 Thanks to the file structure we are using here, you do not need to worry about paths to your contracts or their initial states. When you provide a contract name with `-n` option, the CLI knows to look for the contract source code at `./src/contracts/<name>.contract.ts` and such.
@@ -71,7 +73,7 @@ A SmartWeave contract for Warp Contracts is basically a single JS file that expo
 To begin creating your own contract, simply do:
 
 ```sh
-yarn contract create -n your-new-contract
+pnpm contract create -n your-new-contract
 ```
 
 Within your newly created contract, you can modify the existing functions or add your own.
@@ -235,4 +237,4 @@ Within this directory:
 - `states` has the initial state for each contract.
 - `types` has types, as usual in TypeScript.
 - `utils` has common utility functions, such as proof verification.
-- the remaining files with `.contract.ts` extension are the smart-contracts, and when you run `yarn contract:build` they will be detected and built.
+- the remaining files with `.contract.ts` extension are the smart-contracts, and when you run `pnpm contract build` they will be detected and built.
