@@ -13,7 +13,7 @@
 
 <p align="center">
     <a href="https://opensource.org/licenses/MIT" target="_blank">
-        <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-yellow.svg">
+        <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-7CB9E8.svg">
     </a>
     <a href="https://www.npmjs.com/package/hollowdb" target="_blank">
         <img alt="NPM" src="https://img.shields.io/npm/v/hollowdb?logo=npm&color=CB3837">
@@ -23,9 +23,6 @@
     </a>
     <a href="./.github/workflows/test.yml" target="_blank">
         <img alt="Workflow: Tests" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master">
-    </a>
-    <a href="./.github/workflows/build.yml" target="_blank">
-        <img alt="Workflow: Build" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/build.yml/badge.svg?branch=master">
     </a>
     <a href="https://discord.gg/2wuU9ym6fq" target="_blank">
         <img alt="Discord" src="https://dcbadge.vercel.app/api/server/2wuU9ym6fq?style=flat">
@@ -47,10 +44,15 @@ Depending on your use-cases, we have several optional dependencies:
 - You can use [hollowdb-prover](https://www.npmjs.com/package/hollowdb-prover) as a simple utility that generates zero-knowledge proofs that are verifiable by HollowDB.
 - You can use LMDB cache within your Warp instance via [warp-contracts-lmdb](https://www.npmjs.com/package/warp-contracts-lmdb).
 - You can use Redis cache within your warp instance via [warp-contracts-redis](https://www.npmjs.com/package/warp-contracts-redis) together with [ioredis](https://www.npmjs.com/package/ioredis).
+- When you are evaluating a contract that uses ZK proofs, you should also use [warp-contracts-plugin-snarkjs](https://www.npmjs.com/package/warp-contracts-plugin-snarkjs) and [warp-contracts-plugin-ethers](https://www.npmjs.com/package/warp-contracts-plugin-ethers).
 
 ## Usage
 
-You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>. If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
+You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>.
+
+> [!NOTE]
+>
+> If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
 
 ## Examples
 
@@ -64,7 +66,7 @@ Check out the [examples](./examples/) folder for a few examples of HollowDB usag
 You can run all tests via:
 
 ```sh
-yarn test
+pnpm test
 ```
 
 Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
@@ -74,6 +76,6 @@ Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/
 You can check the formatting of the code or lint everything with the following commands:
 
 ```sh
-yarn format # prettier
-yarn lint   # eslint
+pnpm format # prettier
+pnpm lint   # eslint
 ```

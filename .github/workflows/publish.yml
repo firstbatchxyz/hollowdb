@@ -5,65 +5,43 @@ on:
     types: [published]
 
 jobs:
-  test:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Install Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 19.x
+          node-version: 20
 
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.5.0
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
         with:
-          redis-version: 7
-          redis-port: 6379
+          version: 8
+          run_install: false # use caching via later commands
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - name: Restore yarn cache
-        uses: actions/cache@v3
-        id: yarn-cache
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install
 
-      - name: Formatting
-        run: yarn format
+      - name: Build package
+        run: pnpm build
 
-      - name: Linting
-        run: yarn lint
-
-      - name: Build
-        run: yarn build
-
-      - name: Run tests
-        run: yarn test
-
-  publish:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-
-      - run: yarn
-      - run: yarn build
       - uses: JS-DevTools/npm-publish@v3
         id: publish
         with:

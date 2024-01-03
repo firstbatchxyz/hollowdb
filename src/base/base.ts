@@ -1,6 +1,4 @@
-import {Warp, Contract, ArWallet, type CustomSignature} from 'warp-contracts';
-import {SnarkjsExtension} from 'warp-contracts-plugin-snarkjs';
-import {EthersExtension} from 'warp-contracts-plugin-ethers';
+import type {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
 import type {ContractInputGeneric, ContractMode, ContractState} from '../contracts/types/contract';
 
 export class Base<M extends ContractMode> {
@@ -10,16 +8,13 @@ export class Base<M extends ContractMode> {
 
   constructor(signer: ArWallet | CustomSignature, contractTxId: string, warp: Warp) {
     this.signer = signer;
-    this.warp = warp
-      // required for proof verification
-      .use(new SnarkjsExtension())
-      // required for hashing
-      .use(new EthersExtension());
+
+    this.warp = warp;
 
     this.contract = this.warp
       .contract<ContractState<M>>(contractTxId)
       .setEvaluationOptions({
-        allowBigInt: true, // bigInt is required for circuits
+        allowBigInt: true,
         useKVStorage: true,
         sequencerUrl: warp.environment === 'mainnet' ? 'https://gw.warp.cc/' : undefined,
       })

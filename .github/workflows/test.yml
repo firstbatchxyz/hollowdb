@@ -1,29 +1,26 @@
 name: test
 
-# run when `dev` has a push or PR
-# or when `master` has a push
 on:
   pull_request:
     types:
       - opened
     branches:
-      - dev
+      - master
   push:
     branches:
       - master
-      - dev
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 19.x
+          node-version: 20
 
       - name: Start Redis
         uses: supercharge/redis-github-action@1.5.0
@@ -31,21 +28,30 @@ jobs:
           redis-version: 7
           redis-port: 6379
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-
-      - name: Restore yarn cache
-        uses: actions/cache@v3
-        id: yarn-cache
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install
+
+      - name: Build package
+        run: pnpm build
 
       - name: Run tests
-        run: yarn test
+        run: pnpm test

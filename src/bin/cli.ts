@@ -7,12 +7,13 @@ import {deploy, deployFromSrc} from './deploy';
 import {evolve, evolveFromSrc} from './evolve';
 import {getPath, prepareCode, prepareState, prepareStateAtPath, prepareWallet, prepareWarp} from './utils';
 import {build} from './build';
+import {transfer} from './transfer';
 
 // Contract creation script will use existing hollowdb contract & state
 const BASE_CONTRACT_NAME = 'hollowdb';
 
 yargs(hideBin(process.argv))
-  .scriptName('yarn contract')
+  .scriptName('pnpm contract')
   // .example('$0 build -n my-contract', 'Build your contract')
   // .example('$0 deploy -n my-contract -w ./my/wallet.json', 'Deploy to mainnet')
   // .example('$0 evolve -n new-contract -c txId -w ./my/wallet.json', 'Evolve an existing contract with new source')
@@ -44,6 +45,26 @@ yargs(hideBin(process.argv))
     describe: 'Contract transaction id',
   })
   .string(['wallet', 'name', 'init', 'target', 'sourceTxId', 'contractTxId'])
+
+  .command(
+    'whoami',
+    'Display information about your wallet',
+    yargs => yargs.demandOption(['wallet']),
+    async args => {
+      const warp = prepareWarp(args.target);
+      const wallet = prepareWallet(args.wallet);
+
+      const address = await warp.arweave.wallets.getAddress(wallet);
+      const balance = await warp.arweave.wallets.getBalance(address);
+      const lastTxId = await warp.arweave.wallets.getLastTransactionID(address);
+
+      console.table({
+        address,
+        balance: parseFloat(balance),
+        lastTxId: lastTxId === '' ? 'no transactions yet' : lastTxId,
+      });
+    }
+  )
 
   .command(
     'deploy',
@@ -115,6 +136,27 @@ yargs(hideBin(process.argv))
     yargs => yargs,
     async args => {
       build(args.name);
+    }
+  )
+
+  .command(
+    'transfer',
+    'Transfer keys & values from one contract to another',
+    yargs =>
+      yargs
+        .option('destination', {
+          alias: 'd',
+          describe: 'Destination contract transaction id',
+          string: true,
+        })
+        .demandOption(['wallet', 'contractTxId', 'destination']),
+    async args => {
+      const warp = prepareWarp(args.target);
+      const wallet = prepareWallet(args.wallet);
+
+      const numKeys = await transfer(wallet, warp, args.contractTxId, args.destination);
+
+      console.log(`${numKeys} transferred.`);
     }
   )
 
