@@ -17,10 +17,10 @@
   },
   "main": "build/src/index.js",
   "scripts": {
-    "precompile": "yarn clean",
-    "compile": "npx tsc",
-    "prestart": "yarn compile",
-    "start": "npx micro",
+    "prebuild": "yarn clean",
+    "build": "npx tsc",
+    "prestart": "yarn build",
+    "start": "node ./build/src/index.js",
     "test": "npx mocha --bail",
     "clean": "rm -rf ./build"
   },
@@ -29,7 +29,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.16.3",
     "@types/test-listen": "^1.1.0",
-    "arlocal": "^1.1.60",
+    "arlocal": "1.1.62",
     "chai": "^4.3.7",
     "hollowdb-prover": "^0.1.4",
     "mocha": "^10.2.0",

@@ -45,8 +45,8 @@ describe("crud operations", () => {
     const { contractTxId } = await deploy(owner, warp);
 
     // start the server & connect to the contract
-    const circuitsDir = __dirname + "../../../config/circuits/hollow-authz-plonk";
-    prover = new Prover(circuitsDir + "/circuit/hollow-authz.wasm", circuitsDir + "/circuit/prover_key.zkey", "plonk");
+    const circuitsDir = __dirname + "/../../../config/circuits/hollow-authz-plonk";
+    prover = new Prover(circuitsDir + "/hollow-authz.wasm", circuitsDir + "/prover_key.zkey", "plonk");
     caches = createCaches(contractTxId, redisClient);
     warp = makeLocalWarp(config.ARWEAVE_PORT, caches);
     const hollowdb = new SDK(owner, contractTxId, warp);

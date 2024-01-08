@@ -4,7 +4,7 @@ This backend implementation uses [Micro](https://github.com/vercel/micro) which 
 
 ## Usage
 
-First, you need an Arweave wallet. Provide the path to the wallet with the `WALLET_PATH` environment variable.
+First, you need an Arweave wallet. Provide the path to the wallet with the `WALLET` environment variable.
 
 > [!NOTE]
 >
@@ -23,14 +23,14 @@ yarn install
 Finally, start the server with:
 
 ```sh
-CONTRACT_TXID="your-contract" yarn start
+CONTRACT="your-contract" yarn start
 ```
 
 ### Configurations
 
 There are several environment variables to configure the server. You can provide them within the command line, or via `.env` file. An example is given [here](./.env.example).
 
-- `WALLET_PATH=path/to/wallet.json` <br> HollowDB requires an Arweave wallet, specified by this variable. If none is given, it defaults to `./config/wallet.json`.
+- `WALLET=path/to/wallet.json` <br> HollowDB requires an Arweave wallet, specified by this variable. If none is given, it defaults to `./config/wallet.json`.
 
 - `REDIS_URL=<redis-url>` <br> You need a Redis server running before you start the server, the URL to the server can be provided with a `REDIS_URL` environment variable. The connection URL defaults to `redis://default:redispw@localhost:6379`.
 
