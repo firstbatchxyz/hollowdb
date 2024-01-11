@@ -1933,7 +1933,36 @@ argparse@^2.0.1:
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
   integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
 
-arlocal@^1.1.59, arlocal@^1.1.60:
+arlocal@1.1.62:
+  version "1.1.62"
+  resolved "https://registry.yarnpkg.com/arlocal/-/arlocal-1.1.62.tgz#aecb7e8bc2e915a7e4be8c82b74a0a694c5a080a"
+  integrity sha512-BnpolFe3obbQBGKvvkvrAZ4oleLHox7Xcly2l896cHzysPqvo8C9lYofUiQKYcprHIhHH1F7AFLrxAvZq5yQLQ==
+  dependencies:
+    "@koa/cors" "^3.1.0"
+    apollo-server-koa "^3.6.2"
+    arbundles "^0.6.19"
+    arweave-bundles "^1.0.3"
+    asn1.js "5.4.1"
+    bignumber.js "^9.0.2"
+    bytes "^3.1.2"
+    graphql "^16.2.0"
+    knex "^0.95.6"
+    koa "^2.13.4"
+    koa-body "^4.2.0"
+    koa-bodyparser "^4.3.0"
+    koa-json "^2.0.2"
+    koa-logger "^3.2.1"
+    koa-router "^10.1.1"
+    lodash "^4.17.21"
+    mime "^3.0.0"
+    minimist "^1.2.5"
+    moment "^2.29.1"
+    rfc4648 "^1.5.1"
+    smartweave "^0.4.46"
+    sqlite3 "^5.0.3"
+    tsc-watch "^4.6.0"
+
+arlocal@^1.1.59:
   version "1.1.64"
   resolved "https://registry.yarnpkg.com/arlocal/-/arlocal-1.1.64.tgz#153f6bdb8fdc8840813f4d147ac60d4c50d1b81a"
   integrity sha512-623LT99n+TVYYO7USXaETN+uTOcZOWxMbMtdnlQ6uGWiroGJzu13jSsB0w3Q0JHsaiOwIHG5tZFNVUpNCplrNQ==
