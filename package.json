@@ -1,6 +1,6 @@
 {
   "name": "hollowdb",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A decentralized privacy-preserving key-value database",
   "license": "MIT",
   "homepage": "https://github.com/firstbatchxyz/hollowdb#readme",
@@ -23,19 +23,13 @@
   "targets": {
     "cjs": {
       "outputFormat": "commonjs",
-      "isLibrary": false,
-      "context": "node",
-      "scopeHoist": false,
-      "includeNodeModules": false,
-      "optimize": false
+      "isLibrary": true,
+      "context": "node"
     },
     "mjs": {
       "outputFormat": "esmodule",
-      "isLibrary": false,
-      "context": "node",
-      "scopeHoist": false,
-      "includeNodeModules": false,
-      "optimize": false
+      "isLibrary": true,
+      "context": "node"
     }
   },
   "engines": {
