@@ -1,0 +1,14 @@
+{
+  "name": "evolve-many",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "evolve": "node index.js"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "warp-contracts": "^1.4.36"
+  }
+}
