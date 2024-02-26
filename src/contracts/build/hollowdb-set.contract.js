@@ -209,7 +209,7 @@
         state.evolve = srcTxId;
         return { state };
       }
-      case "seState": {
+      case "setState": {
         const newState = await apply(caller, input.value, state, onlyOwner);
         state = newState;
         return { state };
