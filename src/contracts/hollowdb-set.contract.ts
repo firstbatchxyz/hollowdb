@@ -1,6 +1,6 @@
 import {CantEvolveError, InvalidFunctionError, KeyExistsError} from './errors';
 import {apply, onlyNonNullValue, onlyNonNullValues, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
-import type {ContractHandle} from './types';
+import type {ContractHandle, ContractState} from './types';
 import {hashToGroup} from './utils';
 
 type Mode = {proofs: ['auth']; whitelists: ['put', 'update', 'set']};
@@ -22,7 +22,15 @@ export type SetManyInput<V> = {
   };
 };
 
-export const handle: ContractHandle<Value, Mode, SetInput<Value> | SetManyInput<Value>> = async (state, action) => {
+export type SetStateInput = {
+  function: 'seState';
+  value: ContractState<Mode>;
+};
+
+export const handle: ContractHandle<Value, Mode, SetInput<Value> | SetManyInput<Value> | SetStateInput> = async (
+  state,
+  action
+) => {
   const {caller, input} = action;
   switch (input.function) {
     case 'get': {
@@ -155,6 +163,12 @@ export const handle: ContractHandle<Value, Mode, SetInput<Value> | SetManyInput<
         throw CantEvolveError;
       }
       state.evolve = srcTxId;
+      return {state};
+    }
+
+    case 'seState': {
+      const newState = await apply(caller, input.value, state, onlyOwner);
+      state = newState;
       return {state};
     }
 

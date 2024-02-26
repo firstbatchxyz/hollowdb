@@ -13,6 +13,14 @@
   var InvalidFunctionError = new ContractError("Invalid function.");
   var ArrayLengthMismatchError = new ContractError("Key and value counts mismatch.");
 
+  // src/contracts/modifiers/apply.ts
+  async function apply(caller, input, state, ...modifiers) {
+    for (const modifier of modifiers) {
+      input = await modifier(caller, input, state);
+    }
+    return input;
+  }
+
   // src/contracts/utils/index.ts
   var verifyProof = async (proof, psignals, verificationKey) => {
     if (!verificationKey) {
@@ -54,12 +62,6 @@
       return input;
     };
   };
-  async function apply(caller, input, state, ...modifiers) {
-    for (const modifier of modifiers) {
-      input = await modifier(caller, input, state);
-    }
-    return input;
-  }
 
   // src/contracts/hollowdb-htx.contract.ts
   var handle = async (state, action) => {

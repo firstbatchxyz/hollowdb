@@ -13,6 +13,14 @@
   var InvalidFunctionError = new ContractError("Invalid function.");
   var ArrayLengthMismatchError = new ContractError("Key and value counts mismatch.");
 
+  // src/contracts/modifiers/apply.ts
+  async function apply(caller, input, state, ...modifiers) {
+    for (const modifier of modifiers) {
+      input = await modifier(caller, input, state);
+    }
+    return input;
+  }
+
   // src/contracts/utils/index.ts
   var verifyProof = async (proof, psignals, verificationKey) => {
     if (!verificationKey) {
@@ -80,12 +88,6 @@
       return input;
     };
   };
-  async function apply(caller, input, state, ...modifiers) {
-    for (const modifier of modifiers) {
-      input = await modifier(caller, input, state);
-    }
-    return input;
-  }
 
   // src/contracts/hollowdb-set.contract.ts
   var handle = async (state, action) => {
@@ -205,6 +207,11 @@
           throw CantEvolveError;
         }
         state.evolve = srcTxId;
+        return { state };
+      }
+      case "seState": {
+        const newState = await apply(caller, input.value, state, onlyOwner);
+        state = newState;
         return { state };
       }
       default:
