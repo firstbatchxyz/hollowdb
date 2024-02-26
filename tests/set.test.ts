@@ -55,4 +55,24 @@ describe('set tests', () => {
       expect(results[i]?.val).toBe(values[i].val);
     }
   });
+
+  it('should allow overwriting contract state', async () => {
+    const oldState = await owner.getState();
+    const newVersion = 'im-overwritten-oh-no';
+    await owner.setState({
+      ...oldState,
+      version: newVersion,
+    });
+
+    const newState = await owner.getState();
+    expect(newState.version).toBe(newVersion);
+
+    // this kind of acts like a kill switch
+    // you should NOT reset the state like this
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    await owner.setState({});
+    const emptyState = await owner.getState();
+    expect(JSON.stringify(emptyState)).toBe('{}');
+  });
 });

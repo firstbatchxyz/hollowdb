@@ -1,5 +1,5 @@
 import {BaseSDK} from '.';
-import {SetInput, SetManyInput} from './contracts/hollowdb-set.contract';
+import {SetInput, SetManyInput, SetStateInput} from './contracts/hollowdb-set.contract';
 
 /** Just like HollowDB SDK, but supports `Set` and `SetMany` operations.
  * The user must be whitelisted for `set` separately to use them.
@@ -40,6 +40,21 @@ export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelist
         keys,
         values,
       },
+    });
+  }
+
+  /**
+   * Overwrites the contract state.
+   *
+   * Note that this is an owner-only operation, and a wrongfully
+   * overwritten state may break some of the contract methods.
+   *
+   * @param state the key of the value to be inserted
+   */
+  async setState(state: Awaited<ReturnType<this['getState']>>): Promise<void> {
+    await this.base.dryWriteInteraction<SetStateInput>({
+      function: 'seState',
+      value: state,
     });
   }
 }
