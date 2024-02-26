@@ -23,7 +23,7 @@ export type SetManyInput<V> = {
 };
 
 export type SetStateInput = {
-  function: 'seState';
+  function: 'setState';
   value: ContractState<Mode>;
 };
 
@@ -166,7 +166,7 @@ export const handle: ContractHandle<Value, Mode, SetInput<Value> | SetManyInput<
       return {state};
     }
 
-    case 'seState': {
+    case 'setState': {
       const newState = await apply(caller, input.value, state, onlyOwner);
       state = newState;
       return {state};

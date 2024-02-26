@@ -53,7 +53,7 @@ export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelist
    */
   async setState(state: Awaited<ReturnType<this['getState']>>): Promise<void> {
     await this.base.dryWriteInteraction<SetStateInput>({
-      function: 'seState',
+      function: 'setState',
       value: state,
     });
   }
