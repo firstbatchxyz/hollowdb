@@ -1,0 +1,87 @@
+{
+  "name": "hollowdb-client",
+  "description": "HollowDB Client",
+  "version": "0.2.5",
+  "author": "FirstBatch Team <dev@firstbatch.xyz>",
+  "contributors": [
+    "Faruk Can Özkan <farukcan@firstbatch.xyz>",
+    "Erhan Tezcan <erhan@firstbatch.xyz>"
+  ],
+  "homepage": "https://github.com/firstbatchxyz/hollowdb-client#readme",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "yarn clean:lib && yarn lint",
+    "build": "parcel build",
+    "test": "jest",
+    "clean": "gts clean",
+    "clean:lib": "rimraf ./lib",
+    "lint": "gts lint",
+    "format": "prettier --write './src/**/*.ts'",
+    "prepublishOnly": "yarn lint",
+    "preversion": "yarn lint && yarn build",
+    "version": "yarn format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "yalc:publish": "yarn build && yalc publish --push"
+  },
+  "files": [
+    "lib/",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "source": "src/index.ts",
+  "types": "lib/index.d.ts",
+  "cjs": "lib/index.cjs",
+  "mjs": "lib/index.mjs",
+  "exports": {
+    "types": "./lib/index.d.ts",
+    "import": "./lib/index.mjs",
+    "require": "./lib/index.cjs",
+    "default": "./lib/index.mjs"
+  },
+  "targets": {
+    "cjs": {
+      "outputFormat": "commonjs",
+      "isLibrary": true,
+      "context": "node"
+    },
+    "mjs": {
+      "outputFormat": "esmodule",
+      "isLibrary": true,
+      "context": "node"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "snarkjs": "^0.7.0",
+    "@parcel/packager-ts": "2.9.3",
+    "@parcel/transformer-typescript-tsc": "^2.9.3",
+    "@parcel/transformer-typescript-types": "2.9.3",
+    "@types/jest": "^29.5.3",
+    "@types/node": "^14.11.2",
+    "gts": "^5.2.0",
+    "hollowdb-prover": "^0.1.4",
+    "jest": "^29.6.1",
+    "parcel": "^2.9.3",
+    "rimraf": "^5.0.1",
+    "ts-jest": "^29.1.1",
+    "typescript": "~4.7.0"
+  },
+  "keywords": [
+    "hollowdb",
+    "key-value store",
+    "storage",
+    "database",
+    "zksnark",
+    "blockchain",
+    "smart-contracts",
+    "arweave",
+    "anonymous",
+    "smartweave",
+    "circom",
+    "warp-contracts",
+    "zero-knowledge"
+  ]
+}

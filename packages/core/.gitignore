@@ -1,0 +1,27 @@
+# OS junk files
+.DS_Store
+
+# Node files
+node_modules/
+yarn-error.log
+
+# Warp Logger logs
+logs 
+
+# Project files 
+.parcel-cache/
+cache/
+lib/
+dist/
+
+# Redis stuff
+dump.rdb
+
+# Temporary stuff not-to-be pushed
+*.tmp.ts
+tmp.ts
+
+# Test stuff
+coverage
+
+.vscode
