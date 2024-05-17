@@ -123,8 +123,7 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
 };
 
 /**
- * A modifier specific to HTX contract, where values are in form `hash.txid` and txId represents
- * a Bundlr upload transaction id.
+ * A modifier specific to HTX contract, where values are in form `hash.txid` and txId represents an Arweave txid
  */
 export function onlyProofVerifiedHTX(circuit: string) {
   return async <I extends {key: string; value?: `${string}.${string}`; proof?: object}, S extends ContractState>(

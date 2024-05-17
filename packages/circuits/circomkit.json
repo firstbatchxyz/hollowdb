@@ -1,0 +1,4 @@
+{
+  "protocol": "groth16",
+  "prime": "bn128"
+}

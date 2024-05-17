@@ -1,6 +1,10 @@
 import {CacheOptions, Warp, defaultCacheOptions} from 'warp-contracts';
 import {LmdbCache} from 'warp-contracts-lmdb';
-import {LmdbOptions} from 'warp-contracts-lmdb/lib/types/LmdbOptions';
+
+// TODO: warp type error???
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import type {LmdbOptions} from 'warp-contracts-lmdb/lib/types/LmdbOptions';
 import {RedisCache, RedisOptions} from 'warp-contracts-redis';
 import constants from '../constants';
 import {Redis} from 'ioredis';
@@ -38,34 +42,6 @@ export function overrideCache(
           url: constants.REDIS_URL,
         };
 
-    // if (useCache.state)
-    //   warp = warp.useStateCache(
-    //     new RedisCache(
-    //       {
-    //         ...redisCacheOptions,
-    //         dbLocation: 'state',
-    //       },
-    //       redisSpecificOptions
-    //     )
-    //   );
-    // if (useCache.contract)
-    //   warp = warp.useContractCache(
-    //     new RedisCache(
-    //       {
-    //         ...redisCacheOptions,
-    //         dbLocation: 'contract',
-    //       },
-    //       redisSpecificOptions
-    //     ),
-    //     new RedisCache(
-    //       {
-    //         ...redisCacheOptions,
-    //         dbLocation: 'src',
-    //       },
-    //       redisSpecificOptions
-    //     )
-    //   );
-
     warp = warp.useKVStorageFactory(
       (contractTxId: string) =>
         new RedisCache(
@@ -79,35 +55,6 @@ export function overrideCache(
   } else if (cacheType === 'lmdb') {
     const lmdbCacheOptions: CacheOptions = defaultCacheOptions;
     const lmdbSpecificOptions: LmdbOptions = LIMIT_OPTS;
-
-    // if (useCache.state)
-    //   warp = warp.useStateCache(
-    //     new LmdbCache(
-    //       {
-    //         ...lmdbCacheOptions,
-    //         dbLocation: './cache/warp/state',
-    //       },
-    //       lmdbSpecificOptions
-    //     )
-    //   );
-
-    // if (useCache.contract)
-    //   warp = warp.useContractCache(
-    //     new LmdbCache(
-    //       {
-    //         ...lmdbCacheOptions,
-    //         dbLocation: './cache/warp/contract',
-    //       },
-    //       lmdbSpecificOptions
-    //     ),
-    //     new LmdbCache(
-    //       {
-    //         ...lmdbCacheOptions,
-    //         dbLocation: './cache/warp/src',
-    //       },
-    //       lmdbSpecificOptions
-    //     )
-    //   );
 
     warp = warp.useKVStorageFactory(
       (contractTxId: string) =>

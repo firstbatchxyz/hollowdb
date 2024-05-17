@@ -69,7 +69,16 @@ You can run all tests via:
 pnpm test
 ```
 
-Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
+Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts). Below are the scope of our tests:
+
+- `evolve` tests for evolve functionality.
+- `whitelists` tests for Whitelist functionality, both enabled and disabled.
+- `proofs` tests for Proofs functionality, both enabled and disabled.
+- `crud` tests for basic CRUD functionality, such as checking for existing keys, not removing an already removed key and such.
+- `htx` tests use a custom contract where assume bundler usage and instead of values themselves, we store `valueHash.txid` as values.
+- `multi` tests using a single Warp instance with multiple contracts, and multiple HollowDB instances.
+- `null` tests null values, which are not allowed due to ambiguity between a null value and non-existent value.
+- `set` tests `set` & `setMany` operations.
 
 ## Styling
 

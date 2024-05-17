@@ -80,7 +80,7 @@ await client.remove(KEY, PROOF);
 To run tests:
 
 ```sh
-yarn test
+pnpm test
 ```
 
 The API calls are mocked during the test, so you can run it offline.
