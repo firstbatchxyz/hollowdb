@@ -14,6 +14,10 @@
     "format": "npx prettier --check ./**/*.ts",
     "lint": "npx gts lint"
   },
+  "dependencies": {
+    "circomkit": "^0.1.0",
+    "circomlib": "latest"
+  },
   "devDependencies": {
     "@ethersproject/sha2": "^5.7.0",
     "@types/chai": "^4.3.4",
@@ -26,9 +30,5 @@
     "poseidon-lite": "^0.2.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
-  },
-  "dependencies": {
-    "circomkit": "^0.1.0",
-    "circomlib": "latest"
   }
 }

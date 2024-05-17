@@ -29,46 +29,17 @@
     </a>
 </p>
 
-## Installation
+## Packages
 
-To install HollowDB:
+HollowDB is composed the following packages within a [workspace](https://pnpm.io/workspaces):
 
-```bash
-yarn add hollowdb     # yarn
-npm install hollowdb  # npm
-pnpm add hollowdb     # pnpm
-```
+| Package  | NPM | Tests |
+| -------- | --- | ----- |
+| core     |     |       |
+| client   |     |       |
+| circuits |     |       |
+| prover   |     |       |
 
-Depending on your use-cases, we have several optional dependencies:
+## License
 
-- You can use [hollowdb-prover](https://www.npmjs.com/package/hollowdb-prover) as a simple utility that generates zero-knowledge proofs that are verifiable by HollowDB.
-- You can use LMDB cache within your Warp instance via [warp-contracts-lmdb](https://www.npmjs.com/package/warp-contracts-lmdb).
-- You can use Redis cache within your warp instance via [warp-contracts-redis](https://www.npmjs.com/package/warp-contracts-redis) together with [ioredis](https://www.npmjs.com/package/ioredis).
-- When you are evaluating a contract that uses ZK proofs, you should also use [warp-contracts-plugin-snarkjs](https://www.npmjs.com/package/warp-contracts-plugin-snarkjs) and [warp-contracts-plugin-ethers](https://www.npmjs.com/package/warp-contracts-plugin-ethers).
-
-## Usage
-
-You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>.
-
-> [!NOTE]
->
-> If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
-
-## Testing
-
-You can run all tests via:
-
-```sh
-pnpm test
-```
-
-Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
-
-## Styling
-
-You can check the formatting of the code or lint everything with the following commands:
-
-```sh
-pnpm format # prettier
-pnpm lint   # eslint
-```
+All packages are licensed under MIT license.

@@ -12,7 +12,7 @@
     "downlevelIteration": true,
     "skipLibCheck": true,
     "module": "ESNext",
-    "types": ["jest", "./src/globals.d.ts"],
+    "types": ["jest"],
     "isolatedModules": true
   },
   "include": ["src/**/*.ts"],
