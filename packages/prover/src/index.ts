@@ -1,9 +1,6 @@
 import {createHash} from "crypto";
 import {poseidon1} from "poseidon-lite/poseidon1";
-
-// we need to import like this due to a bug
-// https://vivianblog.hashnode.dev/how-to-create-a-zero-knowledge-dapp-from-zero-to-production
-import {groth16, plonk} from "snarkjs";
+import * as snarkjs from "snarkjs";
 
 const bn254Prime = BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
 const TooLargeError = new Error("Preimage is larger than the order of scalar field of BN254.");
@@ -16,12 +13,8 @@ const TooLargeError = new Error("Preimage is larger than the order of scalar fie
  *
  * You can also choose to provide the protocol, which defaults to Groth16.
  */
-export class Prover {
-  constructor(
-    private readonly wasmPath: string,
-    private readonly proverKeyPath: string,
-    readonly protocol: "groth16" | "plonk" = "groth16"
-  ) {}
+export class Prover<T extends "plonk" | "groth16"> {
+  constructor(private readonly wasmPath: string, private readonly proverKeyPath: string, readonly protocol: T) {}
 
   /** Generate a zero-knowledge proof.
    *
@@ -32,7 +25,30 @@ export class Prover {
     preimage: bigint,
     curValue: unknown,
     nextValue: unknown
-  ): Promise<{proof: object; publicSignals: [curValueHash: string, nextValueHash: string, key: string]}> {
+  ): Promise<{
+    proof: snarkjs.Groth16Proof;
+    publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+  }>;
+  async prove(
+    preimage: bigint,
+    curValue: unknown,
+    nextValue: unknown
+  ): Promise<{
+    proof: snarkjs.PlonkProof;
+    publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+  }>;
+  async prove(
+    preimage: bigint,
+    curValue: unknown,
+    nextValue: unknown
+  ): Promise<{
+    proof: snarkjs.Groth16Proof | snarkjs.PlonkProof;
+    publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+  }> {
+    // | {
+    //     proof: ;
+    //     publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+    //   }
     return await this.proveHashed(preimage, hashToGroup(curValue), hashToGroup(nextValue));
   }
 
@@ -47,12 +63,35 @@ export class Prover {
     preimage: bigint,
     curValueHash: bigint,
     nextValueHash: bigint
-  ): Promise<{proof: object; publicSignals: [curValueHash: string, nextValueHash: string, key: string]}> {
+  ): Promise<{
+    proof: snarkjs.Groth16Proof;
+    publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+  }>;
+  async proveHashed(
+    preimage: bigint,
+    curValueHash: bigint,
+    nextValueHash: bigint
+  ): Promise<{
+    proof: snarkjs.PlonkProof;
+    publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+  }>;
+  async proveHashed(
+    preimage: bigint,
+    curValueHash: bigint,
+    nextValueHash: bigint
+  ): Promise<{
+    proof: snarkjs.Groth16Proof | snarkjs.PlonkProof;
+    publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+  }> {
+    // | {
+    //     proof: snarkjs.PlonkProof;
+    //     publicSignals: [curValueHash: string, nextValueHash: string, key: string];
+    //   }
     if (preimage >= bn254Prime) {
       throw TooLargeError;
     }
 
-    return await (this.protocol === "groth16" ? groth16 : plonk).fullProve(
+    const {proof, publicSignals} = await snarkjs[this.protocol].fullProve(
       {
         preimage,
         curValueHash,
@@ -61,6 +100,11 @@ export class Prover {
       this.wasmPath,
       this.proverKeyPath
     );
+
+    return {
+      proof,
+      publicSignals: [publicSignals[0], publicSignals[1], publicSignals[2]] as const,
+    };
   }
 }
 

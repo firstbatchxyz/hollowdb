@@ -6,21 +6,13 @@ import * as snarkjs from "snarkjs";
 describe("prover", () => {
   const secret = "my lovely lovely secret";
   const preimage = BigInt(hashToGroup(secret));
-  const CUR_VALUE = {
-    lorem: "ipsum",
-    foo: 123,
-    bar: true,
-  };
-  const NEXT_VALUE = {
-    lorem: "dolor",
-    foo: 987,
-    bar: false,
-  };
+  const CUR_VALUE = {lorem: "ipsum", foo: 123, bar: true};
+  const NEXT_VALUE = {lorem: "dolor", foo: 987, bar: false};
 
   describe.each(["groth16", "plonk"] as const)("%s protocol", (protocol) => {
-    let prover: Prover;
+    let prover: Prover<typeof protocol>;
     let verificationKey: object;
-    let proof: object;
+    let proof: snarkjs.Groth16Proof & snarkjs.PlonkProof;
     let correctKey: string;
     let correctCurValueHash: string;
     let correctNewValueHash: string;
@@ -31,7 +23,8 @@ describe("prover", () => {
 
       // generate a proof
       const fullProof = await prover.prove(preimage, CUR_VALUE, NEXT_VALUE);
-      proof = fullProof.proof;
+      proof = fullProof.proof as snarkjs.Groth16Proof & snarkjs.PlonkProof;
+
       correctCurValueHash = fullProof.publicSignals[0];
       correctNewValueHash = fullProof.publicSignals[1];
       correctKey = "0x" + BigInt(fullProof.publicSignals[2]).toString(16);
