@@ -1,11 +1,11 @@
-import {createValues, deployContract} from './utils';
-import {setupWarp} from './hooks';
-import {hollowdb as initialState} from '../src/contracts/states';
-import {SetSDK} from '../src';
+import {createValues, deployContract} from "./utils";
+import {setupWarp} from "./hooks";
+import {hollowdb as initialState} from "../src/contracts/states";
+import {SetSDK} from "../src";
 
 type ValueType = {val: string};
 
-describe('set tests', () => {
+describe("set tests", () => {
   const warpHook = setupWarp();
   let owner: SetSDK<ValueType>;
 
@@ -14,39 +14,39 @@ describe('set tests', () => {
   beforeAll(async () => {
     const hook = warpHook();
     const [ownerWallet] = hook.wallets;
-    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialState, 'hollowdb-set');
+    const contractTxId = await deployContract(hook.warp, ownerWallet.jwk, initialState, "hollowdb-set");
 
     owner = new SetSDK(ownerWallet.jwk, contractTxId, hook.warp);
   });
 
-  it('should allow putting a value', async () => {
+  it("should allow putting a value", async () => {
     await owner.put(KEY, VALUE);
     const value = await owner.get(KEY);
     expect(value?.val).toBe(VALUE.val);
   });
 
-  it('should NOT allow putting a value again', async () => {
-    await expect(owner.put(KEY, NEXT_VALUE)).rejects.toThrow('Contract Error [put]: Key already exists.');
+  it("should NOT allow putting a value again", async () => {
+    await expect(owner.put(KEY, NEXT_VALUE)).rejects.toThrow("Contract Error [put]: Key already exists.");
   });
 
-  it('should allow setting a value at an existing key', async () => {
+  it("should allow setting a value at an existing key", async () => {
     await owner.set(KEY, NEXT_VALUE);
     const value = await owner.get(KEY);
     expect(value?.val).toBe(NEXT_VALUE.val);
   });
 
-  it('should allow setting a value at a new key', async () => {
+  it("should allow setting a value at a new key", async () => {
     const newKV = createValues();
     await owner.set(newKV.KEY, newKV.VALUE);
     const value = await owner.get(newKV.KEY);
     expect(value?.val).toBe(newKV.VALUE.val);
   });
 
-  it('should allow setting many values', async () => {
+  it("should allow setting many values", async () => {
     const kvs = Array.from({length: 5}, () => createValues());
 
-    const keys = kvs.map(kv => kv.KEY);
-    const values = kvs.map(kv => kv.VALUE);
+    const keys = kvs.map((kv) => kv.KEY);
+    const values = kvs.map((kv) => kv.VALUE);
     await owner.setMany(keys, values);
 
     const results = await owner.getMany(keys);
@@ -56,9 +56,9 @@ describe('set tests', () => {
     }
   });
 
-  it('should allow overwriting contract state', async () => {
+  it("should allow overwriting contract state", async () => {
     const oldState = await owner.getState();
-    const newVersion = 'im-overwritten-oh-no';
+    const newVersion = "im-overwritten-oh-no";
     await owner.setState({
       ...oldState,
       version: newVersion,
@@ -73,6 +73,6 @@ describe('set tests', () => {
     // @ts-expect-error
     await owner.setState({});
     const emptyState = await owner.getState();
-    expect(JSON.stringify(emptyState)).toBe('{}');
+    expect(JSON.stringify(emptyState)).toBe("{}");
   });
 });

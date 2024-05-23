@@ -1,14 +1,12 @@
-import {createHash} from 'crypto';
-import {poseidon1} from 'poseidon-lite/poseidon1';
+import {createHash} from "crypto";
+import {poseidon1} from "poseidon-lite/poseidon1";
 
 // we need to import like this due to a bug
 // https://vivianblog.hashnode.dev/how-to-create-a-zero-knowledge-dapp-from-zero-to-production
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import {groth16, plonk} from 'snarkjs';
+import {groth16, plonk} from "snarkjs";
 
-const bn254Prime = BigInt('21888242871839275222246405745257275088548364400416034343698204186575808495617');
-const TooLargeError = new Error('Preimage is larger than the order of scalar field of BN254.');
+const bn254Prime = BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+const TooLargeError = new Error("Preimage is larger than the order of scalar field of BN254.");
 
 /** A zero-knowledge prover utility to be used with HollowDB.
  *
@@ -22,7 +20,7 @@ export class Prover {
   constructor(
     private readonly wasmPath: string,
     private readonly proverKeyPath: string,
-    readonly protocol: 'groth16' | 'plonk' = 'groth16'
+    readonly protocol: "groth16" | "plonk" = "groth16"
   ) {}
 
   /** Generate a zero-knowledge proof.
@@ -54,7 +52,7 @@ export class Prover {
       throw TooLargeError;
     }
 
-    return await (this.protocol === 'groth16' ? groth16 : plonk).fullProve(
+    return await (this.protocol === "groth16" ? groth16 : plonk).fullProve(
       {
         preimage,
         curValueHash,
@@ -77,10 +75,10 @@ export class Prover {
 export function hashToGroup(value: unknown): bigint {
   if (value) {
     return BigInt(
-      '0x' +
-        createHash('ripemd160')
+      "0x" +
+        createHash("ripemd160")
           .update(Buffer.from(JSON.stringify(value)))
-          .digest('hex')
+          .digest("hex")
     );
   } else {
     return BigInt(0);
@@ -96,5 +94,5 @@ export function computeKey(preimage: bigint): string {
     throw TooLargeError;
   }
 
-  return '0x' + poseidon1([preimage]).toString(16);
+  return "0x" + poseidon1([preimage]).toString(16);
 }

@@ -1,9 +1,9 @@
-import type {Warp, JWKInterface} from 'warp-contracts';
-import {randomBytes} from 'crypto';
-import {readFileSync} from 'fs';
-import {computeKey} from 'hollowdb-prover';
-import {deploy} from '../../src/bin/deploy';
-import {ContractState} from '../../src/contracts/types';
+import type {Warp, JWKInterface} from "warp-contracts";
+import {randomBytes} from "crypto";
+import {readFileSync} from "fs";
+import {computeKey} from "hollowdb-prover";
+import {deploy} from "../../src/bin/deploy";
+import {ContractState} from "../../src/contracts/types";
 
 /** Add funds to any wallet. */
 export async function addFunds(warp: Warp, wallet: JWKInterface) {
@@ -13,12 +13,12 @@ export async function addFunds(warp: Warp, wallet: JWKInterface) {
 
 /** Mine a block in the local instance. */
 export async function mineBlock(warp: Warp) {
-  await warp.arweave.api.get('mine');
+  await warp.arweave.api.get("mine");
 }
 
 /** Convert a decimal string to hexadecimal, both belonging to a bigint. */
 export function decimalToHex(bigIntString: string): string {
-  return '0x' + BigInt(bigIntString).toString(16);
+  return "0x" + BigInt(bigIntString).toString(16);
 }
 
 /**
@@ -26,13 +26,13 @@ export function decimalToHex(bigIntString: string): string {
  * @param numBytes number of random bytes
  */
 export function createValues(numBytes = 10) {
-  const KEY_PREIMAGE = BigInt('0x' + randomBytes(numBytes).toString('hex'));
+  const KEY_PREIMAGE = BigInt("0x" + randomBytes(numBytes).toString("hex"));
   const KEY = computeKey(KEY_PREIMAGE);
   const VALUE = {
-    val: randomBytes(numBytes).toString('hex'),
+    val: randomBytes(numBytes).toString("hex"),
   };
   const NEXT_VALUE = {
-    val: randomBytes(numBytes).toString('hex'),
+    val: randomBytes(numBytes).toString("hex"),
   };
   return {
     KEY,
@@ -50,10 +50,10 @@ export async function deployContract(
   warp: Warp,
   signer: JWKInterface,
   initialState: ContractState,
-  contractName = 'hollowdb'
+  contractName = "hollowdb"
 ): Promise<string> {
-  const contractSource = readFileSync(`./src/contracts/build/${contractName}.contract.js`, 'utf8');
-  const contractTxId = await deploy(signer, warp, initialState, contractSource).then(result => result.contractTxId);
+  const contractSource = readFileSync(`./src/contracts/build/${contractName}.contract.js`, "utf8");
+  const contractTxId = await deploy(signer, warp, initialState, contractSource).then((result) => result.contractTxId);
 
   const contractTx = await warp.arweave.transactions.get(contractTxId);
   expect(contractTx).not.toBeNull();

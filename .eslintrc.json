@@ -10,7 +10,7 @@
     "eol-last": "error",
     "prefer-arrow-callback": "error",
     "no-trailing-spaces": "error",
-    "quotes": ["warn", "single", {"avoidEscape": true}],
+    "quotes": ["warn", "double", {"avoidEscape": true}],
     "no-restricted-properties": [
       "error",
       {

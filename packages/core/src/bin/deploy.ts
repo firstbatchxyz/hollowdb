@@ -1,6 +1,6 @@
-import {JWKInterface, Warp} from 'warp-contracts';
-import {ContractState} from '../contracts/types';
-import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
+import {JWKInterface, Warp} from "warp-contracts";
+import {ContractState} from "../contracts/types";
+import {ArweaveSigner} from "warp-contracts-plugin-deploy";
 
 /** Sets the contract owner as the deployer wallet's address, adds the owner to whitelists and sets contract version. */
 export async function prepareState(
@@ -20,7 +20,7 @@ export async function prepareState(
 
   // if available, hollowdb version is written
   const version = process.env.npm_package_version;
-  initialState.version = version || '1.2.x';
+  initialState.version = version || "1.2.x";
 
   return initialState;
 }
@@ -36,7 +36,7 @@ export async function deploy(
   // throw new Error('nope');
   const {contractTxId, srcTxId} = await warp.deploy(
     {
-      wallet: warp.environment === 'local' ? owner : new ArweaveSigner(owner),
+      wallet: warp.environment === "local" ? owner : new ArweaveSigner(owner),
       initState: JSON.stringify(preparedState),
       src: contractSourceCode,
       evaluationManifest: {
@@ -46,7 +46,7 @@ export async function deploy(
         },
       },
     },
-    warp.environment === 'local' // if local, bundling should be disabled
+    warp.environment === "local" // if local, bundling should be disabled
   );
 
   return {contractTxId, srcTxId};
@@ -63,7 +63,7 @@ export async function deployFromSrc(
 
   const {contractTxId} = await warp.deployFromSourceTx(
     {
-      wallet: warp.environment === 'local' ? owner : new ArweaveSigner(owner),
+      wallet: warp.environment === "local" ? owner : new ArweaveSigner(owner),
       initState: JSON.stringify(preparedState),
       srcTxId: srcTxId,
       evaluationManifest: {
@@ -73,7 +73,7 @@ export async function deployFromSrc(
         },
       },
     },
-    warp.environment === 'local'
+    warp.environment === "local"
   );
 
   return {contractTxId, srcTxId};

@@ -1,6 +1,6 @@
-import {Base} from './base';
-import {Admin} from './admin';
-import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
+import {Base} from "./base";
+import {Admin} from "./admin";
+import type {SortKeyCacheRangeOptions} from "warp-contracts/lib/types/cache/SortKeyCacheRangeOptions";
 import type {
   ContractMode,
   ContractState,
@@ -12,8 +12,8 @@ import type {
   PutManyInput,
   RemoveInput,
   UpdateInput,
-} from '../contracts/types';
-import type {ArWallet, Contract, CustomSignature, SortKeyCacheResult, Warp} from 'warp-contracts';
+} from "../contracts/types";
+import type {ArWallet, Contract, CustomSignature, SortKeyCacheResult, Warp} from "warp-contracts";
 
 export class SDK<V = unknown, M extends ContractMode = ContractMode> {
   readonly base: Base<M>;
@@ -58,7 +58,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    * @returns contract state object
    */
   async getState(): Promise<ContractState<M>> {
-    return await this.base.readState().then(s => s.cachedValue.state);
+    return await this.base.readState().then((s) => s.cachedValue.state);
   }
 
   /**
@@ -82,7 +82,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async getKeys(options?: SortKeyCacheRangeOptions): Promise<string[]> {
     return await this.base.safeReadInteraction<GetKeysInput, string[]>({
-      function: 'getKeys',
+      function: "getKeys",
       value: {
         options,
       },
@@ -107,7 +107,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async getKVMap(options?: SortKeyCacheRangeOptions): Promise<Map<string, V | null>> {
     return await this.base.safeReadInteraction<GetKVMapInput, Map<string, V>>({
-      function: 'getKVMap',
+      function: "getKVMap",
       value: {
         options,
       },
@@ -121,7 +121,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async get(key: string): Promise<V | null> {
     return await this.base.safeReadInteraction<GetInput, V>({
-      function: 'get',
+      function: "get",
       value: {
         key,
       },
@@ -140,7 +140,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async getMany(keys: string[]): Promise<(V | null)[]> {
     return await this.base.safeReadInteraction<GetManyInput, (V | null)[]>({
-      function: 'getMany',
+      function: "getMany",
       value: {
         keys,
       },
@@ -157,7 +157,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async put(key: string, value: V): Promise<void> {
     await this.base.dryWriteInteraction<PutInput<V>>({
-      function: 'put',
+      function: "put",
       value: {
         key,
         value,
@@ -175,7 +175,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async putMany(keys: string[], values: V[]): Promise<void> {
     await this.base.dryWriteInteraction<PutManyInput<V>>({
-      function: 'putMany',
+      function: "putMany",
       value: {
         keys,
         values,
@@ -191,7 +191,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async update(key: string, value: V, proof?: object): Promise<void> {
     await this.base.dryWriteInteraction<UpdateInput<V>>({
-      function: 'update',
+      function: "update",
       value: {
         key,
         value,
@@ -208,7 +208,7 @@ export class SDK<V = unknown, M extends ContractMode = ContractMode> {
    */
   async remove(key: string, proof?: object): Promise<void> {
     await this.base.dryWriteInteraction<RemoveInput>({
-      function: 'remove',
+      function: "remove",
       value: {
         key,
         proof,

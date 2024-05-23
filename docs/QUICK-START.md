@@ -22,7 +22,7 @@ cd hollowdb-example
 Install HollowDB & Warp Contracts packages:
 
 ```sh
-yarn add hollowdb warp-contracts
+pnpm add hollowdb warp-contracts
 ```
 
 Finally, create yourself an Arweave wallet at <https://arweave.app/> or use an existing one if you have. Download your wallet (which will be a JSON file) and put it as `wallet.json` in the current directory.
@@ -30,8 +30,8 @@ Finally, create yourself an Arweave wallet at <https://arweave.app/> or use an e
 Create a new file called `index.js`. Prepare the code as follows:
 
 ```js
-const { SDK } = require("hollowdb");
-const { WarpFactory } = require("warp-contracts");
+const {SDK} = require("hollowdb");
+const {WarpFactory} = require("warp-contracts");
 const fs = require("fs");
 
 async function main() {
@@ -69,7 +69,7 @@ The contract we are connecting to in this example uses zero-knowledge proofs to 
 We can use **HollowDB Prover** for this:
 
 ```js
-const { Prover, computeKey } = require("hollowdb-prover");
+const {Prover, computeKey} = require("hollowdb-prover");
 ```
 
 ## Getting & Setting keys
@@ -107,17 +107,13 @@ We can use the Prover utility for that. We need the WASM file for the circuit, a
 Download these files and add them to the project directory. Then, create the prover as follows:
 
 ```js
-const prover = new Prover(
-  "./hollow-authz.wasm",
-  "./prover_key.zkey",
-  "groth16"
-);
+const prover = new Prover("./hollow-authz.wasm", "./prover_key.zkey", "groth16");
 ```
 
 To generate the proof, we provide our secret, along with the current value & next value:
 
 ```js
-const { proof } = await prover.prove(secret, "hello world", "seeya world");
+const {proof} = await prover.prove(secret, "hello world", "seeya world");
 ```
 
 We can now update our value using the SDK:
@@ -132,9 +128,9 @@ console.log(await sdk.get(key)); // get the new value
 That is it! Our final `index.js` looks like the following:
 
 ```js
-const { SDK } = require("hollowdb");
-const { WarpFactory } = require("warp-contracts");
-const { Prover, computeKey } = require("hollowdb-prover");
+const {SDK} = require("hollowdb");
+const {WarpFactory} = require("warp-contracts");
+const {Prover, computeKey} = require("hollowdb-prover");
 const fs = require("fs");
 
 async function main() {
@@ -160,14 +156,10 @@ async function main() {
   console.log(await sdk.get(key)); // get that value
 
   console.log("Generating a proof for update...");
-  const prover = new Prover(
-    "./hollow-authz.wasm",
-    "./prover_key.zkey",
-    "groth16"
-  );
+  const prover = new Prover("./hollow-authz.wasm", "./prover_key.zkey", "groth16");
 
   console.log("Generating a proof:");
-  const { proof } = await prover.prove(secret, "hello world", "seeya world");
+  const {proof} = await prover.prove(secret, "hello world", "seeya world");
 
   console.log("Updating the value...");
   await sdk.update(key, "bye bye world", proof); // update value

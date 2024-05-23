@@ -1,12 +1,12 @@
-import {LoggerFactory, lastPossibleSortKey} from 'warp-contracts';
-import type {JWKInterface, Warp} from 'warp-contracts';
-import {SDK} from '../hollowdb';
+import {LoggerFactory, lastPossibleSortKey} from "warp-contracts";
+import type {JWKInterface, Warp} from "warp-contracts";
+import {SDK} from "../hollowdb";
 
 // load state with feedback to console
 async function loadState(sdk: SDK) {
   const start = Date.now();
   const interval = setInterval(() => {
-    process.stdout.write('Time: ' + (Date.now() - start) / 1000 + ' (s)             \r');
+    process.stdout.write("Time: " + (Date.now() - start) / 1000 + " (s)             \r");
   }, 2000);
 
   await sdk.getState();
@@ -23,7 +23,7 @@ async function getValueFromStorage(sdk: SDK, contractTxId: string, key: string):
   return await sdk.warp
     .kvStorageFactory(contractTxId)
     .getLast(key)
-    .then(sk => (sk === null ? null : sk.cachedValue));
+    .then((sk) => (sk === null ? null : sk.cachedValue));
 }
 
 /** Transfer keys & values of a contract to another. */
@@ -33,25 +33,25 @@ export async function transfer(
   srcContractTxId: string,
   destContractTxId: string
 ): Promise<number> {
-  LoggerFactory.INST.logLevel('none');
+  LoggerFactory.INST.logLevel("none");
 
-  console.time('Creating source SDK');
+  console.time("Creating source SDK");
   const src = new SDK(wallet, srcContractTxId, warp);
   await loadState(src);
-  console.timeEnd('Creating source SDK');
-  console.log('https://sonar.warp.cc/?#/app/contract/' + srcContractTxId);
+  console.timeEnd("Creating source SDK");
+  console.log("https://sonar.warp.cc/?#/app/contract/" + srcContractTxId);
 
-  console.time('\nCreating destination SDK');
+  console.time("\nCreating destination SDK");
   const dest = new SDK(wallet, destContractTxId, warp);
   await loadState(dest);
-  console.timeEnd('\nCreating destination SDK');
-  console.log('https://sonar.warp.cc/?#/app/contract/' + destContractTxId);
+  console.timeEnd("\nCreating destination SDK");
+  console.log("https://sonar.warp.cc/?#/app/contract/" + destContractTxId);
 
   const [srcKeys, destKeys] = await Promise.all([
     getKeysFromStorage(src, srcContractTxId),
     getKeysFromStorage(dest, destContractTxId),
   ]);
-  console.log('\nNumber of keys:', '\n  Source:', srcKeys.length, '\n  Destination:', destKeys.length);
+  console.log("\nNumber of keys:", "\n  Source:", srcKeys.length, "\n  Destination:", destKeys.length);
 
   let numKeys = 0;
   async function transferKey(i: number) {
@@ -75,11 +75,11 @@ export async function transfer(
     }
   }
 
-  console.log('\nStarting...');
+  console.log("\nStarting...");
   for (let i = 0; i < srcKeys.length; i++) {
     await transferKey(i);
   }
-  console.log('\nTransfer complete!');
+  console.log("\nTransfer complete!");
 
   return numKeys;
 }

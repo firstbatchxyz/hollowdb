@@ -18,9 +18,6 @@
     <a href="https://www.npmjs.com/package/hollowdb" target="_blank">
         <img alt="NPM" src="https://img.shields.io/npm/v/hollowdb?logo=npm&color=CB3837">
     </a>
-    <a href="https://docs.hollowdb.xyz" target="_blank">
-        <img alt="License: MIT" src="https://img.shields.io/badge/docs-hollowdb-3884FF.svg?logo=gitbook">
-    </a>
     <a href="./.github/workflows/test.yml" target="_blank">
         <img alt="Workflow: Tests" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master">
     </a>
@@ -31,15 +28,25 @@
 
 ## Packages
 
-HollowDB is composed the following packages within a [workspace](https://pnpm.io/workspaces):
+HollowDB is composed of the following packages within a [workspace](https://pnpm.io/workspaces):
 
-| Package  | NPM | Tests |
-| -------- | --- | ----- |
-| core     |     |       |
-| client   |     |       |
-| circuits |     |       |
-| prover   |     |       |
+| Package                  | NPM                                       | Tests                                             |
+| ------------------------ | ----------------------------------------- | ------------------------------------------------- |
+| [core][core-pkg]         | [![NPM][core-npm-bdg]][core-npm-link]     | [![TESTS][core-test-bdg]][core-test-link]         |
+| [client][client-pkg]     | [![NPM][client-npm-bdg]][client-npm-link] | [![TESTS][client-test-bdg]][client-test-link]     |
+| [prover][prover-pkg]     | [![NPM][prover-npm-bdg]][prover-npm-link] | [![TESTS][prover-test-bdg]][prover-test-link]     |
+| [circuits][circuits-pkg] | none                                      | [![TESTS][circuits-test-bdg]][circuits-test-link] |
 
 ## License
 
 All packages are licensed under MIT license.
+
+<!-- core -->
+
+[core-pkg]: ./packages/core
+[core-npm-bdg]: https://img.shields.io/npm/v/hollowdb?logo=npm&color=CB3837
+[core-npm-link]: https://www.npmjs.com/package/hollowdb
+[core-test-bdg]: https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master
+[core-test-link]: ./.github/workflows/test.yml
+
+<!-- client -->

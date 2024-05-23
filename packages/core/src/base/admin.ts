@@ -6,8 +6,8 @@ import type {
   UpdateVerificationKeyInput,
   UpdateWhitelistInput,
   OpitonalArray,
-} from '../contracts/types';
-import type {Base} from './base';
+} from "../contracts/types";
+import type {Base} from "./base";
 
 export class Admin<M extends ContractMode = ContractMode> {
   constructor(private readonly base: Base<M>) {}
@@ -18,7 +18,7 @@ export class Admin<M extends ContractMode = ContractMode> {
    */
   async updateOwner(newOwner: string) {
     await this.base.writeInteraction<UpdateOwnerInput>({
-      function: 'updateOwner',
+      function: "updateOwner",
       value: {
         newOwner,
       },
@@ -31,11 +31,11 @@ export class Admin<M extends ContractMode = ContractMode> {
    * @param name name of the list to be updated
    * @param op whether to `add` the users to whitelist or `remove` them
    */
-  async updateWhitelist(users: string[], name: OpitonalArray<M['whitelists'], string>, op: 'add' | 'remove') {
-    const add = op === 'add' ? users : [];
-    const remove = op === 'remove' ? users : [];
-    await this.base.writeInteraction<UpdateWhitelistInput<M['whitelists']>>({
-      function: 'updateWhitelist',
+  async updateWhitelist(users: string[], name: OpitonalArray<M["whitelists"], string>, op: "add" | "remove") {
+    const add = op === "add" ? users : [];
+    const remove = op === "remove" ? users : [];
+    await this.base.writeInteraction<UpdateWhitelistInput<M["whitelists"]>>({
+      function: "updateWhitelist",
       value: {
         add,
         remove,
@@ -50,12 +50,12 @@ export class Admin<M extends ContractMode = ContractMode> {
    * @param verificationKey verification key
    */
   async updateVerificationKey(
-    name: OpitonalArray<M['proofs'], string>,
+    name: OpitonalArray<M["proofs"], string>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     verificationKey: any
   ) {
-    await this.base.writeInteraction<UpdateVerificationKeyInput<M['proofs']>>({
-      function: 'updateVerificationKey',
+    await this.base.writeInteraction<UpdateVerificationKeyInput<M["proofs"]>>({
+      function: "updateVerificationKey",
       value: {
         verificationKey,
         name,
@@ -68,9 +68,9 @@ export class Admin<M extends ContractMode = ContractMode> {
    * @param name name of the list
    * @param value a boolean
    */
-  async updateWhitelistRequirement(name: OpitonalArray<M['whitelists'], string>, value: boolean) {
-    await this.base.writeInteraction<UpdateWhitelistRequirementInput<M['whitelists']>>({
-      function: 'updateWhitelistRequirement',
+  async updateWhitelistRequirement(name: OpitonalArray<M["whitelists"], string>, value: boolean) {
+    await this.base.writeInteraction<UpdateWhitelistRequirementInput<M["whitelists"]>>({
+      function: "updateWhitelistRequirement",
       value: {
         name,
         value,
@@ -83,9 +83,9 @@ export class Admin<M extends ContractMode = ContractMode> {
    * @param name name of the circuit
    * @param value a boolean
    */
-  async updateProofRequirement(name: OpitonalArray<M['proofs'], string>, value: boolean) {
-    await this.base.writeInteraction<UpdateProofRequirementInput<M['proofs']>>({
-      function: 'updateProofRequirement',
+  async updateProofRequirement(name: OpitonalArray<M["proofs"], string>, value: boolean) {
+    await this.base.writeInteraction<UpdateProofRequirementInput<M["proofs"]>>({
+      function: "updateProofRequirement",
       value: {
         name,
         value,

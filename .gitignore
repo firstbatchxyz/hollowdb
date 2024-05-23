@@ -9,7 +9,6 @@ yarn-error.log
 logs 
 
 # Project files 
-.parcel-cache/
 cache/
 lib/
 dist/

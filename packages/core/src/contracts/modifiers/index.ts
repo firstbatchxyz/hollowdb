@@ -1,8 +1,8 @@
-export {apply} from './apply';
+export {apply} from "./apply";
 
-import {ExpectedProofError, InvalidProofError, NotOwnerError, NotWhitelistedError, NullValueError} from '../errors';
-import {verifyProof} from '../utils';
-import {ContractState} from '../types';
+import {ExpectedProofError, InvalidProofError, NotOwnerError, NotWhitelistedError, NullValueError} from "../errors";
+import {verifyProof} from "../utils";
+import {ContractState} from "../types";
 
 /** Ensures `caller` to be the contract owner. */
 export const onlyOwner = <I, S extends ContractState>(caller: string, input: I, state: S) => {
@@ -28,14 +28,14 @@ export const onlyNonNullValue = <I extends {value: unknown}>(_: string, input: I
 
 /** Just like {@link onlyNonNullValue} but for arrays. */
 export const onlyNonNullValues = <I extends {values: unknown[]}>(_: string, input: I) => {
-  if (input.values.some(val => val === null)) {
+  if (input.values.some((val) => val === null)) {
     throw NullValueError;
   }
   return input;
 };
 
 /** Returns a modifier that ensures `caller` is whitelisted for `list`. */
-export const onlyWhitelisted = <I, S extends ContractState>(list: keyof S['whitelists']) => {
+export const onlyWhitelisted = <I, S extends ContractState>(list: keyof S["whitelists"]) => {
   return (caller: string, input: I, state: S) => {
     // must have whitelisting enabled for this list
     if (!state.isWhitelistRequired[list as string]) {
@@ -52,7 +52,7 @@ export const onlyWhitelisted = <I, S extends ContractState>(list: keyof S['white
 
 /** Returns a modifier that ensures input has a proof . */
 export const onlyProofVerified = <I extends {key: string; value?: unknown; proof?: object}, S extends ContractState>(
-  proofName: keyof S['isProofRequired'],
+  proofName: keyof S["isProofRequired"],
   prepareInputs: (caller: string, input: I, state: S) => Promise<bigint[]> | bigint[]
 ) => {
   return async (caller: string, input: I, state: S) => {

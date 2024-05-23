@@ -1,12 +1,12 @@
-import {BaseSDK} from '.';
-import {SetInput, SetManyInput, SetStateInput} from './contracts/hollowdb-set.contract';
+import {BaseSDK} from ".";
+import {SetInput, SetManyInput, SetStateInput} from "./contracts/hollowdb-set.contract";
 
 /** Just like HollowDB SDK, but supports `Set` and `SetMany` operations.
  * The user must be whitelisted for `set` separately to use them.
  *
  * A `set` operation is like a `put` but the key can exist already and will be overwritten.
  */
-export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelists: ['put', 'update', 'set']}> {
+export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ["auth"]; whitelists: ["put", "update", "set"]}> {
   /**
    * Inserts the given value into database.
    *
@@ -17,7 +17,7 @@ export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelist
    */
   async set(key: string, value: V): Promise<void> {
     await this.base.dryWriteInteraction<SetInput<V>>({
-      function: 'set',
+      function: "set",
       value: {
         key,
         value,
@@ -35,7 +35,7 @@ export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelist
    */
   async setMany(keys: string[], values: V[]): Promise<void> {
     await this.base.dryWriteInteraction<SetManyInput<V>>({
-      function: 'setMany',
+      function: "setMany",
       value: {
         keys,
         values,
@@ -51,9 +51,9 @@ export class SetSDK<V = unknown> extends BaseSDK<V, {proofs: ['auth']; whitelist
    *
    * @param state the key of the value to be inserted
    */
-  async setState(state: Awaited<ReturnType<this['getState']>>): Promise<void> {
+  async setState(state: Awaited<ReturnType<this["getState"]>>): Promise<void> {
     await this.base.dryWriteInteraction<SetStateInput>({
-      function: 'setState',
+      function: "setState",
       value: state,
     });
   }

@@ -1,11 +1,11 @@
-import {JWKInterface, Warp} from 'warp-contracts';
-import {SDK} from '../src/hollowdb';
-import {setupWarp} from './hooks';
-import {deployContract} from './utils';
-import {hollowdb as initialState} from '../src/contracts/states/';
-import {evolve} from '../src/bin/evolve';
+import {JWKInterface, Warp} from "warp-contracts";
+import {SDK} from "../src/hollowdb";
+import {setupWarp} from "./hooks";
+import {deployContract} from "./utils";
+import {hollowdb as initialState} from "../src/contracts/states/";
+import {evolve} from "../src/bin/evolve";
 
-describe('evolve contract', () => {
+describe("evolve contract", () => {
   const warpHook = setupWarp();
 
   let warp: Warp;
@@ -19,7 +19,7 @@ describe('evolve contract', () => {
     contractTxId = await deployContract(hook.warp, owner, initialState);
   });
 
-  it('should evolve contract', async () => {
+  it("should evolve contract", async () => {
     const {contractTxId: newContractTxId, srcTxId: newSrcTxId} = await evolve(
       owner,
       warp,
@@ -34,7 +34,7 @@ describe('evolve contract', () => {
     expect(state.evolve).toEqual(newSrcTxId);
 
     // calling a non-existent function in the new contract should give error
-    await expect(sdk.put('1234', '1234')).rejects.toThrow('Contract Error [put]: Unknown function: put');
+    await expect(sdk.put("1234", "1234")).rejects.toThrow("Contract Error [put]: Unknown function: put");
   });
 });
 

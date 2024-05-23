@@ -1,13 +1,13 @@
-import {CacheOptions, Warp, defaultCacheOptions} from 'warp-contracts';
-import {LmdbCache} from 'warp-contracts-lmdb';
+import {CacheOptions, Warp, defaultCacheOptions} from "warp-contracts";
+import {LmdbCache} from "warp-contracts-lmdb";
 
 // TODO: warp type error???
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import type {LmdbOptions} from 'warp-contracts-lmdb/lib/types/LmdbOptions';
-import {RedisCache, RedisOptions} from 'warp-contracts-redis';
-import constants from '../constants';
-import {Redis} from 'ioredis';
+import type {LmdbOptions} from "warp-contracts-lmdb/lib/types/LmdbOptions";
+import {RedisCache, RedisOptions} from "warp-contracts-redis";
+import constants from "../constants";
+import {Redis} from "ioredis";
 
 /**
  * Override Warp cache by using LMDB or Redis. The `default` option simply does
@@ -19,18 +19,18 @@ import {Redis} from 'ioredis';
  */
 export function overrideCache(
   warp: Warp,
-  cacheType: 'lmdb' | 'redis' | 'default',
+  cacheType: "lmdb" | "redis" | "default",
   client?: Redis
   // useCache: {state?: boolean; contract?: boolean},
 ): Warp {
-  if (cacheType === 'default') return warp;
+  if (cacheType === "default") return warp;
 
   const LIMIT_OPTS = constants.DEFAULT_LIMIT_OPTS[cacheType];
-  if (cacheType === 'redis') {
+  if (cacheType === "redis") {
     const redisCacheOptions: CacheOptions = {
       inMemory: true,
-      dbLocation: '', // will be overwritten
-      subLevelSeparator: '|',
+      dbLocation: "", // will be overwritten
+      subLevelSeparator: "|",
     };
     const redisSpecificOptions: RedisOptions = client
       ? {
@@ -52,7 +52,7 @@ export function overrideCache(
           redisSpecificOptions
         )
     );
-  } else if (cacheType === 'lmdb') {
+  } else if (cacheType === "lmdb") {
     const lmdbCacheOptions: CacheOptions = defaultCacheOptions;
     const lmdbSpecificOptions: LmdbOptions = LIMIT_OPTS;
 

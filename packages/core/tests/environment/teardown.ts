@@ -1,4 +1,4 @@
-import ArLocal from 'arlocal';
+import ArLocal from "arlocal";
 
 // This is a Jest environment teardown script, runs only once after all tests.
 module.exports = async () => {

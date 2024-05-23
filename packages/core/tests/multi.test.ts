@@ -1,11 +1,11 @@
-import {deployContract} from './utils';
-import {setupWarp} from './hooks';
-import {SDK} from '../src/hollowdb';
-import {hollowdb as initialState} from '../src/contracts/states/';
+import {deployContract} from "./utils";
+import {setupWarp} from "./hooks";
+import {SDK} from "../src/hollowdb";
+import {hollowdb as initialState} from "../src/contracts/states/";
 
-describe('multiple contracts', () => {
+describe("multiple contracts", () => {
   const REQ_COUNT = 100;
-  const warpHook = setupWarp('redis');
+  const warpHook = setupWarp("redis");
 
   let user1: SDK<number>;
   let user2: SDK<number>;
@@ -33,11 +33,11 @@ describe('multiple contracts', () => {
 
     randomness = Array<boolean>(REQ_COUNT).fill(Math.random() < 0.5);
     keys = Array<string>(REQ_COUNT)
-      .fill('')
+      .fill("")
       .map((_, i) => `key.${i}`);
   });
 
-  it('should allow putting at once', async () => {
+  it("should allow putting at once", async () => {
     const values = Array<number>(REQ_COUNT).fill(Math.random() * REQ_COUNT);
 
     for (let i = 0; i < REQ_COUNT; ++i) {
@@ -53,7 +53,7 @@ describe('multiple contracts', () => {
     }
   });
 
-  it('should allow updating at once', async () => {
+  it("should allow updating at once", async () => {
     const values = Array<number>(REQ_COUNT).fill(Math.random() * REQ_COUNT);
 
     for (let i = 0; i < REQ_COUNT; ++i) {

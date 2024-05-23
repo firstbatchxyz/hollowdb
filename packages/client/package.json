@@ -10,18 +10,18 @@
   "homepage": "https://github.com/firstbatchxyz/hollowdb-client#readme",
   "license": "MIT",
   "scripts": {
-    "prebuild": "yarn clean:lib && yarn lint",
-    "build": "parcel build",
+    "prebuild": "pnpm clean:lib && pnpm lint",
+    "build": "pkgroll",
     "test": "jest",
     "clean": "gts clean",
     "clean:lib": "rimraf ./lib",
     "lint": "gts lint",
     "format": "prettier --write './src/**/*.ts'",
-    "prepublishOnly": "yarn lint",
-    "preversion": "yarn lint && yarn build",
-    "version": "yarn format && git add -A src",
+    "prepublishOnly": "pnpm lint",
+    "preversion": "pnpm lint && pnpm build",
+    "version": "pnpm format && git add -A src",
     "postversion": "git push && git push --tags",
-    "yalc:publish": "yarn build && yalc publish --push"
+    "yalc:publish": "pnpm build && yalc publish --push"
   },
   "files": [
     "lib/",
@@ -29,46 +29,37 @@
     "README.md"
   ],
   "type": "module",
-  "source": "src/index.ts",
-  "types": "lib/index.d.ts",
-  "cjs": "lib/index.cjs",
-  "mjs": "lib/index.mjs",
+  "types": "./dist/index.d.cts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "exports": {
-    "types": "./lib/index.d.ts",
-    "import": "./lib/index.mjs",
-    "require": "./lib/index.cjs",
-    "default": "./lib/index.mjs"
-  },
-  "targets": {
-    "cjs": {
-      "outputFormat": "commonjs",
-      "isLibrary": true,
-      "context": "node"
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
     },
-    "mjs": {
-      "outputFormat": "esmodule",
-      "isLibrary": true,
-      "context": "node"
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     }
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@parcel/packager-ts": "2.9.3",
-    "@parcel/transformer-typescript-tsc": "^2.9.3",
-    "@parcel/transformer-typescript-types": "2.9.3",
     "@types/jest": "^29.5.3",
     "@types/node": "^14.11.2",
     "@types/snarkjs": "^0.7.8",
-    "snarkjs": "^0.7.0",
-    "gts": "^5.2.0",
     "hollowdb-prover": "workspace:^",
     "jest": "^29.6.1",
-    "parcel": "^2.9.3",
-    "rimraf": "^5.0.1",
-    "ts-jest": "^29.1.1",
-    "typescript": "~4.7.0"
+    "snarkjs": "^0.7.0",
+    "ts-jest": "^29.1.1"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "verbose": true,
+    "forceExit": true
   },
   "keywords": [
     "hollowdb",

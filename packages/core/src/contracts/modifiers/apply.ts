@@ -1,4 +1,4 @@
-import type {ContractInputGeneric, ContractState} from '../types';
+import type {ContractInputGeneric, ContractState} from "../types";
 
 /**
  * Apply allows one to execute modifiers which are functions that are run
@@ -35,7 +35,7 @@ import type {ContractInputGeneric, ContractState} from '../types';
  * Due to the generic template parameters, when `apply` is used within the switch-case of the `handle` function, it gets type-safety
  * based on which function is being handled!
  */
-export async function apply<I extends ContractInputGeneric['value'], S extends ContractState>(
+export async function apply<I extends ContractInputGeneric["value"], S extends ContractState>(
   caller: string,
   input: I,
   state: S,

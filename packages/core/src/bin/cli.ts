@@ -1,56 +1,56 @@
 #!/usr/bin/env node
-import {copyFileSync, readFileSync, writeFileSync} from 'fs';
-import yargs from 'yargs';
-import {hideBin} from 'yargs/helpers';
+import {copyFileSync, readFileSync, writeFileSync} from "fs";
+import yargs from "yargs";
+import {hideBin} from "yargs/helpers";
 
-import {deploy, deployFromSrc} from './deploy';
-import {evolve, evolveFromSrc} from './evolve';
-import {getPath, prepareCode, prepareState, prepareStateAtPath, prepareWallet, prepareWarp} from './utils';
-import {build} from './build';
-import {transfer} from './transfer';
+import {deploy, deployFromSrc} from "./deploy";
+import {evolve, evolveFromSrc} from "./evolve";
+import {getPath, prepareCode, prepareState, prepareStateAtPath, prepareWallet, prepareWarp} from "./utils";
+import {build} from "./build";
+import {transfer} from "./transfer";
 
 // Contract creation script will use existing hollowdb contract & state
-const BASE_CONTRACT_NAME = 'hollowdb';
+const BASE_CONTRACT_NAME = "hollowdb";
 
 yargs(hideBin(process.argv))
-  .scriptName('pnpm contract')
+  .scriptName("pnpm contract")
   // .example('$0 build -n my-contract', 'Build your contract')
   // .example('$0 deploy -n my-contract -w ./my/wallet.json', 'Deploy to mainnet')
   // .example('$0 evolve -n new-contract -c txId -w ./my/wallet.json', 'Evolve an existing contract with new source')
 
-  .option('wallet', {
-    alias: 'w',
-    describe: 'Path to Arweave wallet',
+  .option("wallet", {
+    alias: "w",
+    describe: "Path to Arweave wallet",
   })
-  .option('name', {
-    alias: 'n',
-    describe: 'Name of the contract',
+  .option("name", {
+    alias: "n",
+    describe: "Name of the contract",
   })
-  .option('init', {
-    alias: 'i',
-    describe: 'A specific initial state',
+  .option("init", {
+    alias: "i",
+    describe: "A specific initial state",
   })
-  .option('target', {
-    alias: 't',
-    describe: 'Target network',
-    default: 'main',
-    choices: ['main', 'test'],
+  .option("target", {
+    alias: "t",
+    describe: "Target network",
+    default: "main",
+    choices: ["main", "test"],
   })
-  .option('sourceTxId', {
-    alias: 's',
-    describe: 'Source transaction id',
+  .option("sourceTxId", {
+    alias: "s",
+    describe: "Source transaction id",
   })
-  .option('contractTxId', {
-    alias: 'c',
-    describe: 'Contract transaction id',
+  .option("contractTxId", {
+    alias: "c",
+    describe: "Contract transaction id",
   })
-  .string(['wallet', 'name', 'init', 'target', 'sourceTxId', 'contractTxId'])
+  .string(["wallet", "name", "init", "target", "sourceTxId", "contractTxId"])
 
   .command(
-    'whoami',
-    'Display information about your wallet',
-    yargs => yargs.demandOption(['wallet']),
-    async args => {
+    "whoami",
+    "Display information about your wallet",
+    (yargs) => yargs.demandOption(["wallet"]),
+    async (args) => {
       const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
 
@@ -61,16 +61,16 @@ yargs(hideBin(process.argv))
       console.table({
         address,
         balance: parseFloat(balance),
-        lastTxId: lastTxId === '' ? 'no transactions yet' : lastTxId,
+        lastTxId: lastTxId === "" ? "no transactions yet" : lastTxId,
       });
     }
   )
 
   .command(
-    'deploy',
-    'Deploy a new contract',
-    yargs => yargs.demandOption(['name', 'target', 'wallet']),
-    async args => {
+    "deploy",
+    "Deploy a new contract",
+    (yargs) => yargs.demandOption(["name", "target", "wallet"]),
+    async (args) => {
       const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
       const state = args.init
@@ -91,10 +91,10 @@ yargs(hideBin(process.argv))
   )
 
   .command(
-    'evolve',
-    'Evolve an existing contract',
-    yargs => yargs.demandOption(['wallet', 'contractTxId']),
-    async args => {
+    "evolve",
+    "Evolve an existing contract",
+    (yargs) => yargs.demandOption(["wallet", "contractTxId"]),
+    async (args) => {
       const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
 
@@ -107,50 +107,50 @@ yargs(hideBin(process.argv))
         result = await evolve(wallet, warp, args.contractTxId, code);
         console.log(`Contract ${args.contractTxId} evolved from local ${args.name} code.`);
       } else {
-        throw new Error('You must provide a contract name or source txId.');
+        throw new Error("You must provide a contract name or source txId.");
       }
       console.log(result);
     }
   )
 
   .command(
-    'create',
-    'Create your own custom contract',
-    yargs => yargs.demandOption('name').check(args => args.name !== BASE_CONTRACT_NAME),
-    async args => {
+    "create",
+    "Create your own custom contract",
+    (yargs) => yargs.demandOption("name").check((args) => args.name !== BASE_CONTRACT_NAME),
+    async (args) => {
       // copy contract code
-      const baseContractPath = getPath(BASE_CONTRACT_NAME, 'contract');
-      const newContractPath = getPath(args.name, 'contract');
+      const baseContractPath = getPath(BASE_CONTRACT_NAME, "contract");
+      const newContractPath = getPath(args.name, "contract");
       copyFileSync(baseContractPath, newContractPath);
 
       // copy state with contract name updated
-      const baseState = readFileSync(getPath(BASE_CONTRACT_NAME, 'state'), 'utf-8');
-      const newState = baseState.replace('hollowdb', args.name);
-      writeFileSync(getPath(args.name, 'state'), newState);
+      const baseState = readFileSync(getPath(BASE_CONTRACT_NAME, "state"), "utf-8");
+      const newState = baseState.replace("hollowdb", args.name);
+      writeFileSync(getPath(args.name, "state"), newState);
     }
   )
 
   .command(
-    'build',
-    'Build a contract',
-    yargs => yargs,
-    async args => {
+    "build",
+    "Build a contract",
+    (yargs) => yargs,
+    async (args) => {
       build(args.name);
     }
   )
 
   .command(
-    'transfer',
-    'Transfer keys & values from one contract to another',
-    yargs =>
+    "transfer",
+    "Transfer keys & values from one contract to another",
+    (yargs) =>
       yargs
-        .option('destination', {
-          alias: 'd',
-          describe: 'Destination contract transaction id',
+        .option("destination", {
+          alias: "d",
+          describe: "Destination contract transaction id",
           string: true,
         })
-        .demandOption(['wallet', 'contractTxId', 'destination']),
-    async args => {
+        .demandOption(["wallet", "contractTxId", "destination"]),
+    async (args) => {
       const warp = prepareWarp(args.target);
       const wallet = prepareWallet(args.wallet);
 

@@ -1,5 +1,5 @@
-import type {JWKInterface, Warp} from 'warp-contracts';
-import {ArweaveSigner} from 'warp-contracts-plugin-deploy';
+import type {JWKInterface, Warp} from "warp-contracts";
+import {ArweaveSigner} from "warp-contracts-plugin-deploy";
 
 /** Evolve an existing contract with a new source code. */
 export async function evolve(
@@ -10,7 +10,7 @@ export async function evolve(
 ): Promise<{contractTxId: string; srcTxId: string}> {
   const newSource = await warp.createSource(
     {src: contractSourceCode},
-    warp.environment === 'local' ? owner : new ArweaveSigner(owner)
+    warp.environment === "local" ? owner : new ArweaveSigner(owner)
   );
   const newSrcTxId = await warp.saveSource(newSource);
 

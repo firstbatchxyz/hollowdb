@@ -1,5 +1,5 @@
-import type {Warp, Contract, ArWallet, CustomSignature} from 'warp-contracts';
-import type {ContractInputGeneric, ContractMode, ContractState} from '../contracts/types/contract';
+import type {Warp, Contract, ArWallet, CustomSignature} from "warp-contracts";
+import type {ContractInputGeneric, ContractMode, ContractState} from "../contracts/types/contract";
 
 export class Base<M extends ContractMode> {
   readonly contract: Contract<ContractState<M>>;
@@ -16,7 +16,7 @@ export class Base<M extends ContractMode> {
       .setEvaluationOptions({
         allowBigInt: true,
         useKVStorage: true,
-        sequencerUrl: warp.environment === 'mainnet' ? 'https://gw.warp.cc/' : undefined,
+        sequencerUrl: warp.environment === "mainnet" ? "https://gw.warp.cc/" : undefined,
       })
       .connect(this.signer);
   }
@@ -65,7 +65,7 @@ export class Base<M extends ContractMode> {
    */
   async dryWriteInteraction<I extends ContractInputGeneric>(input: I) {
     const result = await this.dryWrite(input);
-    if (result.type !== 'ok') {
+    if (result.type !== "ok") {
       throw new Error(`Contract Error [${input.function}]: ${result.errorMessage}`);
     }
     await this.writeInteraction(input);
@@ -79,7 +79,7 @@ export class Base<M extends ContractMode> {
    */
   async safeReadInteraction<I extends ContractInputGeneric, V>(input: I) {
     const response = await this.viewState<I, V>(input);
-    if (response.type !== 'ok') {
+    if (response.type !== "ok") {
       throw new Error(`Contract Error [${input.function}]: ${response.errorMessage}`);
     }
     return response.result;

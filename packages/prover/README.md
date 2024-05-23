@@ -44,7 +44,9 @@ pnpm add hollowdb-prover    # pnpm
 
 ## Usage
 
-See documentation at https://docs.hollowdb.xyz/zero-knowledge-proofs/hollowdb-prover.
+<!-- See documentation at https://docs.hollowdb.xyz/zero-knowledge-proofs/hollowdb-prover. -->
+
+TODO: !!!
 
 ## Testing
 
