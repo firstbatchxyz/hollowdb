@@ -1,2 +1,2 @@
-export {HollowClient} from './client';
-export type {HollowClientOptions} from './client';
+export {HollowClient} from "./client";
+export type {HollowClientOptions} from "./client";

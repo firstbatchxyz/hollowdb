@@ -1,22 +1,22 @@
-import type {SortKeyCacheRangeOptions} from 'warp-contracts/lib/types/cache/SortKeyCacheRangeOptions';
-import {OpitonalArray} from '.';
+import type {SortKeyCacheRangeOptions} from "warp-contracts/lib/types/cache/SortKeyCacheRangeOptions";
+import {OpitonalArray} from ".";
 
 export type GetInput = {
-  function: 'get';
+  function: "get";
   value: {
     key: string;
   };
 };
 
 export type GetManyInput = {
-  function: 'getMany';
+  function: "getMany";
   value: {
     keys: string[];
   };
 };
 
 export type PutInput<V> = {
-  function: 'put';
+  function: "put";
   value: {
     key: string;
     value: V;
@@ -24,7 +24,7 @@ export type PutInput<V> = {
 };
 
 export type PutManyInput<V> = {
-  function: 'putMany';
+  function: "putMany";
   value: {
     keys: string[];
     values: V[];
@@ -32,7 +32,7 @@ export type PutManyInput<V> = {
 };
 
 export type UpdateInput<V> = {
-  function: 'update';
+  function: "update";
   value: {
     key: string;
     value: V;
@@ -41,7 +41,7 @@ export type UpdateInput<V> = {
 };
 
 export type RemoveInput = {
-  function: 'remove';
+  function: "remove";
   value: {
     key: string;
     proof?: object;
@@ -49,21 +49,21 @@ export type RemoveInput = {
 };
 
 export type GetKeysInput = {
-  function: 'getKeys';
+  function: "getKeys";
   value: {
     options?: SortKeyCacheRangeOptions;
   };
 };
 
 export type GetKVMapInput = {
-  function: 'getKVMap';
+  function: "getKVMap";
   value: {
     options?: SortKeyCacheRangeOptions;
   };
 };
 
 export type UpdateWhitelistRequirementInput<N extends string[]> = {
-  function: 'updateWhitelistRequirement';
+  function: "updateWhitelistRequirement";
   value: {
     name: OpitonalArray<N, string>;
     value: boolean;
@@ -71,7 +71,7 @@ export type UpdateWhitelistRequirementInput<N extends string[]> = {
 };
 
 export type UpdateProofRequirementInput<N extends string[]> = {
-  function: 'updateProofRequirement';
+  function: "updateProofRequirement";
   value: {
     name: OpitonalArray<N, string>;
     value: boolean;
@@ -79,14 +79,14 @@ export type UpdateProofRequirementInput<N extends string[]> = {
 };
 
 export type UpdateOwnerInput = {
-  function: 'updateOwner';
+  function: "updateOwner";
   value: {
     newOwner: string;
   };
 };
 
 export type UpdateVerificationKeyInput<N extends string[]> = {
-  function: 'updateVerificationKey';
+  function: "updateVerificationKey";
   value: {
     verificationKey: object;
     name: OpitonalArray<N, string>;
@@ -94,7 +94,7 @@ export type UpdateVerificationKeyInput<N extends string[]> = {
 };
 
 export type UpdateWhitelistInput<N extends string[]> = {
-  function: 'updateWhitelist';
+  function: "updateWhitelist";
   value: {
     add: string[];
     remove: string[];
@@ -103,7 +103,7 @@ export type UpdateWhitelistInput<N extends string[]> = {
 };
 
 export type EvolveInput = {
-  function: 'evolve';
+  function: "evolve";
   // NOTE: it is important that this is named `value`
   value: string;
 };

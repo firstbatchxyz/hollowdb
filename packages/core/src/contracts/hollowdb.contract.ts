@@ -1,37 +1,37 @@
-import {CantEvolveError, InvalidFunctionError, KeyExistsError} from './errors';
-import {apply, onlyNonNullValue, onlyNonNullValues, onlyOwner, onlyProofVerified, onlyWhitelisted} from './modifiers';
-import type {ContractHandle} from './types';
-import {hashToGroup} from './utils';
+import {CantEvolveError, InvalidFunctionError, KeyExistsError} from "./errors";
+import {apply, onlyNonNullValue, onlyNonNullValues, onlyOwner, onlyProofVerified, onlyWhitelisted} from "./modifiers";
+import type {ContractHandle} from "./types";
+import {hashToGroup} from "./utils";
 
-type Mode = {proofs: ['auth']; whitelists: ['put', 'update']};
+type Mode = {proofs: ["auth"]; whitelists: ["put", "update"]};
 type Value = unknown;
 
 export const handle: ContractHandle<Value, Mode> = async (state, action) => {
   const {caller, input} = action;
   switch (input.function) {
-    case 'get': {
+    case "get": {
       const {key} = await apply(caller, input.value, state);
       return {result: (await SmartWeave.kv.get(key)) as Value | null};
     }
 
-    case 'getMany': {
+    case "getMany": {
       const {keys} = await apply(caller, input.value, state);
-      const values = (await Promise.all(keys.map(key => SmartWeave.kv.get(key)))) as (Value | null)[];
+      const values = (await Promise.all(keys.map((key) => SmartWeave.kv.get(key)))) as (Value | null)[];
       return {result: values};
     }
 
-    case 'getKeys': {
+    case "getKeys": {
       const {options} = await apply(caller, input.value, state);
       return {result: await SmartWeave.kv.keys(options)};
     }
 
-    case 'getKVMap': {
+    case "getKVMap": {
       const {options} = await apply(caller, input.value, state);
       return {result: await SmartWeave.kv.kvMap(options)};
     }
 
-    case 'put': {
-      const {key, value} = await apply(caller, input.value, state, onlyWhitelisted('put'), onlyNonNullValue);
+    case "put": {
+      const {key, value} = await apply(caller, input.value, state, onlyWhitelisted("put"), onlyNonNullValue);
       if ((await SmartWeave.kv.get(key)) !== null) {
         throw KeyExistsError;
       }
@@ -39,27 +39,31 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
       return {state};
     }
 
-    case 'putMany': {
-      const {keys, values} = await apply(caller, input.value, state, onlyWhitelisted('put'), onlyNonNullValues);
+    case "putMany": {
+      const {keys, values} = await apply(caller, input.value, state, onlyWhitelisted("put"), onlyNonNullValues);
       if (keys.length !== values.length) {
-        throw new ContractError('Key and value counts mismatch');
+        throw new ContractError("Key and value counts mismatch");
       }
 
-      if (await Promise.all(keys.map(key => SmartWeave.kv.get(key))).then(values => values.some(val => val !== null))) {
+      if (
+        await Promise.all(keys.map((key) => SmartWeave.kv.get(key))).then((values) =>
+          values.some((val) => val !== null)
+        )
+      ) {
         throw KeyExistsError;
       }
       await Promise.all(keys.map((key, i) => SmartWeave.kv.put(key, values[i])));
       return {state};
     }
 
-    case 'update': {
+    case "update": {
       const {key, value} = await apply(
         caller,
         input.value,
         state,
         onlyNonNullValue,
-        onlyWhitelisted('update'),
-        onlyProofVerified('auth', async (_, input) => {
+        onlyWhitelisted("update"),
+        onlyProofVerified("auth", async (_, input) => {
           const oldValue = await SmartWeave.kv.get(input.key);
           return [hashToGroup(oldValue), hashToGroup(input.value), BigInt(input.key)];
         })
@@ -68,13 +72,13 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
       return {state};
     }
 
-    case 'remove': {
+    case "remove": {
       const {key} = await apply(
         caller,
         input.value,
         state,
-        onlyWhitelisted('update'),
-        onlyProofVerified('auth', async (_, input) => {
+        onlyWhitelisted("update"),
+        onlyProofVerified("auth", async (_, input) => {
           const oldValue = await SmartWeave.kv.get(input.key);
           return [hashToGroup(oldValue), BigInt(0), BigInt(input.key)];
         })
@@ -83,42 +87,42 @@ export const handle: ContractHandle<Value, Mode> = async (state, action) => {
       return {state};
     }
 
-    case 'updateOwner': {
+    case "updateOwner": {
       const {newOwner} = await apply(caller, input.value, state, onlyOwner);
       state.owner = newOwner;
       return {state};
     }
 
-    case 'updateProofRequirement': {
+    case "updateProofRequirement": {
       const {name, value} = await apply(caller, input.value, state, onlyOwner);
       state.isProofRequired[name] = value;
       return {state};
     }
 
-    case 'updateVerificationKey': {
+    case "updateVerificationKey": {
       const {name, verificationKey} = await apply(caller, input.value, state, onlyOwner);
       state.verificationKeys[name] = verificationKey;
       return {state};
     }
 
-    case 'updateWhitelistRequirement': {
+    case "updateWhitelistRequirement": {
       const {name, value} = await apply(caller, input.value, state, onlyOwner);
       state.isWhitelistRequired[name] = value;
       return {state};
     }
 
-    case 'updateWhitelist': {
+    case "updateWhitelist": {
       const {add, remove, name} = await apply(caller, input.value, state, onlyOwner);
-      add.forEach(user => {
+      add.forEach((user) => {
         state.whitelists[name][user] = true;
       });
-      remove.forEach(user => {
+      remove.forEach((user) => {
         delete state.whitelists[name][user];
       });
       return {state};
     }
 
-    case 'evolve': {
+    case "evolve": {
       const srcTxId = await apply(caller, input.value, state, onlyOwner);
       if (!state.canEvolve) {
         throw CantEvolveError;

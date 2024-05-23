@@ -1,4 +1,4 @@
-import {OpitonalArray} from '.';
+import {OpitonalArray} from ".";
 import {
   EvolveInput,
   GetInput,
@@ -14,7 +14,7 @@ import {
   UpdateWhitelistInput,
   GetManyInput,
   PutManyInput,
-} from './inputs';
+} from "./inputs";
 
 /**
  * A prepared HollowDB contract input. It is a union of all basic operations,
@@ -36,10 +36,10 @@ export type ContractInput<V = any, M extends ContractMode = ContractMode> =
   | UpdateInput<V>
   | RemoveInput
   | UpdateOwnerInput
-  | UpdateWhitelistInput<M['whitelists']>
-  | UpdateWhitelistRequirementInput<M['whitelists']>
-  | UpdateVerificationKeyInput<M['proofs']>
-  | UpdateProofRequirementInput<M['proofs']>
+  | UpdateWhitelistInput<M["whitelists"]>
+  | UpdateWhitelistRequirementInput<M["whitelists"]>
+  | UpdateVerificationKeyInput<M["proofs"]>
+  | UpdateProofRequirementInput<M["proofs"]>
   | EvolveInput;
 
 /**
@@ -79,14 +79,14 @@ export type ContractState<M extends ContractMode = ContractMode> = {
   evolve?: string;
   owner: string;
   // proofs mode
-  isProofRequired: {[name in OpitonalArray<M['proofs'], string>]: boolean};
+  isProofRequired: {[name in OpitonalArray<M["proofs"], string>]: boolean};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  verificationKeys: {[name in OpitonalArray<M['proofs'], string>]: any};
+  verificationKeys: {[name in OpitonalArray<M["proofs"], string>]: any};
   // whitelists mode
   whitelists: {
-    [name in OpitonalArray<M['whitelists'], string>]: {[address: string]: boolean};
+    [name in OpitonalArray<M["whitelists"], string>]: {[address: string]: boolean};
   };
-  isWhitelistRequired: {[name in OpitonalArray<M['whitelists'], string>]: boolean};
+  isWhitelistRequired: {[name in OpitonalArray<M["whitelists"], string>]: boolean};
 };
 
 /** A contract handler, that is the entry point to a SmartWeave contract.

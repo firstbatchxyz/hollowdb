@@ -6,8 +6,8 @@ import {
   NotOwnerError,
   NotWhitelistedError,
   UnknownProtocolError,
-} from '../errors';
-import type {ContractState} from '../types/contract';
+} from "../errors";
+import type {ContractState} from "../types/contract";
 
 /** Verifies a zero-knowledge proof. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,7 +15,7 @@ export const verifyProof = async (proof: object, psignals: bigint[], verificatio
   if (!verificationKey) {
     throw NoVerificationKeyError;
   }
-  if (verificationKey.protocol !== 'groth16' && verificationKey.protocol !== 'plonk') {
+  if (verificationKey.protocol !== "groth16" && verificationKey.protocol !== "plonk") {
     throw UnknownProtocolError;
   }
   return await SmartWeave.extensions[verificationKey.protocol].verify(verificationKey, psignals, proof);
@@ -38,9 +38,9 @@ export const hashToGroup = (value: unknown): bigint => {
 
 /** Converts a 256-bit digest into an array of 32 bytes. */
 export const digestToBytes = (digest: string): number[] => {
-  const bytes = Buffer.from(digest.slice(2), 'hex').toJSON().data;
+  const bytes = Buffer.from(digest.slice(2), "hex").toJSON().data;
   if (bytes.length !== 32) {
-    throw new Error('Bad digest length');
+    throw new Error("Bad digest length");
   }
   return bytes;
 };

@@ -15,11 +15,6 @@
     "clean": "gts clean",
     "clean:lib": "rm -rf ./lib"
   },
-  "files": [
-    "lib/",
-    "LICENSE",
-    "README.md"
-  ],
   "type": "module",
   "types": "./dist/index.d.cts",
   "main": "./dist/index.cjs",
@@ -37,18 +32,20 @@
   "engines": {
     "node": ">=10.6.0"
   },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
   "dependencies": {
     "poseidon-lite": "^0.2.0"
   },
   "peerDependencies": {
-    "snarkjs": "^0.7.0",
-    "@types/snarkjs": "^0.7.0"
+    "@types/snarkjs": "^0.7.0",
+    "snarkjs": "^0.7.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.3",
-    "@types/node": "^14.11.2",
-    "jest": "^29.6.1",
-    "ts-jest": "^29.1.1"
+    "@types/node": "^14.11.2"
   },
   "jest": {
     "preset": "ts-jest",

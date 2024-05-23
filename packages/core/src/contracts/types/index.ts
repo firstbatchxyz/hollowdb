@@ -1,5 +1,5 @@
-export * from './contract';
-export * from './inputs';
+export * from "./contract";
+export * from "./inputs";
 
 /**
  * A type-utility to convert an array of `T`s into a mapped type,
