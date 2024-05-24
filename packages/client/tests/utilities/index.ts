@@ -1,11 +1,11 @@
 import {createHash} from "crypto";
-import snarkjs from "snarkjs";
+import * as snarkjs from "snarkjs";
 
 import groth16Vkey from "../circuits/hollow-authz-groth16/verification_key.json";
 import plonkVkey from "../circuits/hollow-authz-plonk/verification_key.json";
 
 export async function verifyProof(proof: snarkjs.Groth16Proof & snarkjs.PlonkProof, psignals: snarkjs.PublicSignals) {
-  const protocol = proof.protocol;
+  const protocol = proof.protocol as "plonk" | "groth16";
   const verificationKey = {
     groth16: groth16Vkey,
     plonk: plonkVkey,

@@ -37,7 +37,7 @@ describe("hollowdb authorization", () => {
       ["digest", "curValueHashOut", "nextValueHashOut"]
     >;
 
-    before(async () => {
+    beforeAll(async () => {
       circuit = await circomkit.WitnessTester("hollow-authz", {
         file: "hollow-authz",
         template: "HollowAuthz",
@@ -62,10 +62,12 @@ describe("hollowdb authorization", () => {
   });
 
   describe.skip("validation", () => {
-    let fullProof: {proof: object; publicSignals: string[]};
-    let circuit: ProofTester;
-    before(async () => {
-      circuit = await circomkit.ProofTester("hollow-authz");
+    let fullProof: {proof: snarkjs.Groth16Proof; publicSignals: snarkjs.PublicSignals};
+    const protocol = "groth16";
+    let circuit: ProofTester<["preimage", "curValueHash", "nextValueHash"], typeof protocol>;
+
+    beforeAll(async () => {
+      circuit = await circomkit.ProofTester("hollow-authz", protocol);
       fullProof = await circuit.prove(INPUT);
     });
 

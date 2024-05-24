@@ -35,14 +35,14 @@ export const mockFetchDB = jest.fn(async (input: RequestInfo | URL, init?: Reque
         break;
       case "update":
         if (body.proof) {
-          verifyProof(body.proof, [valueToBigInt(DB[body.key]), valueToBigInt(body.value), BigInt(body.key)]);
+          verifyProof(body.proof, [valueToBigInt(DB[body.key]), valueToBigInt(body.value), body.key]);
         }
 
         DB[body.key] = body.value;
         break;
       case "remove":
         if (body.proof) {
-          verifyProof(body.proof, [valueToBigInt(DB[body.key]), BigInt(0), BigInt(body.key)]);
+          verifyProof(body.proof, [valueToBigInt(DB[body.key]), "0", body.key]);
         }
 
         delete DB[body.key];

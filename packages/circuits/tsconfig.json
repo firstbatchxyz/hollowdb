@@ -14,7 +14,8 @@
     "pretty": true,
     "declaration": true,
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "types/**/*.ts"],
   "exclude": ["node_modules", "build", "dist", "ptau"]
