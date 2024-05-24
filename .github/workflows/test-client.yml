@@ -8,6 +8,7 @@ on:
       - dev
     paths:
       - "packages/client/**"
+      - erhant/workspaces # TODO: remove
   push:
     branches:
       - master
@@ -33,10 +34,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install
-        run: pnpm install --frozen-lockfile --filter=./packages/client
+        run: pnpm --filter ./packages/client install
 
       - name: Build
-        run: pnpm build --filter=./packages/client
+        run: pnpm --filter ./packages/client run build
 
-      - name: Run tests
-        run: pnpm test --filter=./packages/client
+      - name: Test
+        run: pnpm --filter ./packages/client run test

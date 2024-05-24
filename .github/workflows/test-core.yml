@@ -3,24 +3,41 @@ name: core-test
 on:
   pull_request:
     types:
-      - opened
+      - review_requested
     branches:
-      - master
+      - dev
+    paths:
+      - "packages/client/**"
+      - erhant/workspaces # TODO: remove
   push:
     branches:
       - master
+      - erhant/workspaces # TODO: remove
+    paths:
+      - "packages/client/**"
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm --filter ./packages/core install
+
+      - name: Build
+        run: pnpm --filter ./packages/core run build
 
       - name: Start Redis
         uses: supercharge/redis-github-action@1.5.0
@@ -28,17 +45,5 @@ jobs:
           redis-version: 7
           redis-port: 6379
 
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        with:
-          version: 8
-          run_install: false
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build package
-        run: pnpm build
-
-      - name: Run tests
-        run: pnpm test
+      - name: Test
+        run: pnpm --filter ./packages/core run test

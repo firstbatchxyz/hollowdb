@@ -33,7 +33,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install
-        run: pnpm install --frozen-lockfile --filter=./packages/prover
+        run: pnpm --filter ./packages/prover install
 
-      - name: Run tests
-        run: pnpm test --filter=./packages/prover
+      - name: Build
+        run: pnpm --filter ./packages/prover run build
+
+      - name: Test
+        run: pnpm --filter ./packages/prover run test

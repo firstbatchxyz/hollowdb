@@ -8,6 +8,7 @@ on:
       - dev
     paths:
       - "packages/circuits/**"
+      - erhant/workspaces # TODO: remove
   push:
     branches:
       - master
@@ -33,7 +34,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install
-        run: pnpm install --frozen-lockfile --filter=./packages/circuits
+        run: pnpm --filter ./packages/circuits install
 
-      - name: Run tests
-        run: pnpm test --filter=./packages/circuits
+      - name: Build
+        run: pnpm --filter ./packages/circuits run build
+
+      - name: Test
+        run: pnpm --filter ./packages/circuits run test

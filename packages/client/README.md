@@ -44,12 +44,16 @@ pnpm add hollowdb-client    # pnpm
 
 ## Usage
 
+> [!CAUTION]
+>
+> HollowDB API service is currently disabled until further notice.
+
 Create a new API key and a database at <https://developer.hollowdb.xyz>. Create a new client by providing your API key and the database name to connect:
 
 ```ts
 client = await HollowClient.new({
-  apiKey: 'your-api-key',
-  db: 'your-database-name',
+  apiKey: "your-api-key",
+  db: "your-database-name",
 });
 ```
 
