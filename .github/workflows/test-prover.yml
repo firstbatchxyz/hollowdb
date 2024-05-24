@@ -1,0 +1,42 @@
+name: prover-test
+
+on:
+  pull_request:
+    types:
+      - review_requested
+    branches:
+      - dev
+    paths:
+      - "packages/prover/**"
+      - erhant/workspaces # TODO: remove
+  push:
+    branches:
+      - master
+    paths:
+      - "packages/prover/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm --filter ./packages/prover install
+
+      - name: Build
+        run: pnpm --filter ./packages/prover run build
+
+      - name: Test
+        run: pnpm --filter ./packages/prover run test

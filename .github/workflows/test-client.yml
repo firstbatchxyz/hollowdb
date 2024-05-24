@@ -1,0 +1,43 @@
+name: client-test
+
+on:
+  pull_request:
+    types:
+      - review_requested
+    branches:
+      - dev
+    paths:
+      - "packages/client/**"
+      - erhant/workspaces # TODO: remove
+  push:
+    branches:
+      - master
+      - erhant/workspaces # TODO: remove
+    paths:
+      - "packages/client/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm --filter ./packages/client install
+
+      - name: Build
+        run: pnpm --filter ./packages/client run build
+
+      - name: Test
+        run: pnpm --filter ./packages/client run test

@@ -1,0 +1,66 @@
+{
+  "name": "hollowdb-client",
+  "description": "HollowDB Client",
+  "version": "0.2.5",
+  "author": "FirstBatch Team <dev@firstbatch.xyz>",
+  "contributors": [
+    "Faruk Can Özkan <farukcan@firstbatch.xyz>",
+    "Erhan Tezcan <erhan@firstbatch.xyz>"
+  ],
+  "homepage": "https://github.com/firstbatchxyz/hollowdb-client#readme",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf ./lib && pkgroll",
+    "test": "jest"
+  },
+  "type": "module",
+  "types": "./dist/index.d.cts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "devDependencies": {
+    "@types/node": "^14.11.2",
+    "@types/snarkjs": "^0.7.8",
+    "hollowdb-prover": "workspace:^",
+    "snarkjs": "^0.7.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "verbose": true,
+    "forceExit": true
+  },
+  "keywords": [
+    "hollowdb",
+    "key-value store",
+    "storage",
+    "database",
+    "zksnark",
+    "blockchain",
+    "smart-contracts",
+    "arweave",
+    "anonymous",
+    "smartweave",
+    "circom",
+    "warp-contracts",
+    "zero-knowledge"
+  ]
+}

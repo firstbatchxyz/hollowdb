@@ -1,0 +1,6 @@
+{
+  "hollow-authz": {
+    "file": "hollow-authz",
+    "template": "HollowAuthz"
+  }
+}

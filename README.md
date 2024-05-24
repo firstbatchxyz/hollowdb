@@ -18,9 +18,6 @@
     <a href="https://www.npmjs.com/package/hollowdb" target="_blank">
         <img alt="NPM" src="https://img.shields.io/npm/v/hollowdb?logo=npm&color=CB3837">
     </a>
-    <a href="https://docs.hollowdb.xyz" target="_blank">
-        <img alt="License: MIT" src="https://img.shields.io/badge/docs-hollowdb-3884FF.svg?logo=gitbook">
-    </a>
     <a href="./.github/workflows/test.yml" target="_blank">
         <img alt="Workflow: Tests" src="https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master">
     </a>
@@ -29,53 +26,27 @@
     </a>
 </p>
 
-## Installation
+## Packages
 
-To install HollowDB:
+HollowDB is composed of the following packages within a [workspace](https://pnpm.io/workspaces):
 
-```bash
-yarn add hollowdb     # yarn
-npm install hollowdb  # npm
-pnpm add hollowdb     # pnpm
-```
+| Package                  | NPM                                       | Tests                                             |
+| ------------------------ | ----------------------------------------- | ------------------------------------------------- |
+| [core][core-pkg]         | [![NPM][core-npm-bdg]][core-npm-link]     | [![TESTS][core-test-bdg]][core-test-link]         |
+| [client][client-pkg]     | [![NPM][client-npm-bdg]][client-npm-link] | [![TESTS][client-test-bdg]][client-test-link]     |
+| [prover][prover-pkg]     | [![NPM][prover-npm-bdg]][prover-npm-link] | [![TESTS][prover-test-bdg]][prover-test-link]     |
+| [circuits][circuits-pkg] | none                                      | [![TESTS][circuits-test-bdg]][circuits-test-link] |
 
-Depending on your use-cases, we have several optional dependencies:
+## License
 
-- You can use [hollowdb-prover](https://www.npmjs.com/package/hollowdb-prover) as a simple utility that generates zero-knowledge proofs that are verifiable by HollowDB.
-- You can use LMDB cache within your Warp instance via [warp-contracts-lmdb](https://www.npmjs.com/package/warp-contracts-lmdb).
-- You can use Redis cache within your warp instance via [warp-contracts-redis](https://www.npmjs.com/package/warp-contracts-redis) together with [ioredis](https://www.npmjs.com/package/ioredis).
-- When you are evaluating a contract that uses ZK proofs, you should also use [warp-contracts-plugin-snarkjs](https://www.npmjs.com/package/warp-contracts-plugin-snarkjs) and [warp-contracts-plugin-ethers](https://www.npmjs.com/package/warp-contracts-plugin-ethers).
+All packages are licensed under MIT license.
 
-## Usage
+<!-- core -->
 
-You can read the full documentation of HollowDB at <https://docs.hollowdb.xyz>.
+[core-pkg]: ./packages/core
+[core-npm-bdg]: https://img.shields.io/npm/v/hollowdb?logo=npm&color=CB3837
+[core-npm-link]: https://www.npmjs.com/package/hollowdb
+[core-test-bdg]: https://github.com/firstbatchxyz/hollowdb/actions/workflows/test.yml/badge.svg?branch=master
+[core-test-link]: ./.github/workflows/test.yml
 
-> [!NOTE]
->
-> If you are interested in customizing the smart contract of HollowDB and extending its SDKs, refer to this [README](./src/contracts/README.md).
-
-## Examples
-
-Check out the [examples](./examples/) folder for a few examples of HollowDB usage:
-
-- **Simple**: a single JS file that demonstrates getting & setting a key.
-- **Micro**: a Vercel Micro backend that can serves HollowDB as API endpoints, useful when you want to use HollowDB from another language.
-
-## Testing
-
-You can run all tests via:
-
-```sh
-pnpm test
-```
-
-Tests operate on a local Arweave instance using [arlocal](https://www.npmjs.com/package/arlocal). They will run for all cache types (LMDB, Redis, LevelDB). You will need to have a Redis server running for some of the tests to pass, the URL shall be specified [here](./tests/constants/index.ts).
-
-## Styling
-
-You can check the formatting of the code or lint everything with the following commands:
-
-```sh
-pnpm format # prettier
-pnpm lint   # eslint
-```
+<!-- client -->

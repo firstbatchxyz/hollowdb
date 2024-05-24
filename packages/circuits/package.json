@@ -1,0 +1,30 @@
+{
+  "name": "hollowdb-circuits",
+  "private": true,
+  "author": "FirstBatch Team <dev@firstbatch.xyz>",
+  "contributors": [
+    "Erhan Tezcan <erhan@firstbatch.xyz>"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=10.4.0"
+  },
+  "scripts": {
+    "test": "jest",
+    "format": "npx prettier --check ./**/*.ts",
+    "lint": "npx gts lint"
+  },
+  "devDependencies": {
+    "@ethersproject/sha2": "^5.7.0",
+    "circomkit": "^0.2.1",
+    "circomlib": "latest",
+    "poseidon-lite": "^0.2.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "verbose": true,
+    "forceExit": true
+  }
+}

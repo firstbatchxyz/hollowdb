@@ -1,0 +1,68 @@
+{
+  "name": "hollowdb-prover",
+  "description": "Zero-knowledge proof generator utiity for HollowDB",
+  "version": "0.1.5",
+  "author": "FirstBatch Team <dev@firstbatch.xyz>",
+  "contributors": [
+    "Erhan Tezcan <erhan@firstbatch.xyz>"
+  ],
+  "homepage": "https://github.com/firstbatchxyz/hollowdb-prover#readme",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf ./lib && pkgroll",
+    "test": "jest"
+  },
+  "type": "module",
+  "types": "./dist/index.d.cts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "engines": {
+    "node": ">=10.6.0"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "poseidon-lite": "^0.2.0"
+  },
+  "peerDependencies": {
+    "@types/snarkjs": "^0.7.0",
+    "snarkjs": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.11.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testTimeout": 20000,
+    "verbose": true
+  },
+  "keywords": [
+    "hollowdb",
+    "key-value store",
+    "storage",
+    "database",
+    "zksnark",
+    "blockchain",
+    "smart-contracts",
+    "arweave",
+    "anonymous",
+    "smartweave",
+    "circom",
+    "warp-contracts",
+    "zero-knowledge"
+  ]
+}

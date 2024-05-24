@@ -1,0 +1,85 @@
+{
+  "name": "hollowdb",
+  "version": "1.4.3",
+  "description": "A decentralized privacy-preserving key-value database",
+  "license": "MIT",
+  "homepage": "https://github.com/firstbatchxyz/hollowdb#readme",
+  "author": "FirstBatch Team <dev@firstbatch.xyz>",
+  "contributors": [
+    "Faruk Can Özkan <farukcan@firstbatch.xyz>",
+    "Erhan Tezcan <erhan@firstbatch.xyz>"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.cts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "prebuild": "pnpm clean && pnpm check",
+    "build": "pkgroll",
+    "clean": "rm -rf ./lib",
+    "check": "tsc --noEmit && echo 'All good.'",
+    "contract": "node --no-warnings --loader ts-node/esm ./src/bin/cli.ts",
+    "compile": "rm -rf ./dist && npx tsc",
+    "test": "jest",
+    "pretest": "pnpm contract build",
+    "lint": "eslint '**/*.ts' && echo 'All good.'",
+    "format": "prettier --check '**/*.ts'",
+    "prepublishOnly": "pnpm lint",
+    "preversion": "pnpm lint && pnpm build",
+    "version": "pnpm format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "yalc:publish": "pnpm build && yalc publish --push"
+  },
+  "peerDependencies": {
+    "warp-contracts": "^1.4.2"
+  },
+  "optionalDependencies": {
+    "hollowdb-prover": "workspace:^",
+    "ioredis": "^5.3.2",
+    "warp-contracts-lmdb": "^1.1.10",
+    "warp-contracts-plugin-ethers": "^1.0.7",
+    "warp-contracts-plugin-snarkjs": "^0.2.1",
+    "warp-contracts-redis": "^0.3.4"
+  },
+  "devDependencies": {
+    "@types/yargs": "^17.0.24",
+    "arlocal": "1.1.62",
+    "arweave": "^1.13.0",
+    "replace-in-file": "^6.3.5",
+    "svgo": "^3.0.2",
+    "warp-contracts-plugin-deploy": "^1.0.7",
+    "yargs": "^17.7.2"
+  },
+  "keywords": [
+    "key-value store",
+    "storage",
+    "database",
+    "zksnark",
+    "blockchain",
+    "smart-contracts",
+    "arweave",
+    "anonymous",
+    "smartweave",
+    "circom",
+    "warp-contracts",
+    "zero-knowledge"
+  ]
+}
