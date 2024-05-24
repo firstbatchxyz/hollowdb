@@ -13,7 +13,7 @@ type ValueType = {val: string} | null;
 describe("null value tests with proofs", () => {
   const warpHook = setupWarp();
   const protocol = "groth16";
-  let prover: Prover;
+  let prover: Prover<typeof protocol>;
   let owner: SDK<ValueType>;
 
   const {KEY, KEY_PREIMAGE, VALUE, NEXT_VALUE} = createValues();

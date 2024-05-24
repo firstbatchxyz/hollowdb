@@ -10,18 +10,8 @@
   "homepage": "https://github.com/firstbatchxyz/hollowdb-client#readme",
   "license": "MIT",
   "scripts": {
-    "prebuild": "pnpm clean:lib && pnpm lint",
-    "build": "pkgroll",
-    "test": "jest",
-    "clean": "gts clean",
-    "clean:lib": "rm -rf ./lib",
-    "lint": "gts lint",
-    "format": "prettier --write './src/**/*.ts'",
-    "prepublishOnly": "pnpm lint",
-    "preversion": "pnpm lint && pnpm build",
-    "version": "pnpm format && git add -A src",
-    "postversion": "git push && git push --tags",
-    "yalc:publish": "pnpm build && yalc publish --push"
+    "build": "rm -rf ./lib && pkgroll",
+    "test": "jest"
   },
   "type": "module",
   "types": "./dist/index.d.cts",

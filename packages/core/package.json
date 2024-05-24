@@ -52,7 +52,7 @@
     "warp-contracts": "^1.4.2"
   },
   "optionalDependencies": {
-    "hollowdb-prover": "workspace:^1.4",
+    "hollowdb-prover": "workspace:^",
     "ioredis": "^5.3.2",
     "warp-contracts-lmdb": "^1.1.10",
     "warp-contracts-plugin-ethers": "^1.0.7",

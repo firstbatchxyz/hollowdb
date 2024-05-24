@@ -10,7 +10,7 @@ type ValueType = {val: string};
 describe("proofs mode", () => {
   describe.each(["groth16", "plonk"] as const)("protocol: %s", (protocol) => {
     const warpHook = setupWarp();
-    let prover: Prover;
+    let prover: Prover<typeof protocol>;
     let owner: SDK<ValueType>;
     let alice: SDK<ValueType>;
 

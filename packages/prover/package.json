@@ -9,11 +9,8 @@
   "homepage": "https://github.com/firstbatchxyz/hollowdb-prover#readme",
   "license": "MIT",
   "scripts": {
-    "prebuild": "pnpm clean:lib && pnpm lint",
-    "build": "pkgroll",
-    "test": "jest",
-    "clean": "gts clean",
-    "clean:lib": "rm -rf ./lib"
+    "build": "rm -rf ./lib && pkgroll",
+    "test": "jest"
   },
   "type": "module",
   "types": "./dist/index.d.cts",

@@ -3,50 +3,37 @@ name: prover-test
 on:
   pull_request:
     types:
-      - opened
+      - review_requested
     branches:
       - dev
+    paths:
+      - "packages/prover/**"
+      - erhant/workspaces # TODO: remove
   push:
     branches:
       - master
-      - dev
+    paths:
+      - "packages/prover/**"
 
 jobs:
-  style:
+  test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v1
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: 19.x
+          version: 8
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-
-      - name: Restore yarn cache
-        uses: actions/cache@v3
-        id: yarn-cache
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          node-version: 20
+          cache: "pnpm"
 
-      - name: Install dependencies
-        run: yarn
-
-      - name: Formatting
-        run: yarn format
-
-      - name: Linting
-        run: yarn lint
-
-      - name: Build
-        run: yarn build
+      - name: Install
+        run: pnpm install --frozen-lockfile --filter=./packages/prover
 
       - name: Run tests
-        run: yarn test
+        run: pnpm test --filter=./packages/prover
